@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CountdownTimerProps {
     targetDate: string;
@@ -52,7 +52,7 @@ export default function CountdownTimer({ targetDate, onComplete }: CountdownTime
         return () => clearTimeout(timer);
     });
 
-    const timerComponents: JSX.Element[] = [];
+    const timerComponents: React.ReactNode[] = [];
 
     Object.keys(timeLeft).forEach((interval) => {
         const value = timeLeft[interval];
