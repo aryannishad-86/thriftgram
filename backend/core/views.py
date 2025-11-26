@@ -83,6 +83,25 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             'total_sales': 0, # Placeholder
         })
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def debug_config(self, request):
+        from django.conf import settings
+        import os
+        
+        cloudinary_url = os.getenv('CLOUDINARY_URL', '')
+        masked_url = cloudinary_url[:15] + '...' if cloudinary_url else 'Not Set'
+        
+        storage_conf = getattr(settings, 'CLOUDINARY_STORAGE', None)
+        masked_conf = {k: '***' for k in storage_conf.keys()} if storage_conf else 'Not Set'
+        
+        return Response({
+            'DEFAULT_FILE_STORAGE': getattr(settings, 'DEFAULT_FILE_STORAGE', 'Not Set'),
+            'CLOUDINARY_URL': masked_url,
+            'CLOUDINARY_STORAGE': masked_conf,
+            'MEDIA_ROOT': str(settings.MEDIA_ROOT),
+            'MEDIA_URL': settings.MEDIA_URL,
+        })
+
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all().order_by('-created_at')
     serializer_class = ItemSerializer
