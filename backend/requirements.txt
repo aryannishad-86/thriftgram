@@ -10,3 +10,4 @@ dj-database-url
 django-cloudinary-storage
 whitenoise
 gunicorn
+daphne
