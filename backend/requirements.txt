@@ -13,3 +13,4 @@ gunicorn
 daphne
 djangorestframework-simplejwt
 django-cors-headers
+channels
