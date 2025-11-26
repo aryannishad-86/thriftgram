@@ -11,3 +11,5 @@ django-cloudinary-storage
 whitenoise
 gunicorn
 daphne
+djangorestframework-simplejwt
+django-cors-headers
