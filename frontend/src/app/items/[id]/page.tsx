@@ -12,9 +12,26 @@ import { Skeleton } from '@/components/ui/skeleton';
 import BuyButton from '@/components/BuyButton';
 
 
+interface Item {
+    id: number;
+    title: string;
+    price: string;
+    size: string;
+    condition: string;
+    description: string;
+    images: { image: string }[];
+    ai_analysis?: {
+        is_verified: boolean;
+        detected_brand: string;
+        fabric_type: string;
+        condition_rating: number;
+        detected_defects: string[];
+    };
+}
+
 export default function ItemDetailPage() {
     const params = useParams();
-    const [item, setItem] = useState<any>(null);
+    const [item, setItem] = useState<Item | null>(null);
     const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false);
 
