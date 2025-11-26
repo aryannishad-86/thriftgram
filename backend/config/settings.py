@@ -169,6 +169,24 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+# Cloudinary Configuration
+CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
+if CLOUDINARY_URL:
+    import cloudinary
+    # Parse CLOUDINARY_URL: cloudinary://<api_key>:<api_secret>@<cloud_name>
+    try:
+        # Remove 'cloudinary://'
+        auth, cloud_name = CLOUDINARY_URL.replace('cloudinary://', '').split('@')
+        api_key, api_secret = auth.split(':')
+        
+        CLOUDINARY_STORAGE = {
+            'CLOUD_NAME': cloud_name,
+            'API_KEY': api_key,
+            'API_SECRET': api_secret,
+        }
+    except Exception as e:
+        print(f"Error parsing CLOUDINARY_URL: {e}")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
