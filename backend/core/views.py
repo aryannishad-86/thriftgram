@@ -28,7 +28,15 @@ class RegisterView(APIView):
             return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create_user(username=username, password=password, email=email)
-        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+        
+        from rest_framework_simplejwt.tokens import RefreshToken
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'message': 'User created successfully',
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_201_CREATED)
 
 class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('-eco_points')

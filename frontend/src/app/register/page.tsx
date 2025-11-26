@@ -35,14 +35,19 @@ export default function RegisterPage() {
         }
 
         try {
-            await api.post('/register/', {
+            const response = await api.post('/register/', {
                 username,
                 email,
                 password,
             });
 
-            // Redirect to login page on success
-            router.push('/login');
+            // Auto-login: Store tokens
+            localStorage.setItem('access_token', response.data.access);
+            localStorage.setItem('refresh_token', response.data.refresh);
+            localStorage.setItem('username', username);
+
+            // Redirect to home page
+            window.location.href = '/';
         } catch (error: any) {
             console.error('Registration failed:', error);
             if (error.response && error.response.data) {
