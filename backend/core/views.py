@@ -11,6 +11,25 @@ from .eco_service import EcoService
 
 User = get_user_model()
 
+from rest_framework.views import APIView
+
+class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        email = request.data.get('email')
+
+        if not username or not password:
+            return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(username=username).exists():
+            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create_user(username=username, password=password, email=email)
+        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+
 class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('-eco_points')
     serializer_class = UserSerializer

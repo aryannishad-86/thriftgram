@@ -23,7 +23,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from core.views import ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet, DropEventViewSet
+from core.views import ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet, DropEventViewSet, RegisterView
 from notifications.views import NotificationViewSet
 
 router = DefaultRouter()
@@ -38,6 +38,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/notifications/', include('notifications.urls')),
     path('api/', include(router.urls)),
+    path('api/register/', RegisterView.as_view(), name='register'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
