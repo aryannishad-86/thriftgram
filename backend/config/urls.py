@@ -23,7 +23,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from core.views import ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet, DropEventViewSet, RegisterView
+from core.views import ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet, DropEventViewSet, RegisterView, GoogleLogin
 from notifications.views import NotificationViewSet
 
 router = DefaultRouter()
@@ -41,4 +41,7 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/auth/', include('dj_rest_auth.urls')),
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('api/auth/google/', GoogleLogin.as_view(), name='google_login'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

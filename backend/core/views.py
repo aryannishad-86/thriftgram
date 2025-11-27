@@ -164,3 +164,12 @@ class ItemViewSet(viewsets.ModelViewSet):
         item = self.get_object()
         Like.objects.filter(user=request.user, item=item).delete()
         return Response({'detail': 'Item unliked.'}, status=status.HTTP_204_NO_CONTENT)
+
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = "http://localhost:3000"
+    client_class = OAuth2Client
