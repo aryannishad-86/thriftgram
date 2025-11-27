@@ -204,6 +204,10 @@ STORAGES = {
     },
 }
 
+# Legacy settings for compatibility with third-party apps (like cloudinary_storage)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 # Cloudinary Configuration
 CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
 if CLOUDINARY_URL:
