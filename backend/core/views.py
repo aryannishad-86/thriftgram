@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
@@ -83,7 +84,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             'total_sales': 0, # Placeholder
         })
 
-    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
     def debug_config(self, request):
         from django.conf import settings
         import os
@@ -171,5 +172,5 @@ from dj_rest_auth.registration.views import SocialLoginView
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = "http://localhost:3000"
+    callback_url = os.getenv('GOOGLE_CALLBACK_URL', "http://localhost:3000")
     client_class = OAuth2Client

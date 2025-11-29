@@ -106,7 +106,9 @@ CHANNEL_LAYERS = {
 }
 
 # CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:8000').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
