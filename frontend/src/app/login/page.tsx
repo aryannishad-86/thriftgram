@@ -68,6 +68,9 @@ export default function LoginPage() {
                     access_token: tokenResponse.access_token,
                 });
                 console.log('Google Login Response:', res.data); // DEBUG LOG
+                // ALERT FOR DEBUGGING
+                alert(JSON.stringify(res.data, null, 2));
+
                 localStorage.setItem('access_token', res.data.access);
                 localStorage.setItem('refresh_token', res.data.refresh);
                 if (res.data.user) {
