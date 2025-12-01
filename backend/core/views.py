@@ -172,5 +172,5 @@ from dj_rest_auth.registration.views import SocialLoginView
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = os.getenv('GOOGLE_CALLBACK_URL', "http://localhost:3000")
-    client_class = OAuth2Client
+    # client_class = OAuth2Client  <-- Commented out to support access_token (Implicit Flow)
+    # callback_url = ...           <-- Commented out to support access_token (Implicit Flow)
