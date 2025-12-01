@@ -170,7 +170,19 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
+import logging
+logger = logging.getLogger(__name__)
+
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    # client_class = OAuth2Client  <-- Commented out to support access_token (Implicit Flow)
-    # callback_url = ...           <-- Commented out to support access_token (Implicit Flow)
+    permission_classes = [permissions.AllowAny]
+    # client_class = OAuth2Client
+    # callback_url = ...
+
+    def post(self, request, *args, **kwargs):
+        logger.error(f"Google Login Request Data: {request.data}")
+        try:
+            return super().post(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"Google Login Error: {str(e)}")
+            raise e
