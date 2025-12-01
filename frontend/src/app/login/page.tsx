@@ -67,11 +67,13 @@ export default function LoginPage() {
                 const res = await api.post('/auth/google/', {
                     access_token: tokenResponse.access_token,
                 });
+                console.log('Google Login Response:', res.data); // DEBUG LOG
                 localStorage.setItem('access_token', res.data.access);
                 localStorage.setItem('refresh_token', res.data.refresh);
                 if (res.data.user) {
                     localStorage.setItem('username', res.data.user.username);
                 }
+                console.log('Token saved to localStorage:', localStorage.getItem('access_token')); // DEBUG LOG
                 window.location.href = '/';
             } catch (err) {
                 console.error('Google login failed', err);
