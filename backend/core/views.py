@@ -175,6 +175,7 @@ logger = logging.getLogger(__name__)
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
+    authentication_classes = [] # Ignore invalid tokens in headers
     permission_classes = [permissions.AllowAny]
     # client_class = OAuth2Client
     # callback_url = ...
