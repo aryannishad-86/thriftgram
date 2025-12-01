@@ -1,20 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useGoogleLogin } from '@react-oauth/google';
+import { Eye, EyeOff, ArrowRight, Sparkles, Leaf, Recycle, Heart } from 'lucide-react';
+import RippleText from '@/components/RippleText';
 
 export default function LoginPage() {
     const router = useRouter();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
+    const containerRef = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end end"]
+    });
+
+    const y1 = useTransform(scrollYProgress, [0, 1], [0, 200]);
+    const y2 = useTransform(scrollYProgress, [0, 1], [0, -150]);
+    const y3 = useTransform(scrollYProgress, [0, 1], [0, 100]);
+    const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,7 +52,6 @@ export default function LoginPage() {
             localStorage.setItem('refresh_token', response.data.refresh);
             localStorage.setItem('username', username);
 
-            // Force a hard reload to ensure all components (Navbar) pick up the new state
             window.location.href = '/';
         } catch (error: any) {
             console.error('Login failed:', error);
@@ -55,7 +69,6 @@ export default function LoginPage() {
                 });
                 localStorage.setItem('access_token', res.data.access);
                 localStorage.setItem('refresh_token', res.data.refresh);
-                // Assuming the response contains user info, otherwise might need another call
                 if (res.data.user) {
                     localStorage.setItem('username', res.data.user.username);
                 }
@@ -71,192 +84,267 @@ export default function LoginPage() {
     });
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center bg-black p-4 relative overflow-hidden selection:bg-primary/30">
-            {/* Dynamic Background Gradient */}
-            <div className="absolute inset-0 -z-30 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0a0a] to-black" />
+        <main ref={containerRef} className="min-h-screen w-full bg-black relative selection:bg-primary/30">
+            {/* Parallax Background Elements */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-black to-black" />
+                <motion.div
+                    style={{ y: y1 }}
+                    className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px]"
+                />
+                <motion.div
+                    style={{ y: y2 }}
+                    className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px]"
+                />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+            </div>
 
-            {/* Background Image with Overlay */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.4 }}
-                transition={{ duration: 1.5 }}
-                className="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat mix-blend-overlay"
-                style={{ backgroundImage: "url('/hero-bg.jpeg')" }}
-            />
+            <div className="relative z-10 flex flex-col lg:flex-row min-h-screen">
+                {/* Left Side - Branding (Sticky) */}
+                <div className="hidden lg:flex w-1/2 flex-col justify-between p-12 sticky top-0 h-screen">
+                    <div></div> {/* Spacer to keep alignment if needed, or just empty to push content down/up depending on justify-between */}
 
-            {/* Animated Gradient Mesh */}
-            <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-primary/10 via-transparent to-accent/10 animate-pulse" />
-            <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-
-            {/* Fluid Background Orbs */}
-            <motion.div
-                animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 90, 0],
-                    x: [0, 100, 0],
-                    y: [0, -50, 0]
-                }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/4 left-1/4 -z-10 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]"
-            />
-            <motion.div
-                animate={{
-                    scale: [1, 1.5, 1],
-                    rotate: [0, -60, 0],
-                    x: [0, -100, 0],
-                    y: [0, 100, 0]
-                }}
-                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                className="absolute bottom-1/4 right-1/4 -z-10 h-[600px] w-[600px] rounded-full bg-accent/10 blur-[120px]"
-            />
-            <motion.div
-                animate={{
-                    opacity: [0.3, 0.6, 0.3],
-                    scale: [1, 1.1, 1],
-                }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[800px] w-[800px] rounded-full bg-purple-900/10 blur-[100px]"
-            />
-
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.5, type: "spring", stiffness: 100, damping: 20 }}
-                className="w-full max-w-md space-y-8 rounded-3xl border border-white/10 bg-black/40 p-8 backdrop-blur-2xl shadow-[0_0_60px_-15px_rgba(109,40,217,0.3)] relative group"
-            >
-                {/* Subtle Border Glow */}
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10 blur-xl" />
-
-                <div className="text-center space-y-2">
-                    <motion.h1
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, type: "spring" }}
-                        className="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/60"
+                    <motion.div
+                        style={{ opacity }}
+                        className="space-y-6 max-w-lg"
                     >
-                        Welcome Back
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="text-sm text-muted-foreground"
-                    >
-                        Enter your credentials to access your account
-                    </motion.p>
+                        <div className="relative">
+                            <RippleText
+                                text="Sustainable style,"
+                                fontSize={60}
+                                className="h-[80px]"
+                            />
+                            <div className="-mt-4">
+                                <RippleText
+                                    text="reimagined."
+                                    fontSize={60}
+                                    className="h-[80px]"
+                                    colors={['#a855f7', '#ec4899']}
+                                />
+                            </div>
+                        </div>
+                        <p className="text-lg text-white/60 leading-relaxed">
+                            Join the community of conscious fashion enthusiasts. Discover unique pieces, sell your pre-loved items, and make a difference.
+                        </p>
+
+                        <div className="flex items-center gap-4 pt-4">
+                            <div className="flex -space-x-4">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="w-12 h-12 rounded-full border-2 border-black bg-white/10 backdrop-blur-md flex items-center justify-center text-xs font-bold text-white">
+                                        <Sparkles className="w-4 h-4 opacity-70" />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="text-sm text-white/80 font-medium">
+                                <span className="text-primary font-bold">10k+</span> active thrifters
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    <div className="text-xs text-white/30">
+                        © 2024 ThriftGram Inc. All rights reserved.
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-4">
+                {/* Right Side - Login Form (Scrollable) */}
+                <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 lg:p-12">
+                    <div className="min-h-[calc(100vh-6rem)] flex items-center justify-center w-full">
                         <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="space-y-2"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
                         >
-                            <Input
-                                type="text"
-                                placeholder="Username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="bg-white/5 border-white/10 focus:border-primary/50 focus:bg-white/10 text-white placeholder:text-muted-foreground/50 h-12 transition-all duration-300 hover:bg-white/10"
-                            />
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="space-y-2"
-                        >
-                            <Input
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="bg-white/5 border-white/10 focus:border-primary/50 focus:bg-white/10 text-white placeholder:text-muted-foreground/50 h-12 transition-all duration-300 hover:bg-white/10"
-                            />
+                            {/* Glow Effect on Card */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+
+                            <div className="mb-8 text-center">
+                                <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+                                <p className="text-muted-foreground">Enter your details to access your account</p>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="space-y-4">
+                                    <div className="relative group">
+                                        <motion.label
+                                            animate={{
+                                                y: focusedInput === 'username' || username ? -24 : 0,
+                                                scale: focusedInput === 'username' || username ? 0.85 : 1,
+                                                color: focusedInput === 'username' ? '#a78bfa' : '#71717a'
+                                            }}
+                                            className="absolute left-3 top-3 text-muted-foreground pointer-events-none origin-left transition-colors"
+                                        >
+                                            Username
+                                        </motion.label>
+                                        <Input
+                                            type="text"
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                            onFocus={() => setFocusedInput('username')}
+                                            onBlur={() => setFocusedInput(null)}
+                                            className="bg-white/5 border-white/10 focus:border-primary/50 text-white h-12 pt-4 transition-all duration-300 hover:bg-white/10"
+                                        />
+                                    </div>
+
+                                    <div className="relative group">
+                                        <motion.label
+                                            animate={{
+                                                y: focusedInput === 'password' || password ? -24 : 0,
+                                                scale: focusedInput === 'password' || password ? 0.85 : 1,
+                                                color: focusedInput === 'password' ? '#a78bfa' : '#71717a'
+                                            }}
+                                            className="absolute left-3 top-3 text-muted-foreground pointer-events-none origin-left transition-colors"
+                                        >
+                                            Password
+                                        </motion.label>
+                                        <Input
+                                            type={showPassword ? "text" : "password"}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            onFocus={() => setFocusedInput('password')}
+                                            onBlur={() => setFocusedInput(null)}
+                                            className="bg-white/5 border-white/10 focus:border-primary/50 text-white h-12 pt-4 pr-10 transition-all duration-300 hover:bg-white/10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-3 text-muted-foreground hover:text-white transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end">
+                                    <Link href="#" className="text-sm text-primary hover:text-accent transition-colors">
+                                        Forgot password?
+                                    </Link>
+                                </div>
+
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400 text-center"
+                                    >
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-gradient-to-r from-primary to-accent text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-2 group"
+                                >
+                                    {loading ? (
+                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    ) : (
+                                        <>
+                                            Sign In
+                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
+                                </motion.button>
+
+                                <div className="relative my-8">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <span className="w-full border-t border-white/10" />
+                                    </div>
+                                    <div className="relative flex justify-center text-xs uppercase">
+                                        <span className="bg-black px-2 text-muted-foreground">Or continue with</span>
+                                    </div>
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="button"
+                                    onClick={() => handleGoogleLogin()}
+                                    className="w-full bg-white/5 border border-white/10 text-white font-medium py-3.5 rounded-xl hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-3"
+                                >
+                                    <svg className="h-5 w-5" viewBox="0 0 24 24">
+                                        <path
+                                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                            fill="#4285F4"
+                                        />
+                                        <path
+                                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                            fill="#34A853"
+                                        />
+                                        <path
+                                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                            fill="#FBBC05"
+                                        />
+                                        <path
+                                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                            fill="#EA4335"
+                                        />
+                                    </svg>
+                                    Google
+                                </motion.button>
+
+                                <div className="mt-8 text-center">
+                                    <p className="text-sm text-muted-foreground">
+                                        Don't have an account?{' '}
+                                        <Link href="/register" className="text-primary hover:text-accent font-medium transition-colors relative group">
+                                            Sign up
+                                            <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
+                                        </Link>
+                                    </p>
+                                </div>
+                            </form>
                         </motion.div>
                     </div>
 
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400 text-center overflow-hidden"
-                        >
-                            {error}
-                        </motion.div>
-                    )}
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <Button
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-primary via-purple-600 to-accent hover:opacity-90 text-white font-medium py-6 shadow-lg shadow-primary/25 transition-all"
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                    Signing in...
+                    {/* Features Section (Scroll Target) */}
+                    <div className="w-full max-w-2xl mt-24 space-y-24 pb-24">
+                        {[
+                            {
+                                icon: Leaf,
+                                title: "Eco-Conscious",
+                                description: "Every purchase reduces waste and supports a sustainable future for fashion.",
+                                color: "text-green-400",
+                                gradient: "from-green-400/20 to-emerald-500/20"
+                            },
+                            {
+                                icon: Recycle,
+                                title: "Circular Economy",
+                                description: "Give pre-loved items a second life and earn rewards for your contribution.",
+                                color: "text-blue-400",
+                                gradient: "from-blue-400/20 to-cyan-500/20"
+                            },
+                            {
+                                icon: Heart,
+                                title: "Community Driven",
+                                description: "Connect with like-minded thrifters who share your passion for style and planet.",
+                                color: "text-pink-400",
+                                gradient: "from-pink-400/20 to-rose-500/20"
+                            }
+                        ].map((feature, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 50 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-100px" }}
+                                transition={{ duration: 0.8, delay: index * 0.2 }}
+                                className="flex gap-6 items-start group"
+                            >
+                                <div className={`p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} border border-white/5 backdrop-blur-sm group-hover:scale-110 transition-transform duration-500`}>
+                                    <feature.icon className={`w-8 h-8 ${feature.color}`} />
                                 </div>
-                            ) : 'Sign In'}
-                        </Button>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.65 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <Button
-                            type="button"
-                            onClick={() => handleGoogleLogin()}
-                            className="w-full bg-white text-black hover:bg-gray-100 font-medium py-6 shadow-lg transition-all flex items-center justify-center gap-2"
-                        >
-                            <svg className="h-5 w-5" viewBox="0 0 24 24">
-                                <path
-                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                                    fill="#4285F4"
-                                />
-                                <path
-                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                    fill="#34A853"
-                                />
-                                <path
-                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                                    fill="#FBBC05"
-                                />
-                                <path
-                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                                    fill="#EA4335"
-                                />
-                            </svg>
-                            Sign in with Google
-                        </Button>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.7 }}
-                        className="text-center text-sm"
-                    >
-                        <span className="text-muted-foreground">Don't have an account? </span>
-                        <Link href="/register" className="font-medium text-primary hover:text-accent transition-colors relative group">
-                            Sign up
-                            <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-accent transition-all group-hover:w-full" />
-                        </Link>
-                    </motion.div>
-                </form>
-            </motion.div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">{feature.title}</h3>
+                                    <p className="text-muted-foreground text-lg leading-relaxed">
+                                        {feature.description}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </main>
     );
 }

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import NotificationBell from './NotificationBell';
 import UserDropdown from './UserDropdown';
 import { useCart } from '@/context/CartContext';
+import GradientIconButton from './GradientIconButton';
 
 interface NavActionsProps {
     username: string | null;
@@ -28,17 +29,13 @@ export default function NavActions({ username }: NavActionsProps) {
 
             <NotificationBell />
 
-            <button
+            <GradientIconButton
+                icon={ShoppingBag}
+                label="Cart"
+                gradient="from-blue-400 to-cyan-400"
                 onClick={openCart}
-                className="relative p-2 text-muted-foreground hover:text-primary transition-colors"
-            >
-                <ShoppingBag className="h-6 w-6" />
-                {items.length > 0 && (
-                    <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-white text-[10px] font-bold flex items-center justify-center rounded-full">
-                        {items.length}
-                    </span>
-                )}
-            </button>
+                badgeCount={items.length}
+            />
 
             {username ? (
                 <UserDropdown username={username} />

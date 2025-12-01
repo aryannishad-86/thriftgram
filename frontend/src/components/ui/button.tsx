@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
+import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 export interface ButtonProps
@@ -27,7 +28,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             icon: "h-10 w-10",
         }
 
-        return (
+        const buttonContent = (
             <Comp
                 className={cn(
                     "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -38,6 +39,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ref={ref}
                 {...props}
             />
+        )
+
+        if (asChild) {
+            return buttonContent
+        }
+
+        return (
+            <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-block"
+            >
+                {buttonContent}
+            </motion.div>
         )
     }
 )

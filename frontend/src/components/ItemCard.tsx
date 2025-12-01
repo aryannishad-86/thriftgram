@@ -58,8 +58,8 @@ export default function ItemCard({ item: initialItem }: { item: Item }) {
 
     return (
         <motion.div
-            whileHover={{ y: -5 }}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all hover:border-primary/50 hover:shadow-[0_0_30px_-10px_rgba(109,40,217,0.3)]"
+            whileHover={{ y: -8 }}
+            className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-500 hover:border-primary/80 hover:shadow-[0_0_40px_-5px_rgba(109,40,217,0.6)]"
         >
             {/* Image Container */}
             <div className="aspect-[4/5] relative overflow-hidden bg-secondary/50">

@@ -35,19 +35,21 @@ export default function Navbar() {
 
     return (
         <nav className="sticky top-0 z-50 w-full bg-black/35 backdrop-blur-[18px] supports-[backdrop-filter]:bg-black/35 transition-all duration-300">
-            <div className="container mx-auto flex h-[72px] items-center justify-between px-4 relative">
+            <div className="container mx-auto grid grid-cols-[1fr_auto_1fr] h-[72px] items-center px-4 relative">
                 {/* Logo */}
-                <Link href="/" className="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent hover:opacity-80 transition-opacity hover:drop-shadow-[0_0_15px_rgba(109,40,217,0.5)] z-10">
-                    ThriftGram
-                </Link>
+                <div className="flex justify-start">
+                    <Link href="/" className="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent hover:opacity-80 transition-opacity hover:drop-shadow-[0_0_15px_rgba(109,40,217,0.5)] z-10">
+                        ThriftGram
+                    </Link>
+                </div>
 
                 {/* Centered Nav Links */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8">
+                <div className="flex justify-center items-center gap-8">
                     <NavLinks />
                 </div>
 
                 {/* Right Side: Search + Actions */}
-                <div className="flex items-center gap-4 z-10">
+                <div className="flex justify-end items-center gap-4 z-10">
                     <SearchBar />
                     <NavActions username={username} />
                 </div>

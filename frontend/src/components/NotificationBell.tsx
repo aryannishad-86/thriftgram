@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
+import GradientIconButton from './GradientIconButton';
 
 interface Notification {
     id: number;
@@ -78,19 +79,13 @@ export default function NotificationBell() {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <Button
-                variant="ghost"
-                size="icon"
-                className="relative text-muted-foreground hover:text-primary transition-colors"
+            <GradientIconButton
+                icon={Bell}
+                label="Notifications"
+                gradient="from-violet-500 to-purple-500"
                 onClick={handleBellClick}
-            >
-                <Bell className="h-6 w-6" />
-                {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
-                        {unreadCount}
-                    </span>
-                )}
-            </Button>
+                badgeCount={unreadCount}
+            />
 
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-80 rounded-xl border border-white/10 bg-black/90 backdrop-blur-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">

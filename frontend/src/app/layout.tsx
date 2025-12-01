@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/Providers";
 import CartDrawer from "@/components/CartDrawer";
+import SmoothScrolling from "@/components/SmoothScrolling";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,11 +33,13 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <Navbar />
-          <CartDrawer />
-          <main className="min-h-screen">
-            {children}
-          </main>
+          <SmoothScrolling>
+            <Navbar />
+            <CartDrawer />
+            <main className="min-h-screen">
+              {children}
+            </main>
+          </SmoothScrolling>
         </Providers>
       </body>
     </html>
