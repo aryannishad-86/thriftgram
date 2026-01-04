@@ -37,16 +37,16 @@ export default function DashboardPage() {
                 // We need the username to filter items. 
                 // Let's assume we can get it from a profile endpoint or decode token.
                 // Fetch User Info
-                const userRes = await api.get('/users/me/');
+                const userRes = await api.get('/api/users/me/');
                 setUser(userRes.data);
 
                 // Fetch Stats
-                const statsRes = await api.get('/users/dashboard_stats/');
+                const statsRes = await api.get('/api/users/dashboard_stats/');
                 setStats(statsRes.data);
 
                 // Fetch Items using the username from stats (or userRes)
                 if (statsRes.data.username) {
-                    const itemsRes = await api.get('/items/', {
+                    const itemsRes = await api.get('/api/items/', {
                         params: { seller_username: statsRes.data.username }
                     });
                     setItems(itemsRes.data);

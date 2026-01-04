@@ -28,7 +28,7 @@ export default function ClosetPage() {
 
     const fetchCloset = async () => {
         try {
-            const res = await api.get('/closet/');
+            const res = await api.get('/api/closet/');
             setItems(res.data);
         } catch (error) {
             console.error('Failed to fetch closet', error);
@@ -48,7 +48,7 @@ export default function ClosetPage() {
 
         setUploading(true);
         try {
-            await api.post('/closet/', formData, {
+            await api.post('/api/closet/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             fetchCloset();

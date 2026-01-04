@@ -13,7 +13,7 @@ export default function Feed({ filters }: { filters?: Record<string, unknown> })
     useEffect(() => {
         const fetchItems = async () => {
             try {
-                const response = await api.get('/items/', { params: filters });
+                const response = await api.get('/api/items/', { params: filters });
                 setItems(response.data);
             } catch (err) {
                 console.error(err);
