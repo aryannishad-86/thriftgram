@@ -36,7 +36,7 @@ export default function RegisterPage() {
         }
 
         try {
-            const response = await api.post('/register/', {
+            const response = await api.post('/api/register/', {
                 username,
                 email,
                 password,
@@ -64,7 +64,7 @@ export default function RegisterPage() {
     const handleGoogleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const res = await api.post('/auth/google/', {
+                const res = await api.post('/api/auth/google/', {
                     access_token: tokenResponse.access_token,
                 });
                 localStorage.setItem('access_token', res.data.access);

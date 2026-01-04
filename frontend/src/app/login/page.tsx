@@ -43,7 +43,7 @@ export default function LoginPage() {
         }
 
         try {
-            const response = await api.post('/token/', {
+            const response = await api.post('/api/token/', {
                 username,
                 password,
             });
@@ -64,7 +64,7 @@ export default function LoginPage() {
     const handleGoogleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const res = await api.post('/auth/google/', {
+                const res = await api.post('/api/auth/google/', {
                     access_token: tokenResponse.access_token,
                 });
                 console.log('Google Login Response:', res.data); // DEBUG LOG
