@@ -166,24 +166,68 @@ class ItemViewSet(viewsets.ModelViewSet):
         Like.objects.filter(user=request.user, item=item).delete()
         return Response({'detail': 'Item unliked.'}, status=status.HTTP_204_NO_CONTENT)
 
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from dj_rest_auth.registration.views import SocialLoginView
+from rest_framework_simplejwt.tokens import RefreshToken
+import requests
 
-import logging
-logger = logging.getLogger(__name__)
-
-class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    authentication_classes = [] # Ignore invalid tokens in headers
+class GoogleLogin(APIView):
     permission_classes = [permissions.AllowAny]
-    # client_class = OAuth2Client
-    # callback_url = ...
 
-    def post(self, request, *args, **kwargs):
-        logger.error(f"Google Login Request Data: {request.data}")
+    def post(self, request):
+        access_token = request.data.get('access_token')
+        
+        if not access_token:
+            return Response({'error': 'access_token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
-            return super().post(request, *args, **kwargs)
+            # Verify the Google access token
+            google_response = requests.get(
+                'https://www.googleapis.com/oauth2/v1/userinfo',
+                headers={'Authorization': f'Bearer {access_token}'}
+            )
+            
+            if google_response.status_code != 200:
+                return Response({'error': 'Invalid Google access token'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            google_data = google_response.json()
+            email = google_data.get('email')
+            name = google_data.get('name', '')
+            
+            if not email:
+                return Response({'error': 'Email not provided by Google'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Get or create user
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    'username': email.split('@')[0],  # Use email prefix as username
+                    'first_name': name.split()[0] if name else '',
+                    'last_name': ' '.join(name.split()[1:]) if len(name.split()) > 1 else '',
+                }
+            )
+            
+            # If username already exists, append a number
+            if created and User.objects.filter(username=user.username).exclude(id=user.id).exists():
+                base_username = user.username
+                counter = 1
+                while User.objects.filter(username=f"{base_username}{counter}").exists():
+                    counter += 1
+                user.username = f"{base_username}{counter}"
+                user.save()
+            
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': {
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                }
+            }, status=status.HTTP_200_OK)
+            
         except Exception as e:
-            logger.error(f"Google Login Error: {str(e)}")
-            raise e
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
