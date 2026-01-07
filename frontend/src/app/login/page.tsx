@@ -120,12 +120,11 @@ export default function LoginPage() {
                             initial={{ opacity: 0, x: -50 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, type: "spring" }}
-                            className="space-y-1"
                         >
                             <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none">
                                 <RippleText text="Sustainable style," className="text-base-03" />
                             </h1>
-                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none">
+                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none -mt-2 lg:-mt-4">
                                 <RippleText text="reimagined." className="text-primary" />
                             </h1>
                         </motion.div>
