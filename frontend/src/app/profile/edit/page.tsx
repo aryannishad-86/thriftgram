@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, Instagram, Twitter, Globe, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ import api from '@/lib/api';
 export default function ProfileEditPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [fetchingData, setFetchingData] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -21,6 +22,36 @@ export default function ProfileEditPage() {
 
     const [profilePicture, setProfilePicture] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState('');
+    const [currentProfilePicture, setCurrentProfilePicture] = useState('');
+
+    // Fetch current user data
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await api.get('/api/users/me/');
+                const userData = response.data;
+
+                setFormData({
+                    bio: userData.bio || '',
+                    instagram: userData.social_links?.instagram || '',
+                    twitter: userData.social_links?.twitter || '',
+                    website: userData.social_links?.website || '',
+                });
+
+                if (userData.profile_picture) {
+                    setCurrentProfilePicture(userData.profile_picture);
+                    setPreviewUrl(userData.profile_picture);
+                }
+            } catch (err) {
+                console.error('Failed to fetch user data', err);
+                setError('Failed to load profile data');
+            } finally {
+                setFetchingData(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -69,6 +100,14 @@ export default function ProfileEditPage() {
             setLoading(false);
         }
     };
+
+    if (fetchingData) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center pt-20">
+                <div className="text-base-02">Loading profile...</div>
+            </div>
+        );
+    }
 
     return (
         <main className="min-h-screen bg-background pt-24 pb-12 px-4">
