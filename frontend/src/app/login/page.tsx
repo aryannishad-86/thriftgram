@@ -115,24 +115,25 @@ export default function LoginPage() {
                     style={{ opacity }}
                     className="lg:sticky lg:top-0 lg:h-screen lg:w-1/2 flex flex-col justify-center p-8 lg:p-16 relative overflow-hidden"
                 >
-                    <div className="relative z-10 space-y-8">
+                    <div className="relative z-10 space-y-10">
                         <motion.div
                             initial={{ opacity: 0, x: -50 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, type: "spring" }}
+                            className="space-y-3"
                         >
-                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight">
+                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none">
                                 <RippleText text="Sustainable style," className="text-base-03" />
                             </h1>
-                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight mt-4">
+                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none">
                                 <RippleText text="reimagined." className="text-primary" />
                             </h1>
                         </motion.div>
-                        <p className="text-lg text-base-02 leading-relaxed">
+                        <p className="text-lg text-base-02 leading-relaxed max-w-lg">
                             Join the community of conscious fashion enthusiasts. Discover unique pieces, sell your pre-loved items, and make a difference.
                         </p>
 
-                        <div className="flex items-center gap-4 pt-4">
+                        <div className="flex items-center gap-4 pt-6">
                             <div className="flex -space-x-4">
                                 {[1, 2, 3, 4].map((i) => (
                                     <div key={i} className="w-12 h-12 rounded-full border-2 border-base-2 bg-card flex items-center justify-center text-xs font-bold text-primary">
@@ -146,7 +147,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="text-xs text-base-01 mt-auto pt-8">
+                    <div className="text-xs text-base-01 mt-auto pt-12">
                         © 2024 ThriftGram Inc. All rights reserved.
                     </div>
                 </motion.div>
@@ -163,13 +164,13 @@ export default function LoginPage() {
                             {/* Subtle top accent */}
                             <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
 
-                            <div className="mb-8 text-center">
-                                <h2 className="text-3xl font-bold text-base-03 mb-2">Welcome Back</h2>
-                                <p className="text-base-01">Enter your details to access your account</p>
+                            <div className="mb-10 text-center">
+                                <h2 className="text-3xl font-bold text-base-03 mb-3">Welcome Back</h2>
+                                <p className="text-base-01 text-sm">Enter your details to access your account</p>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="space-y-4">
+                            <form onSubmit={handleSubmit} className="space-y-7">
+                                <div className="space-y-5">
                                     <div className="relative group">
                                         <motion.label
                                             animate={{
