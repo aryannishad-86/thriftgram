@@ -9,10 +9,30 @@ interface RippleTextProps {
     colors?: string[];
 }
 
-export default function RippleText({ text, className, fontSize = 60, colors = ['#ffffff', 'rgba(255, 255, 255, 0.6)'] }: RippleTextProps) {
+export default function RippleText({ text, className, fontSize = 60, colors }: RippleTextProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
     const rippleRef = useRef({ x: 0, y: 0, strength: 0 });
+    const colorRef = useRef<string[]>(['#002b36', '#002b36']); // Default to base-03 (dark)
+
+    useEffect(() => {
+        // Extract color from className if provided
+        if (className && !colors) {
+            const tempDiv = document.createElement('div');
+            tempDiv.className = className;
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.visibility = 'hidden';
+            document.body.appendChild(tempDiv);
+            const computedColor = window.getComputedStyle(tempDiv).color;
+            document.body.removeChild(tempDiv);
+
+            if (computedColor) {
+                colorRef.current = [computedColor, computedColor];
+            }
+        } else if (colors) {
+            colorRef.current = colors;
+        }
+    }, [className, colors]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -63,12 +83,11 @@ export default function RippleText({ text, className, fontSize = 60, colors = ['
             const textMetrics = ctx.measureText(text);
             const textWidth = textMetrics.width;
 
-            // Center text vertically, align left horizontally (or center if desired)
+            // Center text vertically, align left horizontally
             const startX = 0;
             const startY = height / 2;
 
             // Draw text with distortion
-            // We'll draw the text in slices to apply distortion
             const sliceWidth = 2;
             for (let i = 0; i < textWidth; i += sliceWidth) {
                 const x = startX + i;
@@ -79,13 +98,11 @@ export default function RippleText({ text, className, fontSize = 60, colors = ['
                 const dist = Math.sqrt(dx * dx + dy * dy);
 
                 // Ripple effect calculation
-                // Frequency and amplitude based on distance and strength
                 const maxDist = 200;
                 let distortionY = 0;
 
                 if (dist < maxDist) {
                     const influence = (1 - dist / maxDist) * rippleRef.current.strength;
-                    // Even slower speed (0.001), lower frequency (0.04), and reduced amplitude (5)
                     distortionY = Math.sin(dist * 0.04 - Date.now() * 0.001) * influence * 5;
                 }
 
@@ -95,12 +112,8 @@ export default function RippleText({ text, className, fontSize = 60, colors = ['
                 ctx.rect(i, 0, sliceWidth, height);
                 ctx.clip();
 
-                // Apply gradient
-                const gradient = ctx.createLinearGradient(0, 0, width, 0);
-                colors.forEach((color, index) => {
-                    gradient.addColorStop(index / (colors.length - 1), color);
-                });
-                ctx.fillStyle = gradient;
+                // Use the extracted color
+                ctx.fillStyle = colorRef.current[0];
 
                 ctx.fillText(text, startX, startY + distortionY);
                 ctx.restore();
@@ -116,7 +129,7 @@ export default function RippleText({ text, className, fontSize = 60, colors = ['
             canvas.removeEventListener('mousemove', handleMouseMove);
             canvas.removeEventListener('mouseleave', handleMouseLeave);
         };
-    }, [text, fontSize, colors]);
+    }, [text, fontSize]);
 
     return (
         <canvas
