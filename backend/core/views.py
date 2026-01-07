@@ -1,12 +1,16 @@
 import os
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
-from .models import Item, Like, ClosetItem, DropEvent
-from .serializers import ItemSerializer, UserSerializer, UserProfileSerializer, ClosetItemSerializer, DropEventSerializer
+from .models import Item, Like, ClosetItem, DropEvent, Follow, Order, Review, Wishlist
+from .serializers import (
+    ItemSerializer, UserSerializer, UserProfileSerializer, ClosetItemSerializer,
+    DropEventSerializer, FollowSerializer, OrderSerializer, ReviewSerializer, WishlistSerializer
+)
 from .ai_service import AIService
 from .eco_service import EcoService
 
@@ -70,6 +74,63 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+
+    @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
+    def me(self, request):
+        """Get or update current user profile"""
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user, context={'request': request})
+            return Response(serializer.data)
+        elif request.method == 'PATCH':
+            serializer = UserProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def follow(self, request, username=None):
+        """Follow a user"""
+        user_to_follow = self.get_object()
+        if user_to_follow == request.user:
+            return Response({'error': 'Cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        follow, created = Follow.objects.get_or_create(
+            follower=request.user,
+            following=user_to_follow
+        )
+        
+        if created:
+            return Response({'status': 'following'}, status=status.HTTP_201_CREATED)
+        return Response({'status': 'already following'})
+
+    @action(detail=True, methods=['delete'], permission_classes=[permissions.IsAuthenticated])
+    def unfollow(self, request, username=None):
+        """Unfollow a user"""
+        user_to_unfollow = self.get_object()
+        deleted_count, _ = Follow.objects.filter(
+            follower=request.user,
+            following=user_to_unfollow
+        ).delete()
+        
+        if deleted_count > 0:
+            return Response({'status': 'unfollowed'}, status=status.HTTP_200_OK)
+        return Response({'status': 'not following'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'])
+    def followers(self, request, username=None):
+        """Get user's followers"""
+        user = self.get_object()
+        followers = Follow.objects.filter(following=user)
+        serializer = FollowSerializer(followers, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'])
+    def following(self, request, username=None):
+        """Get users that this user follows"""
+        user = self.get_object()
+        following = Follow.objects.filter(follower=user)
+        serializer = FollowSerializer(following, many=True, context={'request': request})
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def dashboard_stats(self, request):
@@ -231,3 +292,94 @@ class GoogleLogin(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+# Phase 1 ViewSets
+
+class OrderViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return orders where user is buyer or seller"""
+        return Order.objects.filter(
+            Q(buyer=self.request.user) | Q(item__seller=self.request.user)
+        )
+    
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
+    def update_status(self, request, pk=None):
+        """Update order status (seller only)"""
+        order = self.get_object()
+        if order.item.seller != request.user:
+            return Response(
+                {'error': 'Only seller can update status'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        new_status = request.data.get('status')
+        if new_status in dict(Order.STATUS_CHOICES):
+            order.status = new_status
+            order.save()
+            serializer = self.get_serializer(order)
+            return Response(serializer.data)
+        return Response(
+            {'error': 'Invalid status'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        item_id = self.request.query_params.get('item')
+        if item_id:
+            return Review.objects.filter(item_id=item_id)
+        return Review.objects.all()
+    
+    def perform_create(self, serializer):
+        serializer.save(reviewer=self.request.user)
+
+
+class WishlistViewSet(viewsets.ModelViewSet):
+    serializer_class = WishlistSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return Wishlist.objects.filter(user=self.request.user)
+    
+    def create(self, request):
+        item_id = request.data.get('item')
+        if not item_id:
+            return Response({'error': 'item ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            item = Item.objects.get(id=item_id)
+        except Item.DoesNotExist:
+            return Response({'error': 'Item not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        wishlist, created = Wishlist.objects.get_or_create(
+            user=request.user,
+            item=item
+        )
+        
+        if created:
+            serializer = self.get_serializer(wishlist)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'status': 'already in wishlist'})
+    
+    @action(detail=False, methods=['delete'], permission_classes=[permissions.IsAuthenticated])
+    def remove(self, request):
+        """Remove item from wishlist"""
+        item_id = request.data.get('item')
+        if not item_id:
+            return Response({'error': 'item ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        deleted_count, _ = Wishlist.objects.filter(
+            user=request.user,
+            item_id=item_id
+        ).delete()
+        
+        if deleted_count > 0:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': 'Item not in wishlist'}, status=status.HTTP_404_NOT_FOUND)

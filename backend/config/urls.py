@@ -23,7 +23,11 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from core.views import ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet, DropEventViewSet, RegisterView, GoogleLogin
+from core.views import (
+    ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet,
+    DropEventViewSet, RegisterView, GoogleLogin, OrderViewSet,
+    ReviewViewSet, WishlistViewSet
+)
 from notifications.views import NotificationViewSet
 
 router = DefaultRouter()
@@ -33,6 +37,9 @@ router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'leaderboard', LeaderboardViewSet, basename='leaderboard')
 router.register(r'closet', ClosetItemViewSet, basename='closet')
 router.register(r'drops', DropEventViewSet, basename='drops')
+router.register(r'orders', OrderViewSet, basename='order')
+router.register(r'reviews', ReviewViewSet, basename='review')
+router.register(r'wishlist', WishlistViewSet, basename='wishlist')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
