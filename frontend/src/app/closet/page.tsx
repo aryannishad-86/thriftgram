@@ -71,7 +71,7 @@ export default function ClosetPage() {
                         <motion.h1
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-4xl md:text-6xl font-bold text-base-01 mb-4"
+                            className="text-4xl md:text-6xl font-bold text-base-03 mb-4"
                         >
                             My Digital Closet
                         </motion.h1>
@@ -79,7 +79,7 @@ export default function ClosetPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            className="text-xl text-secondary"
+                            className="text-xl text-base-02"
                         >
                             Digitize your wardrobe & find matches.
                         </motion.p>

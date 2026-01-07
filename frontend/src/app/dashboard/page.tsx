@@ -80,8 +80,8 @@ export default function DashboardPage() {
             >
                 {/* Header */}
                 <div>
-                    <h1 className="text-4xl font-bold text-base-01 tracking-tight">Seller Dashboard</h1>
-                    <p className="text-muted mt-2 text-lg">Overview of your store performance</p>
+                    <h1 className="text-4xl font-bold text-base-03 tracking-tight">Seller Dashboard</h1>
+                    <p className="text-base-02 mt-2 text-lg">Overview of your store performance</p>
                 </div>
 
                 {/* Stats Grid */}

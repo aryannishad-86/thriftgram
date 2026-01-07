@@ -63,7 +63,7 @@ export default function SellPage() {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="text-5xl font-bold tracking-tight text-base-01"
+                        className="text-5xl font-bold tracking-tight text-base-03"
                     >
                         Sell an Item
                     </motion.h1>
@@ -71,7 +71,7 @@ export default function SellPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="text-lg text-muted max-w-lg mx-auto"
+                        className="text-lg text-base-02 max-w-lg mx-auto"
                     >
                         List your unique finds for the community. Turn your closet into currency.
                     </motion.p>

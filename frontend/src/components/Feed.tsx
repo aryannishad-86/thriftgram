@@ -63,8 +63,8 @@ export default function Feed({ filters }: { filters?: Record<string, unknown> })
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">No items yet</h3>
-                <p className="text-muted-foreground max-w-sm mx-auto">
+                <h3 className="text-2xl font-bold text-base-03 mb-2">No items yet</h3>
+                <p className="text-base-02 max-w-sm mx-auto">
                     Be the first to list a unique find and start the collection.
                 </p>
             </div>
