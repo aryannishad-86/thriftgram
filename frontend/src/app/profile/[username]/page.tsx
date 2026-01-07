@@ -1,30 +1,50 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { User, Edit, Instagram, Twitter, Globe, Users } from 'lucide-react';
+import Image from 'next/image';
 import api from '@/lib/api';
 import Feed from '@/components/Feed';
-import { User } from 'lucide-react';
-import Image from 'next/image';
+import FollowButton from '@/components/FollowButton';
 
 interface UserProfile {
     id: number;
     username: string;
+    email: string;
     bio: string;
     profile_picture: string | null;
+    social_links: {
+        instagram?: string;
+        twitter?: string;
+        website?: string;
+    };
+    eco_points: number;
+    co2_saved: number;
+    water_saved: number;
+    followers_count: number;
+    following_count: number;
+    is_following: boolean;
 }
 
 export default function ProfilePage() {
     const params = useParams();
+    const router = useRouter();
     const username = params.username as string;
     const [user, setUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isOwnProfile, setIsOwnProfile] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await api.get(`/users/${username}/`);
+                const response = await api.get(`/api/users/${username}/`);
                 setUser(response.data);
+
+                // Check if this is the current user's profile
+                const currentUsername = localStorage.getItem('username');
+                setIsOwnProfile(currentUsername === username);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -37,71 +57,153 @@ export default function ProfilePage() {
         }
     }, [username]);
 
+    const handleFollowChange = (isFollowing: boolean) => {
+        if (user) {
+            setUser({
+                ...user,
+                is_following: isFollowing,
+                followers_count: isFollowing ? user.followers_count + 1 : user.followers_count - 1
+            });
+        }
+    };
+
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center text-white">Loading profile...</div>;
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center pt-20">
+                <div className="text-base-02">Loading profile...</div>
+            </div>
+        );
     }
 
     if (!user) {
-        return <div className="min-h-screen flex items-center justify-center text-white">User not found</div>;
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center pt-20">
+                <div className="text-base-02">User not found</div>
+            </div>
+        );
     }
 
     return (
-        <main className="min-h-screen bg-background selection:bg-primary/30 relative overflow-hidden">
-            {/* Cosmic Background */}
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_40%_at_50%_60%,rgba(109,40,217,0.15),transparent)]" />
-
-            <div className="container mx-auto px-4 py-12">
+        <main className="min-h-screen bg-background pt-24 pb-12 px-4">
+            <div className="container mx-auto max-w-4xl">
                 {/* Profile Header */}
-                <div className="mb-12 flex flex-col items-center text-center">
-                    <div className="relative mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-primary/50 bg-white/5 shadow-[0_0_30px_-10px_rgba(109,40,217,0.5)]">
-                        {user.profile_picture ? (
-                            <div className="relative h-full w-full">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-card border border-border rounded-3xl p-8 mb-8 shadow-sm"
+                >
+                    <div className="flex flex-col md:flex-row gap-6 items-start">
+                        {/* Profile Picture */}
+                        <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-border bg-base-2 flex-shrink-0">
+                            {user.profile_picture ? (
                                 <Image
                                     src={user.profile_picture}
                                     alt={user.username}
                                     fill
                                     className="object-cover"
                                 />
-                            </div>
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-white/5">
-                                <User className="h-10 w-10 text-white/50" />
-                            </div>
-                        )}
-                    </div>
-
-                    <h1 className="text-3xl font-bold text-white">@{user.username}</h1>
-                    {user.bio && <p className="mt-2 max-w-md text-muted-foreground">{user.bio}</p>}
-
-                    <div className="mt-6 flex gap-4">
-                        <div className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm font-medium text-white">
-                            Seller
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center">
+                                    <User className="h-16 w-16 text-base-01" />
+                                </div>
+                            )}
                         </div>
-                        <button
-                            onClick={() => {
-                                const currentUser = localStorage.getItem('username');
-                                if (!currentUser) {
-                                    alert('Please login to message');
-                                    window.location.href = '/login';
-                                    return;
-                                }
-                                const participants = [currentUser, user.username].sort();
-                                const roomName = `${participants[0]}_${participants[1]}`;
-                                window.location.href = `/chat?room=${roomName}`;
-                            }}
-                            className="rounded-full bg-white/10 px-6 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-md"
-                        >
-                            Message
-                        </button>
-                        <button className="rounded-full bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors shadow-[0_0_20px_-5px_rgba(109,40,217,0.5)]">
-                            Follow
-                        </button>
-                    </div>
-                </div>
 
-                {/* User's Closet */}
-                <div className="border-t border-white/10 pt-12">
-                    <h2 className="mb-8 text-xl font-bold text-white">Closet</h2>
+                        {/* Profile Info */}
+                        <div className="flex-1">
+                            <div className="flex items-start justify-between mb-4">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-base-03">@{user.username}</h1>
+                                    {user.bio && <p className="mt-2 text-base-02">{user.bio}</p>}
+                                </div>
+
+                                {isOwnProfile ? (
+                                    <button
+                                        onClick={() => router.push('/profile/edit')}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-base-2 text-base-03 border border-border hover:bg-base-1 transition-colors"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                        Edit Profile
+                                    </button>
+                                ) : (
+                                    <FollowButton
+                                        username={username}
+                                        initialIsFollowing={user.is_following}
+                                        onFollowChange={handleFollowChange}
+                                    />
+                                )}
+                            </div>
+
+                            {/* Stats */}
+                            <div className="flex gap-6 mb-4">
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-base-03">{user.followers_count}</div>
+                                    <div className="text-sm text-base-02">Followers</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-base-03">{user.following_count}</div>
+                                    <div className="text-sm text-base-02">Following</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-base-03">{user.eco_points}</div>
+                                    <div className="text-sm text-base-02">Eco Points</div>
+                                </div>
+                            </div>
+
+                            {/* Social Links */}
+                            {user.social_links && Object.keys(user.social_links).length > 0 && (
+                                <div className="flex gap-3">
+                                    {user.social_links.instagram && (
+                                        <a
+                                            href={`https://instagram.com/${user.social_links.instagram.replace('@', '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 rounded-full bg-base-2 text-base-03 hover:bg-primary hover:text-white transition-colors"
+                                        >
+                                            <Instagram className="w-5 h-5" />
+                                        </a>
+                                    )}
+                                    {user.social_links.twitter && (
+                                        <a
+                                            href={`https://twitter.com/${user.social_links.twitter.replace('@', '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 rounded-full bg-base-2 text-base-03 hover:bg-primary hover:text-white transition-colors"
+                                        >
+                                            <Twitter className="w-5 h-5" />
+                                        </a>
+                                    )}
+                                    {user.social_links.website && (
+                                        <a
+                                            href={user.social_links.website}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 rounded-full bg-base-2 text-base-03 hover:bg-primary hover:text-white transition-colors"
+                                        >
+                                            <Globe className="w-5 h-5" />
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Eco Impact */}
+                            <div className="mt-4 flex gap-4 text-sm">
+                                <div className="flex items-center gap-2 text-base-02">
+                                    <span className="font-semibold text-success">{user.co2_saved.toFixed(1)}kg</span>
+                                    CO₂ saved
+                                </div>
+                                <div className="flex items-center gap-2 text-base-02">
+                                    <span className="font-semibold text-primary">{user.water_saved.toFixed(0)}L</span>
+                                    Water saved
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* User's Listings */}
+                <div>
+                    <h2 className="text-2xl font-bold text-base-03 mb-6">Listings</h2>
                     <Feed filters={{ seller_username: username }} />
                 </div>
             </div>
