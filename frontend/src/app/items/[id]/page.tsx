@@ -10,6 +10,8 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import BuyButton from '@/components/BuyButton';
+import ReviewForm from '@/components/ReviewForm';
+import ReviewList from '@/components/ReviewList';
 
 
 interface Item {
@@ -34,6 +36,7 @@ export default function ItemDetailPage() {
     const [item, setItem] = useState<Item | null>(null);
     const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false);
+    const [refreshReviews, setRefreshReviews] = useState(0);
 
     const [matching, setMatching] = useState(false);
     const [matches, setMatches] = useState<any[]>([]);
@@ -257,6 +260,31 @@ export default function ItemDetailPage() {
                         </div>
                     </motion.div>
                 </div>
+
+                {/* Reviews Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="mt-16"
+                >
+                    <h2 className="text-3xl font-bold text-white mb-8">Reviews</h2>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* Review Form */}
+                        <div>
+                            <ReviewForm
+                                itemId={item.id}
+                                onReviewSubmitted={() => setRefreshReviews(prev => prev + 1)}
+                            />
+                        </div>
+
+                        {/* Review List */}
+                        <div>
+                            <ReviewList itemId={item.id} refreshTrigger={refreshReviews} />
+                        </div>
+                    </div>
+                </motion.div>
             </div>
         </main>
     );
