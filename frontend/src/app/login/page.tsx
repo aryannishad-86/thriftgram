@@ -124,7 +124,7 @@ export default function LoginPage() {
                             <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none">
                                 <RippleText text="Sustainable style," className="text-base-03" />
                             </h1>
-                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none -mt-2 lg:-mt-4">
+                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-none -mt-4 lg:-mt-8">
                                 <RippleText text="reimagined." className="text-primary" />
                             </h1>
                         </motion.div>
