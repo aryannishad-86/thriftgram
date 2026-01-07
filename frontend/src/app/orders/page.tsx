@@ -47,8 +47,12 @@ export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'purchases' | 'sales'>('purchases');
+    const [currentUsername, setCurrentUsername] = useState<string | null>(null);
 
     useEffect(() => {
+        // Get username from localStorage (client-side only)
+        setCurrentUsername(localStorage.getItem('username'));
+
         const fetchOrders = async () => {
             try {
                 const response = await api.get('/api/orders/');
@@ -62,8 +66,6 @@ export default function OrdersPage() {
 
         fetchOrders();
     }, []);
-
-    const currentUsername = localStorage.getItem('username');
 
     const purchases = orders.filter(order => order.buyer.username === currentUsername);
     const sales = orders.filter(order => order.item && order.buyer.username !== currentUsername);
