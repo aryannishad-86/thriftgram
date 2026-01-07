@@ -25,7 +25,7 @@ export default function Navbar() {
         return (
             <nav className="absolute top-0 z-50 w-full p-6">
                 <div className="container mx-auto">
-                    <Link href="/" className="text-2xl font-bold tracking-tighter text-primary hover:text-primary/80 transition-colors">
+                    <Link href="/" className="text-2xl font-bold tracking-tighter text-base-03 hover:text-base-02 transition-colors">
                         ThriftGram
                     </Link>
                 </div>
