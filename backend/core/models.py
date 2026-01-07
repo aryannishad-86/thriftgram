@@ -5,12 +5,14 @@ from django.conf import settings
 class CustomUser(AbstractUser):
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    social_links = models.JSONField(default=dict, blank=True)  # {instagram, twitter, website}
     eco_points = models.IntegerField(default=0)
     co2_saved = models.FloatField(default=0.0)  # in kg
     water_saved = models.FloatField(default=0.0)  # in liters
 
     def __str__(self):
         return self.username
+
 
 class Item(models.Model):
     CONDITION_CHOICES = [
@@ -83,3 +85,86 @@ class DropEvent(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Follow(models.Model):
+    """User follow relationships"""
+    follower = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='followers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+        indexes = [
+            models.Index(fields=['follower', 'created_at']),
+            models.Index(fields=['following', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
+
+
+class Order(models.Model):
+    """Order tracking for purchases"""
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Payment'),
+        ('PAID', 'Paid'),
+        ('SHIPPED', 'Shipped'),
+        ('DELIVERED', 'Delivered'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='purchases')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='orders')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    stripe_payment_intent = models.CharField(max_length=255, blank=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['buyer', '-created_at']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.item.title}"
+
+
+class Review(models.Model):
+    """Item reviews and ratings"""
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # 1-5 stars
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('item', 'reviewer')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['item', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.reviewer.username}'s review of {self.item.title}"
+
+
+class Wishlist(models.Model):
+    """User wishlist items"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='wishlisted_by')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'item')
+        ordering = ['-added_at']
+        indexes = [
+            models.Index(fields=['user', '-added_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username}'s wishlist: {self.item.title}"
