@@ -1,11 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Feed from "@/components/Feed";
+import SearchAutocomplete from "@/components/SearchAutocomplete";
+import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 
-export default function Home({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
+export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [filters, setFilters] = useState<FilterState>({
+    minPrice: null,
+    maxPrice: null,
+    sizes: [],
+    condition: null,
+    ordering: '-created_at',
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -13,6 +23,16 @@ export default function Home({ searchParams }: { searchParams: Promise<{ search?
       router.push('/login');
     }
   }, [router]);
+
+  // Build filter object for Feed component
+  const feedFilters = {
+    search: searchParams.get('search') || undefined,
+    min_price: filters.minPrice || undefined,
+    max_price: filters.maxPrice || undefined,
+    size: filters.sizes.length > 0 ? filters.sizes.join(',') : undefined,
+    condition: filters.condition || undefined,
+    ordering: filters.ordering,
+  };
 
   return (
     <main className="min-h-screen bg-background selection:bg-primary/20">
@@ -38,6 +58,12 @@ export default function Home({ searchParams }: { searchParams: Promise<{ search?
             Discover curated vintage and pre-loved fashion in a premium, immersive marketplace.
             Sustainable style meets digital art.
           </p>
+
+          {/* Search Bar */}
+          <div className="mt-10 flex justify-center">
+            <SearchAutocomplete />
+          </div>
+
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <a href="#feed" className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all hover:scale-105">
               Explore Feed
@@ -51,20 +77,16 @@ export default function Home({ searchParams }: { searchParams: Promise<{ search?
 
       {/* Feed Section */}
       <div id="feed" className="container mx-auto px-4 py-16">
-        <div className="mb-10 flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight text-base-03">
-            Trending Now
+        <div className="mb-10">
+          <h2 className="text-2xl font-bold tracking-tight text-base-03 mb-6">
+            {searchParams.get('search') ? `Results for "${searchParams.get('search')}"` : 'Trending Now'}
           </h2>
-          <div className="flex gap-2">
-            {['All', 'Vintage', 'Streetwear', 'Y2K'].map((filter) => (
-              <button key={filter} className="rounded-full border border-border bg-background px-4 py-1 text-xs font-medium text-base-02 hover:bg-base-2 hover:text-base-03 transition-all">
-                {filter}
-              </button>
-            ))}
-          </div>
+
+          {/* Advanced Filters */}
+          <AdvancedFilters filters={filters} onFiltersChange={setFilters} />
         </div>
 
-        <Feed />
+        <Feed filters={feedFilters} />
       </div>
     </main>
   );
