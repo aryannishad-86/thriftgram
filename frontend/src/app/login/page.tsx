@@ -113,7 +113,7 @@ export default function LoginPage() {
                 {/* Left Side - Branding (Sticky) */}
                 <motion.div
                     style={{ opacity }}
-                    className="lg:sticky lg:top-0 lg:h-screen lg:w-1/2 flex flex-col items-center justify-center p-8 lg:p-16 relative overflow-hidden"
+                    className="lg:sticky lg:top-0 lg:h-screen lg:w-1/2 flex items-center justify-center p-8 lg:p-16 relative overflow-hidden"
                 >
                     <div className="relative z-10 space-y-10 w-full">
                         <motion.div
@@ -146,7 +146,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="text-xs text-base-01 mt-auto pt-12 w-full">
+                    <div className="absolute bottom-8 lg:bottom-16 left-8 lg:left-16 text-xs text-base-01">
                         © 2024 ThriftGram Inc. All rights reserved.
                     </div>
                 </motion.div>
