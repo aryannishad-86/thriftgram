@@ -24,11 +24,9 @@ export default function Navbar() {
     if (isAuthPage) {
         return (
             <nav className="absolute top-0 z-50 w-full p-8 lg:p-16">
-                <div className="container mx-auto">
-                    <Link href="/" className="text-2xl font-bold tracking-tighter text-base-03 hover:text-base-02 transition-colors">
-                        ThriftGram
-                    </Link>
-                </div>
+                <Link href="/" className="text-3xl lg:text-4xl font-bold tracking-tighter text-base-03 hover:text-base-02 transition-colors">
+                    ThriftGram
+                </Link>
             </nav>
         );
     }
