@@ -60,9 +60,10 @@ export default function ClosetPage() {
     };
 
     return (
-        <main className="min-h-screen bg-black selection:bg-purple-500/30 pt-24 pb-12 px-4 relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-black to-black" />
+        <main className="min-h-screen bg-background selection:bg-primary/20 pt-24 pb-12 px-4 relative overflow-hidden">
+            {/* Subtle Background Pattern */}
+            <div className="absolute inset-0 -z-10 bg-base-3" />
+            <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] bg-center opacity-[0.03]" />
 
             <div className="container mx-auto max-w-6xl">
                 <div className="flex justify-between items-end mb-12">
@@ -70,7 +71,7 @@ export default function ClosetPage() {
                         <motion.h1
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-4xl md:text-6xl font-bold text-white mb-4"
+                            className="text-4xl md:text-6xl font-bold text-base-01 mb-4"
                         >
                             My Digital Closet
                         </motion.h1>
@@ -78,7 +79,7 @@ export default function ClosetPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            className="text-xl text-purple-400"
+                            className="text-xl text-secondary"
                         >
                             Digitize your wardrobe & find matches.
                         </motion.p>
@@ -89,7 +90,7 @@ export default function ClosetPage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                     >
-                        <Button className="relative overflow-hidden bg-white text-black hover:bg-white/90 rounded-full px-6 py-6 text-lg font-bold group">
+                        <Button className="relative overflow-hidden bg-primary text-white hover:bg-primary/90 rounded-full px-6 py-6 text-lg font-bold group">
                             <input
                                 type="file"
                                 accept="image/*"
@@ -111,14 +112,14 @@ export default function ClosetPage() {
                 {loading ? (
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
                         {[...Array(10)].map((_, i) => (
-                            <Skeleton key={i} className="aspect-[3/4] rounded-2xl bg-white/5" />
+                            <Skeleton key={i} className="aspect-[3/4] rounded-2xl bg-base-2" />
                         ))}
                     </div>
                 ) : items.length === 0 ? (
-                    <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
-                        <Shirt className="w-16 h-16 text-white/20 mx-auto mb-4" />
-                        <h3 className="text-2xl font-bold text-white mb-2">Your closet is empty</h3>
-                        <p className="text-muted-foreground">Upload photos of your clothes to start matching outfits!</p>
+                    <div className="text-center py-20 bg-card rounded-3xl border border-border">
+                        <Shirt className="w-16 h-16 text-muted mx-auto mb-4" />
+                        <h3 className="text-2xl font-bold text-base-01 mb-2">Your closet is empty</h3>
+                        <p className="text-muted">Upload photos of your clothes to start matching outfits!</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -128,7 +129,7 @@ export default function ClosetPage() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: index * 0.05 }}
-                                className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/50 transition-colors"
+                                className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-card border border-border hover:border-primary transition-colors"
                             >
                                 <img
                                     src={item.image}

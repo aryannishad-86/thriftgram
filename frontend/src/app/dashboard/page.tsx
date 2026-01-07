@@ -67,19 +67,10 @@ export default function DashboardPage() {
     // For now, let's implement the structure.
 
     return (
-        <main className="min-h-screen bg-black selection:bg-primary/30 relative overflow-hidden pt-24 pb-12 px-4">
-            {/* Dynamic Background Gradient */}
-            <div className="absolute inset-0 -z-30 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0a0a] to-black" />
-
-            {/* Animated Gradient Mesh */}
-            <div className="absolute inset-0 -z-20 opacity-30">
-                <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-                <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-                <div className="absolute -bottom-8 left-20 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
-            </div>
-
-            {/* Grid Pattern */}
-            <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        <main className="min-h-screen bg-background selection:bg-primary/20 relative overflow-hidden pt-24 pb-12 px-4">
+            {/* Subtle Background Pattern */}
+            <div className="absolute inset-0 -z-30 bg-base-3" />
+            <div className="absolute inset-0 -z-20 bg-[url('/grid.svg')] bg-center opacity-[0.03]" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -89,18 +80,18 @@ export default function DashboardPage() {
             >
                 {/* Header */}
                 <div>
-                    <h1 className="text-4xl font-bold text-white tracking-tight">Seller Dashboard</h1>
-                    <p className="text-muted-foreground mt-2 text-lg">Overview of your store performance</p>
+                    <h1 className="text-4xl font-bold text-base-01 tracking-tight">Seller Dashboard</h1>
+                    <p className="text-muted mt-2 text-lg">Overview of your store performance</p>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {loading ? (
                         <>
-                            <Skeleton className="h-32 rounded-2xl bg-white/5" />
-                            <Skeleton className="h-32 rounded-2xl bg-white/5" />
-                            <Skeleton className="h-32 rounded-2xl bg-white/5" />
-                            <Skeleton className="h-32 rounded-2xl bg-white/5" />
+                            <Skeleton className="h-32 rounded-2xl bg-base-2" />
+                            <Skeleton className="h-32 rounded-2xl bg-base-2" />
+                            <Skeleton className="h-32 rounded-2xl bg-base-2" />
+                            <Skeleton className="h-32 rounded-2xl bg-base-2" />
                         </>
                     ) : (
                         <>
@@ -141,9 +132,9 @@ export default function DashboardPage() {
 
                 {/* Listings Table */}
                 <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-white">Your Listings</h2>
+                    <h2 className="text-2xl font-bold text-base-01">Your Listings</h2>
                     {loading ? (
-                        <Skeleton className="h-64 rounded-2xl bg-white/5" />
+                        <Skeleton className="h-64 rounded-2xl bg-base-2" />
                     ) : (
                         <ListingsTable
                             items={items}
