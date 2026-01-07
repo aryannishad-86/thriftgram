@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import api from '@/lib/api';
+import api, { coldStartEvents } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, ArrowRight, Sparkles, Leaf, Recycle, Heart } from 'lucide-react';
 import RippleText from '@/components/RippleText';
+import ColdStartLoader from '@/components/ColdStartLoader';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -19,6 +20,17 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
+    const [showColdStartLoader, setShowColdStartLoader] = useState(false);
+
+    // Subscribe to cold start events
+    useEffect(() => {
+        const unsubscribe = coldStartEvents.subscribe(setShowColdStartLoader);
+        return () => {
+            unsubscribe();
+        };
+    }, []);
+
+
 
     const containerRef = useRef(null);
     const { scrollYProgress } = useScroll({
@@ -350,6 +362,9 @@ export default function LoginPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Cold Start Loader */}
+            <ColdStartLoader show={showColdStartLoader} />
         </main>
     );
 }

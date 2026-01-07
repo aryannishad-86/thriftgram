@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import api from '@/lib/api';
+import api, { coldStartEvents } from '@/lib/api';
+import ColdStartLoader from '@/components/ColdStartLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -17,6 +18,15 @@ export default function RegisterPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showColdStartLoader, setShowColdStartLoader] = useState(false);
+
+    // Subscribe to cold start events
+    useEffect(() => {
+        const unsubscribe = coldStartEvents.subscribe(setShowColdStartLoader);
+        return () => {
+            unsubscribe();
+        };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -268,6 +278,9 @@ export default function RegisterPage() {
                     </motion.div>
                 </form>
             </motion.div>
+
+            {/* Cold Start Loader */}
+            <ColdStartLoader show={showColdStartLoader} />
         </main>
     );
 }
