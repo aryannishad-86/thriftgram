@@ -53,10 +53,10 @@ export default function DropsPage() {
     const nextDrop = drops.find(d => new Date(d.start_time) > new Date());
 
     return (
-        <main className="min-h-screen bg-black selection:bg-red-500/30 pt-24 pb-12 px-4 relative overflow-hidden">
+        <main className="min-h-screen bg-background selection:bg-primary/20 pt-24 pb-12 px-4 relative overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-black to-black" />
-            <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-20" />
+            <div className="absolute inset-0 -z-10 bg-base-3" />
+            <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-[0.03]" />
 
             <div className="container mx-auto max-w-6xl">
 
@@ -74,7 +74,7 @@ export default function DropsPage() {
                     <motion.h1
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="text-5xl md:text-8xl font-black text-white mb-6 tracking-tighter"
+                        className="text-5xl md:text-8xl font-black text-base-03 mb-6 tracking-tighter"
                     >
                         NEXT DROP IN
                     </motion.h1>
@@ -89,14 +89,14 @@ export default function DropsPage() {
                         >
                             <CountdownTimer targetDate={nextDrop.start_time} onComplete={fetchDrops} />
                             <div className="mt-8">
-                                <h2 className="text-2xl md:text-3xl font-bold text-white">{nextDrop.title}</h2>
-                                <p className="text-white/60 mt-2 max-w-xl mx-auto">{nextDrop.description}</p>
+                                <h2 className="text-2xl md:text-3xl font-bold text-base-03">{nextDrop.title}</h2>
+                                <p className="text-base-02 mt-2 max-w-xl mx-auto">{nextDrop.description}</p>
                             </div>
                         </motion.div>
                     ) : (
                         <div className="py-20">
-                            <h2 className="text-3xl font-bold text-white/40">No upcoming drops scheduled.</h2>
-                            <p className="text-white/30 mt-2">Check back soon for exclusive collections.</p>
+                            <h2 className="text-3xl font-bold text-base-01">No upcoming drops scheduled.</h2>
+                            <p className="text-muted mt-2">Check back soon for exclusive collections.</p>
                         </div>
                     )}
                 </div>
@@ -114,8 +114,8 @@ export default function DropsPage() {
 
                         <div className="grid md:grid-cols-2 gap-12 items-center">
                             <div>
-                                <h2 className="text-4xl font-bold text-white mb-4">{activeDrop.title}</h2>
-                                <p className="text-lg text-white/80 mb-8">{activeDrop.description}</p>
+                                <h2 className="text-4xl font-bold text-base-03 mb-4">{activeDrop.title}</h2>
+                                <p className="text-lg text-base-02 mb-8">{activeDrop.description}</p>
                                 <Button asChild className="bg-red-600 hover:bg-red-700 text-white h-14 px-8 rounded-full text-lg font-bold">
                                     <Link href={`/search?drop=${activeDrop.id}`}>
                                         Shop Collection <ArrowRight className="ml-2 w-5 h-5" />
@@ -138,7 +138,7 @@ export default function DropsPage() {
                 {/* Upcoming Drops Grid */}
                 {drops.length > 0 && (
                     <div>
-                        <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                        <h3 className="text-2xl font-bold text-base-03 mb-8 flex items-center gap-3">
                             <Calendar className="w-6 h-6 text-white/60" /> Upcoming Schedule
                         </h3>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -153,8 +153,8 @@ export default function DropsPage() {
                                         </div>
                                     </div>
                                     <div className="p-6">
-                                        <h4 className="text-xl font-bold text-white mb-2">{drop.title}</h4>
-                                        <p className="text-white/60 text-sm line-clamp-2">{drop.description}</p>
+                                        <h4 className="text-xl font-bold text-base-03 mb-2">{drop.title}</h4>
+                                        <p className="text-base-02 text-sm line-clamp-2">{drop.description}</p>
                                     </div>
                                 </div>
                             ))}

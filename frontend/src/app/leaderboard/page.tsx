@@ -34,16 +34,16 @@ export default function LeaderboardPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-black selection:bg-green-500/30 pt-24 pb-12 px-4 relative overflow-hidden">
+        <main className="min-h-screen bg-background selection:bg-primary/20 pt-24 pb-12 px-4 relative overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-green-900/20 via-black to-black" />
+            <div className="absolute inset-0 -z-10 bg-base-3" />
 
             <div className="container mx-auto max-w-4xl">
                 <div className="text-center mb-12">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-6xl font-bold text-white mb-4"
+                        className="text-4xl md:text-6xl font-bold text-base-03 mb-4"
                     >
                         Eco Champions
                     </motion.h1>
@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="text-xl text-green-400"
+                        className="text-xl text-base-02"
                     >
                         Top savers of the planet 🌍
                     </motion.p>
@@ -61,7 +61,7 @@ export default function LeaderboardPage() {
                     <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
                         <div className="font-bold text-white">Rank</div>
                         <div className="font-bold text-white flex-1 ml-8">User</div>
-                        <div className="font-bold text-green-400">Eco-Points</div>
+                        <div className="font-bold text-base-03">Eco-Points</div>
                     </div>
 
                     {loading ? (
@@ -97,8 +97,8 @@ export default function LeaderboardPage() {
                                             </div>
                                         </div>
                                         <div>
-                                            <div className="font-bold text-white text-lg">{user.username}</div>
-                                            <div className="text-xs text-muted-foreground flex gap-3">
+                                            <div className="font-bold text-base-03 text-lg">{user.username}</div>
+                                            <div className="text-xs text-base-02 flex gap-3">
                                                 <span className="flex items-center gap-1"><Leaf className="w-3 h-3" /> {user.co2_saved}kg CO₂</span>
                                                 <span className="flex items-center gap-1"><Droplets className="w-3 h-3" /> {user.water_saved}L Water</span>
                                             </div>
