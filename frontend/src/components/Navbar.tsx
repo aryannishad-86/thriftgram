@@ -36,7 +36,7 @@ export default function Navbar() {
             <div className="container mx-auto grid grid-cols-[1fr_auto_1fr] h-[72px] items-center px-4 relative">
                 {/* Logo */}
                 <div className="flex justify-start">
-                    <Link href="/" className="text-2xl font-bold tracking-tighter text-primary hover:text-primary/80 transition-colors">
+                    <Link href="/" className="text-2xl font-bold tracking-tighter text-base-03 hover:text-primary transition-colors">
                         ThriftGram
                     </Link>
                 </div>
