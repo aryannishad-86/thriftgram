@@ -122,13 +122,13 @@ export default function LoginPage() {
                             transition={{ duration: 0.8, type: "spring" }}
                         >
                             <h1 className="text-6xl lg:text-8xl font-black tracking-tight">
-                                <RippleText text="Sustainable style," className="text-base-01" />
+                                <RippleText text="Sustainable style," className="text-base-03" />
                             </h1>
                             <h1 className="text-6xl lg:text-8xl font-black tracking-tight mt-4">
                                 <RippleText text="reimagined." className="text-primary" />
                             </h1>
                         </motion.div>
-                        <p className="text-lg text-base-0 leading-relaxed">
+                        <p className="text-lg text-base-02 leading-relaxed">
                             Join the community of conscious fashion enthusiasts. Discover unique pieces, sell your pre-loved items, and make a difference.
                         </p>
 
@@ -140,13 +140,13 @@ export default function LoginPage() {
                                     </div>
                                 ))}
                             </div>
-                            <div className="text-sm text-base-00 font-medium">
+                            <div className="text-sm text-base-02 font-medium">
                                 <span className="text-primary font-bold">10k+</span> active thrifters
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-xs text-base-1 mt-auto pt-8">
+                    <div className="text-xs text-base-01 mt-auto pt-8">
                         © 2024 ThriftGram Inc. All rights reserved.
                     </div>
                 </motion.div>
@@ -164,8 +164,8 @@ export default function LoginPage() {
                             <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
 
                             <div className="mb-8 text-center">
-                                <h2 className="text-3xl font-bold text-base-01 mb-2">Welcome Back</h2>
-                                <p className="text-muted">Enter your details to access your account</p>
+                                <h2 className="text-3xl font-bold text-base-03 mb-2">Welcome Back</h2>
+                                <p className="text-base-01">Enter your details to access your account</p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
