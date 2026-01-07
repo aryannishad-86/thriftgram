@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Feed from "@/components/Feed";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<FilterState>({
@@ -89,5 +89,13 @@ export default function Home() {
         <Feed filters={feedFilters} />
       </div>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="text-base-02">Loading...</div></div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
