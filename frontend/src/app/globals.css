@@ -1,21 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030303;
-  --foreground: #ffffff;
-  --primary: #6d28d9;
-  /* Deep Purple */
+  /* Solarized Light - Base Colors */
+  --base03: #002b36;
+  --base02: #073642;
+  --base01: #586e75;
+  --base00: #657b83;
+  --base0: #839496;
+  --base1: #93a1a1;
+  --base2: #eee8d5;
+  --base3: #fdf6e3;
+
+  /* Solarized Light - Accent Colors */
+  --sol-yellow: #b58900;
+  --sol-orange: #cb4b16;
+  --sol-red: #dc322f;
+  --sol-magenta: #d33682;
+  --sol-violet: #6c71c4;
+  --sol-blue: #268bd2;
+  --sol-cyan: #2aa198;
+  --sol-green: #859900;
+
+  /* Theme Variables */
+  --background: #fdf6e3;
+  /* Warm cream background */
+  --foreground: #657b83;
+  /* Dark gray text */
+  --primary: #268bd2;
+  /* Blue for primary actions */
   --primary-foreground: #ffffff;
-  --secondary: #1e1e24;
-  --secondary-foreground: #a1a1aa;
-  --muted: #27272a;
-  --muted-foreground: #71717a;
-  --accent: #06b6d4;
-  /* Cyan Neon */
+  --secondary: #2aa198;
+  /* Cyan for eco-friendly */
+  --secondary-foreground: #ffffff;
+  --muted: #93a1a1;
+  /* Light gray for muted text */
+  --muted-foreground: #657b83;
+  --accent: #cb4b16;
+  /* Orange for CTAs */
   --accent-foreground: #ffffff;
-  --card: #0a0a0a;
-  --card-foreground: #ffffff;
-  --border: #27272a;
+  --card: #ffffff;
+  /* White for cards */
+  --card-foreground: #657b83;
+  --border: #eee8d5;
+  /* Beige borders */
+  --success: #859900;
+  /* Green for success */
+  --warning: #b58900;
+  /* Yellow for warnings */
+  --error: #dc322f;
+  /* Red for errors */
 }
 
 @layer utilities {
@@ -37,6 +70,27 @@
 }
 
 @theme inline {
+  /* Base colors */
+  --color-base-03: var(--base03);
+  --color-base-02: var(--base02);
+  --color-base-01: var(--base01);
+  --color-base-00: var(--base00);
+  --color-base-0: var(--base0);
+  --color-base-1: var(--base1);
+  --color-base-2: var(--base2);
+  --color-base-3: var(--base3);
+
+  /* Solarized accent colors */
+  --color-sol-yellow: var(--sol-yellow);
+  --color-sol-orange: var(--sol-orange);
+  --color-sol-red: var(--sol-red);
+  --color-sol-magenta: var(--sol-magenta);
+  --color-sol-violet: var(--sol-violet);
+  --color-sol-blue: var(--sol-blue);
+  --color-sol-cyan: var(--sol-cyan);
+  --color-sol-green: var(--sol-green);
+
+  /* Theme colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
@@ -50,15 +104,12 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #030303;
-    --foreground: #ffffff;
-  }
 }
 
 body {

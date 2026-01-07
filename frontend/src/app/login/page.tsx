@@ -101,67 +101,55 @@ export default function LoginPage() {
     });
 
     return (
-        <main ref={containerRef} className="min-h-screen w-full bg-black relative selection:bg-primary/30">
-            {/* Parallax Background Elements */}
+        <main ref={containerRef} className="min-h-screen w-full bg-base-3 relative selection:bg-primary/20">
+            {/* Subtle Background Pattern */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-black to-black" />
-                <motion.div
-                    style={{ y: y1 }}
-                    className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px]"
-                />
-                <motion.div
-                    style={{ y: y2 }}
-                    className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px]"
-                />
-                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+                <div className="absolute inset-0 bg-base-3" />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-[0.03]" />
+                <div className="absolute inset-0 bg-gradient-to-br from-base-2/30 via-transparent to-base-2/20" />
             </div>
 
             <div className="relative z-10 flex flex-col lg:flex-row min-h-screen">
                 {/* Left Side - Branding (Sticky) */}
-                <div className="hidden lg:flex w-1/2 flex-col justify-between p-12 sticky top-0 h-screen">
-                    <div></div> {/* Spacer to keep alignment if needed, or just empty to push content down/up depending on justify-between */}
-
-                    <motion.div
-                        style={{ opacity }}
-                        className="space-y-6 max-w-lg"
-                    >
-                        <div className="relative">
-                            <RippleText
-                                text="Sustainable style,"
-                                fontSize={60}
-                                className="h-[80px]"
-                            />
-                            <div className="-mt-4">
-                                <RippleText
-                                    text="reimagined."
-                                    fontSize={60}
-                                    className="h-[80px]"
-                                    colors={['#a855f7', '#ec4899']}
-                                />
-                            </div>
-                        </div>
-                        <p className="text-lg text-white/60 leading-relaxed">
+                <motion.div
+                    style={{ opacity }}
+                    className="lg:sticky lg:top-0 lg:h-screen lg:w-1/2 flex flex-col justify-center p-8 lg:p-16 relative overflow-hidden"
+                >
+                    <div className="relative z-10 space-y-8">
+                        <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8, type: "spring" }}
+                        >
+                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight">
+                                <RippleText text="Sustainable style," className="text-base-01" />
+                            </h1>
+                            <h1 className="text-6xl lg:text-8xl font-black tracking-tight mt-4">
+                                <RippleText text="reimagined." className="text-primary" />
+                            </h1>
+                        </motion.div>
+                        <p className="text-lg text-base-0 leading-relaxed">
                             Join the community of conscious fashion enthusiasts. Discover unique pieces, sell your pre-loved items, and make a difference.
                         </p>
 
                         <div className="flex items-center gap-4 pt-4">
                             <div className="flex -space-x-4">
                                 {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="w-12 h-12 rounded-full border-2 border-black bg-white/10 backdrop-blur-md flex items-center justify-center text-xs font-bold text-white">
-                                        <Sparkles className="w-4 h-4 opacity-70" />
+                                    <div key={i} className="w-12 h-12 rounded-full border-2 border-base-2 bg-card flex items-center justify-center text-xs font-bold text-primary">
+                                        <Sparkles className="w-4 h-4" />
                                     </div>
                                 ))}
                             </div>
-                            <div className="text-sm text-white/80 font-medium">
+                            <div className="text-sm text-base-00 font-medium">
                                 <span className="text-primary font-bold">10k+</span> active thrifters
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
 
-                    <div className="text-xs text-white/30">
+                    <div className="text-xs text-base-1 mt-auto pt-8">
                         © 2024 ThriftGram Inc. All rights reserved.
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Right Side - Login Form (Scrollable) */}
                 <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 lg:p-12">
@@ -170,14 +158,14 @@ export default function LoginPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, delay: 0.1 }}
-                            className="w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+                            className="w-full max-w-md bg-card border border-border rounded-3xl p-8 shadow-lg relative overflow-hidden"
                         >
-                            {/* Glow Effect on Card */}
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+                            {/* Subtle top accent */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
 
                             <div className="mb-8 text-center">
-                                <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
-                                <p className="text-muted-foreground">Enter your details to access your account</p>
+                                <h2 className="text-3xl font-bold text-base-01 mb-2">Welcome Back</h2>
+                                <p className="text-muted">Enter your details to access your account</p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
@@ -187,9 +175,9 @@ export default function LoginPage() {
                                             animate={{
                                                 y: focusedInput === 'username' || username ? -24 : 0,
                                                 scale: focusedInput === 'username' || username ? 0.85 : 1,
-                                                color: focusedInput === 'username' ? '#a78bfa' : '#71717a'
+                                                color: focusedInput === 'username' ? '#268bd2' : '#93a1a1'
                                             }}
-                                            className="absolute left-3 top-3 text-muted-foreground pointer-events-none origin-left transition-colors"
+                                            className="absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors"
                                         >
                                             Username
                                         </motion.label>
@@ -199,7 +187,7 @@ export default function LoginPage() {
                                             onChange={(e) => setUsername(e.target.value)}
                                             onFocus={() => setFocusedInput('username')}
                                             onBlur={() => setFocusedInput(null)}
-                                            className="bg-white/5 border-white/10 focus:border-primary/50 text-white h-12 pt-4 transition-all duration-300 hover:bg-white/10"
+                                            className="bg-background border-border focus:border-primary text-foreground h-12 pt-4 transition-all duration-300 hover:border-primary/50"
                                         />
                                     </div>
 
@@ -208,9 +196,9 @@ export default function LoginPage() {
                                             animate={{
                                                 y: focusedInput === 'password' || password ? -24 : 0,
                                                 scale: focusedInput === 'password' || password ? 0.85 : 1,
-                                                color: focusedInput === 'password' ? '#a78bfa' : '#71717a'
+                                                color: focusedInput === 'password' ? '#268bd2' : '#93a1a1'
                                             }}
-                                            className="absolute left-3 top-3 text-muted-foreground pointer-events-none origin-left transition-colors"
+                                            className="absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors"
                                         >
                                             Password
                                         </motion.label>
@@ -220,12 +208,12 @@ export default function LoginPage() {
                                             onChange={(e) => setPassword(e.target.value)}
                                             onFocus={() => setFocusedInput('password')}
                                             onBlur={() => setFocusedInput(null)}
-                                            className="bg-white/5 border-white/10 focus:border-primary/50 text-white h-12 pt-4 pr-10 transition-all duration-300 hover:bg-white/10"
+                                            className="bg-background border-border focus:border-primary text-foreground h-12 pt-4 pr-10 transition-all duration-300 hover:border-primary/50"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-3 text-muted-foreground hover:text-white transition-colors"
+                                            className="absolute right-3 top-3 text-muted hover:text-primary transition-colors"
                                         >
                                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
@@ -253,7 +241,7 @@ export default function LoginPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-gradient-to-r from-primary to-accent text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-2 group"
+                                    className="w-full bg-primary text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-primary/90 transition-all duration-300 flex items-center justify-center gap-2 group"
                                 >
                                     {loading ? (
                                         <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -267,19 +255,19 @@ export default function LoginPage() {
 
                                 <div className="relative my-8">
                                     <div className="absolute inset-0 flex items-center">
-                                        <span className="w-full border-t border-white/10" />
+                                        <span className="w-full border-t border-border" />
                                     </div>
                                     <div className="relative flex justify-center text-xs uppercase">
-                                        <span className="bg-black px-2 text-muted-foreground">Or continue with</span>
+                                        <span className="bg-card px-2 text-muted">Or continue with</span>
                                     </div>
                                 </div>
 
                                 <motion.button
-                                    whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
+                                    whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     type="button"
                                     onClick={() => handleGoogleLogin()}
-                                    className="w-full bg-white/5 border border-white/10 text-white font-medium py-3.5 rounded-xl hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-3"
+                                    className="w-full bg-background border border-border text-foreground font-medium py-3.5 rounded-xl hover:border-primary transition-all duration-300 flex items-center justify-center gap-3"
                                 >
                                     <svg className="h-5 w-5" viewBox="0 0 24 24">
                                         <path
@@ -303,7 +291,7 @@ export default function LoginPage() {
                                 </motion.button>
 
                                 <div className="mt-8 text-center">
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-sm text-muted">
                                         Don't have an account?{' '}
                                         <Link href="/register" className="text-primary hover:text-accent font-medium transition-colors relative group">
                                             Sign up
@@ -365,6 +353,6 @@ export default function LoginPage() {
 
             {/* Cold Start Loader */}
             <ColdStartLoader show={showColdStartLoader} />
-        </main>
+        </main >
     );
 }
