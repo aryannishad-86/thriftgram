@@ -17,6 +17,9 @@ interface Order {
         title: string;
         price: string;
         images: Array<{ image: string }>;
+        seller: {
+            username: string;
+        };
     };
     status: string;
     total_amount: string;
@@ -89,8 +92,8 @@ export default function OrdersPage() {
                     <button
                         onClick={() => setActiveTab('purchases')}
                         className={`px-6 py-3 font-semibold transition-colors relative ${activeTab === 'purchases'
-                                ? 'text-primary'
-                                : 'text-base-02 hover:text-base-03'
+                            ? 'text-primary'
+                            : 'text-base-02 hover:text-base-03'
                             }`}
                     >
                         <ShoppingBag className="w-5 h-5 inline mr-2" />
@@ -105,8 +108,8 @@ export default function OrdersPage() {
                     <button
                         onClick={() => setActiveTab('sales')}
                         className={`px-6 py-3 font-semibold transition-colors relative ${activeTab === 'sales'
-                                ? 'text-primary'
-                                : 'text-base-02 hover:text-base-03'
+                            ? 'text-primary'
+                            : 'text-base-02 hover:text-base-03'
                             }`}
                     >
                         <TrendingUp className="w-5 h-5 inline mr-2" />
