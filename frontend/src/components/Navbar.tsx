@@ -32,7 +32,7 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur-md border-b border-border transition-all duration-300 shadow-sm">
+        <nav className="sticky top-0 z-50 w-full bg-base-2/95 backdrop-blur-md border-b border-border transition-all duration-300 shadow-sm">
             <div className="container mx-auto grid grid-cols-[1fr_auto_1fr] h-[72px] items-center px-4 relative">
                 {/* Logo */}
                 <div className="flex justify-start">
