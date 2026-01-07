@@ -94,38 +94,27 @@ export default function RegisterPage() {
     });
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center bg-black p-4 relative overflow-hidden selection:bg-primary/30">
-            {/* Dynamic Background Gradient */}
-            <div className="absolute inset-0 -z-30 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0a0a] to-black" />
+        <main className="flex min-h-screen flex-col items-center justify-center bg-base-3 p-4 relative overflow-hidden selection:bg-primary/20">
+            {/* Subtle Background Pattern */}
+            <div className="absolute inset-0 -z-30 bg-base-3" />
+            <div className="absolute inset-0 -z-20 bg-[url('/grid.svg')] bg-center opacity-[0.03]" />
 
-            {/* Background Image with Overlay */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.4 }}
-                transition={{ duration: 1.5 }}
-                className="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat mix-blend-overlay"
-                style={{ backgroundImage: "url('/hero-bg.jpeg')" }}
-            />
-
-            {/* Animated Gradient Mesh */}
-            <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-primary/10 via-transparent to-accent/10 animate-pulse" />
-            <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-
+            {/* Remove dark overlays */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, type: "spring", stiffness: 100, damping: 20 }}
-                className="w-full max-w-md space-y-8 rounded-3xl border border-white/10 bg-black/40 p-8 backdrop-blur-2xl shadow-[0_0_60px_-15px_rgba(109,40,217,0.3)] relative group"
+                className="w-full max-w-md space-y-8 rounded-3xl border border-border bg-card p-8 shadow-lg relative"
             >
-                {/* Subtle Border Glow */}
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10 blur-xl" />
+                {/* Subtle top accent */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-primary rounded-t-3xl" />
 
                 <div className="text-center space-y-2">
                     <motion.h1
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, type: "spring" }}
-                        className="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/60"
+                        className="text-4xl font-bold tracking-tight text-base-01"
                     >
                         Create Account
                     </motion.h1>
@@ -133,7 +122,7 @@ export default function RegisterPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
-                        className="text-sm text-muted-foreground"
+                        className="text-sm text-muted"
                     >
                         Join ThriftGram today
                     </motion.p>
@@ -152,7 +141,7 @@ export default function RegisterPage() {
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="bg-white/5 border-white/10 focus:border-primary/50 focus:bg-white/10 text-white placeholder:text-muted-foreground/50 h-12 transition-all duration-300 hover:bg-white/10"
+                                className="bg-background border-border focus:border-primary text-foreground placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
                             />
                         </motion.div>
                         <motion.div
@@ -166,7 +155,7 @@ export default function RegisterPage() {
                                 placeholder="Email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="bg-white/5 border-white/10 focus:border-primary/50 focus:bg-white/10 text-white placeholder:text-muted-foreground/50 h-12 transition-all duration-300 hover:bg-white/10"
+                                className="bg-background border-border focus:border-primary text-foreground placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
                             />
                         </motion.div>
                         <motion.div
@@ -180,7 +169,7 @@ export default function RegisterPage() {
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="bg-white/5 border-white/10 focus:border-primary/50 focus:bg-white/10 text-white placeholder:text-muted-foreground/50 h-12 transition-all duration-300 hover:bg-white/10"
+                                className="bg-background border-border focus:border-primary text-foreground placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
                             />
                         </motion.div>
                         <motion.div
@@ -194,7 +183,7 @@ export default function RegisterPage() {
                                 placeholder="Confirm Password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="bg-white/5 border-white/10 focus:border-primary/50 focus:bg-white/10 text-white placeholder:text-muted-foreground/50 h-12 transition-all duration-300 hover:bg-white/10"
+                                className="bg-background border-border focus:border-primary text-foreground placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
                             />
                         </motion.div>
                     </div>
@@ -218,7 +207,7 @@ export default function RegisterPage() {
                     >
                         <Button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-primary via-purple-600 to-accent hover:opacity-90 text-white font-medium py-6 shadow-lg shadow-primary/25 transition-all"
+                            className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6 shadow-md transition-all"
                             disabled={loading}
                         >
                             {loading ? (
@@ -240,7 +229,7 @@ export default function RegisterPage() {
                         <Button
                             type="button"
                             onClick={() => handleGoogleLogin()}
-                            className="w-full bg-white text-black hover:bg-gray-100 font-medium py-6 shadow-lg transition-all flex items-center justify-center gap-2"
+                            className="w-full bg-background border border-border text-foreground hover:border-primary font-medium py-6 shadow-md transition-all flex items-center justify-center gap-2"
                         >
                             <svg className="h-5 w-5" viewBox="0 0 24 24">
                                 <path
@@ -270,10 +259,10 @@ export default function RegisterPage() {
                         transition={{ delay: 0.9 }}
                         className="text-center text-sm"
                     >
-                        <span className="text-muted-foreground">Already have an account? </span>
-                        <Link href="/login" className="font-medium text-primary hover:text-accent transition-colors relative group">
+                        <span className="text-muted">Already have an account? </span>
+                        <Link href="/login" className="font-medium text-primary hover:text-secondary transition-colors relative group">
                             Sign in
-                            <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-accent transition-all group-hover:w-full" />
+                            <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-secondary transition-all group-hover:w-full" />
                         </Link>
                     </motion.div>
                 </form>
