@@ -26,21 +26,43 @@ class AIService:
             image = Image.open(BytesIO(response.content))
 
             prompt = """
-            Analyze this clothing item image for a resale marketplace.
+            Analyze this clothing/fashion item image for a resale marketplace.
             Return ONLY a valid JSON object with the following keys:
-            - condition_rating: One of ['New with tags', 'Like New', 'Good', 'Fair', 'Vintage']
-            - detected_brand: The brand name if visible, else 'Unknown'
-            - fabric_type: Guessed fabric material (e.g., Cotton, Denim)
-            - detected_defects: A list of visible defects (stains, tears), or empty list if none
-            - authenticity_score: A number between 0.0 and 1.0 (1.0 being most likely authentic)
-            - is_verified: Boolean, true if it looks like a real item
+            - condition_rating: A number from 1-10 (10 being perfect condition)
+            - detected_brand: The brand name if visible (e.g., "Nike", "Zara"), else "Unknown"
+            - fabric_type: Guessed fabric material (e.g., "Cotton", "Denim", "Polyester")
+            - detected_defects: A list of visible defects like ["Minor stain on sleeve", "Small tear"], or empty list [] if none
+            - is_verified: Boolean, true if it looks authentic and real (not fake/counterfeit)
+            
+            Be specific and honest in your analysis. Look for:
+            - Brand logos or tags
+            - Fabric texture and quality
+            - Any stains, tears, or wear
+            - Signs of authenticity
             """
 
             response = model.generate_content([prompt, image])
             
             # Clean up response to ensure valid JSON
             text = response.text.replace('```json', '').replace('```', '').strip()
-            return json.loads(text)
+            result = json.loads(text)
+            
+            # Ensure condition_rating is numeric
+            if isinstance(result.get('condition_rating'), str):
+                # Convert string ratings to numeric
+                rating_map = {
+                    'new with tags': 10,
+                    'like new': 9,
+                    'excellent': 8,
+                    'good': 7,
+                    'fair': 5,
+                    'poor': 3,
+                    'vintage': 7
+                }
+                condition_str = result['condition_rating'].lower()
+                result['condition_rating'] = rating_map.get(condition_str, 7)
+            
+            return result
 
         except Exception as e:
             print(f"AI Analysis failed: {e}")
@@ -49,19 +71,24 @@ class AIService:
     @staticmethod
     def _get_mock_data(image_url):
         import random
-        conditions = ['New with tags', 'Like New', 'Good', 'Fair', 'Vintage']
-        brands = ['Zara', 'H&M', 'Nike', 'Adidas', 'Vintage', 'Uniqlo', 'Levis']
-        fabrics = ['Cotton', 'Polyester', 'Denim', 'Silk', 'Wool', 'Leather']
-        defects = [[], [], ['Minor stain on sleeve'], ['Small tear near hem'], []]
+        brands = ['Zara', 'H&M', 'Nike', 'Adidas', 'Vintage', 'Uniqlo', 'Levis', 'Unknown']
+        fabrics = ['Cotton', 'Polyester', 'Denim', 'Silk', 'Wool', 'Leather', 'Blend']
+        defects_options = [
+            [],
+            [],
+            ['Minor stain on sleeve'],
+            ['Small tear near hem'],
+            ['Slight fading'],
+            []
+        ]
 
         seed = hash(image_url)
         random.seed(seed)
 
         return {
-            'condition_rating': random.choice(conditions),
+            'condition_rating': random.randint(6, 10),  # Numeric rating 6-10
             'detected_brand': random.choice(brands),
             'fabric_type': random.choice(fabrics),
-            'detected_defects': random.choice(defects),
-            'authenticity_score': random.randint(85, 100) / 100,
-            'is_verified': True
+            'detected_defects': random.choice(defects_options),
+            'is_verified': random.choice([True, True, True, False])  # Mostly true
         }
