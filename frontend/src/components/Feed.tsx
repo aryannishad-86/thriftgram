@@ -1,20 +1,37 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import api from '@/lib/api';
 import ItemCard, { Item } from './ItemCard';
 import SkeletonCard from './SkeletonCard';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 export default function Feed({ filters }: { filters?: Record<string, unknown> }) {
     const [items, setItems] = useState<Item[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState('');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
+    // Fetch initial items
     useEffect(() => {
         const fetchItems = async () => {
+            setLoading(true);
+            setPage(1);
+            setHasMore(true);
             try {
-                const response = await api.get('/api/items/', { params: filters });
-                setItems(response.data);
+                const response = await api.get('/api/items/', {
+                    params: { ...filters, page: 1, page_size: 20 }
+                });
+
+                // Check if response is paginated
+                const data = response.data.results || response.data;
+                const hasNext = response.data.next !== null && response.data.next !== undefined;
+
+                setItems(data);
+                setHasMore(hasNext);
             } catch (err) {
                 console.error(err);
                 setError('Failed to load items. Please try again later.');
@@ -25,6 +42,40 @@ export default function Feed({ filters }: { filters?: Record<string, unknown> })
 
         fetchItems();
     }, [filters]);
+
+    // Load more items
+    const loadMore = async () => {
+        if (loadingMore || !hasMore) return;
+
+        setLoadingMore(true);
+        try {
+            const nextPage = page + 1;
+            const response = await api.get('/api/items/', {
+                params: { ...filters, page: nextPage, page_size: 20 }
+            });
+
+            const data = response.data.results || response.data;
+            const hasNext = response.data.next !== null && response.data.next !== undefined;
+
+            if (data.length === 0) {
+                setHasMore(false);
+            } else {
+                setItems(prev => [...prev, ...data]);
+                setPage(nextPage);
+                setHasMore(hasNext);
+            }
+        } catch (err) {
+            console.error('Failed to load more items', err);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    const lastItemRef = useInfiniteScroll({
+        onLoadMore: loadMore,
+        hasMore,
+        loading: loadingMore,
+    });
 
     if (loading) {
         return (
@@ -72,16 +123,39 @@ export default function Feed({ filters }: { filters?: Record<string, unknown> })
     }
 
     return (
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {items.map((item, index) => (
-                <div
-                    key={item.id}
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                >
-                    <ItemCard item={item} />
+        <>
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {items.map((item, index) => {
+                    // Attach ref to last item
+                    const isLastItem = index === items.length - 1;
+
+                    return (
+                        <div
+                            key={item.id}
+                            ref={isLastItem ? lastItemRef : null}
+                            className="animate-fade-in"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                            <ItemCard item={item} />
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Loading More Indicator */}
+            {loadingMore && (
+                <div className="flex justify-center items-center py-8">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    <span className="ml-3 text-base-02">Loading more items...</span>
                 </div>
-            ))}
-        </div>
+            )}
+
+            {/* End of Results */}
+            {!hasMore && items.length > 0 && (
+                <div className="text-center py-8">
+                    <p className="text-base-02">You've reached the end!</p>
+                </div>
+            )}
+        </>
     );
 }
