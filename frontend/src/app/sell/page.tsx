@@ -36,7 +36,7 @@ export default function SellPage() {
                 data.append('uploaded_images', file);
             });
 
-            await api.post('/items/', data, {
+            await api.post('/api/items/', data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
