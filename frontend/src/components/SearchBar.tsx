@@ -1,140 +1,60 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Search, X, Clock, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SearchAutocomplete from './SearchAutocomplete';
 
 export default function SearchBar() {
     const [isOpen, setIsOpen] = useState(false);
-    const [query, setQuery] = useState('');
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    const openSearch = () => {
-        setIsOpen(true);
-        setTimeout(() => inputRef.current?.focus(), 100);
-    };
-
-    const closeSearch = () => {
-        setIsOpen(false);
-        setQuery('');
-    };
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                closeSearch();
-            }
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                openSearch();
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, []);
-
-    const suggestions = [
-        { text: 'Vintage Tees', type: 'trending' },
-        { text: 'Nike Windbreaker', type: 'history' },
-        { text: 'Denim Jackets', type: 'trending' },
-        { text: 'Carhartt', type: 'history' },
-    ];
 
     return (
         <>
-            {/* Search Trigger Button */}
+            {/* Search Icon Button */}
             <button
-                onClick={openSearch}
-                className="p-2 text-muted-foreground hover:text-primary transition-colors hover:bg-white/5 rounded-full"
-                aria-label="Open search"
+                onClick={() => setIsOpen(true)}
+                className="p-2 rounded-full hover:bg-base-2 transition-colors"
+                aria-label="Search"
             >
-                <Search className="h-6 w-6" />
+                <Search className="w-5 h-5 text-base-03" />
             </button>
 
-            {/* Full Screen Search Dialog */}
+            {/* Search Modal */}
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh] px-4"
-                    >
-                        {/* Backdrop with Motion Blur */}
+                    <>
+                        {/* Backdrop */}
                         <motion.div
-                            initial={{ backdropFilter: 'blur(0px)' }}
-                            animate={{ backdropFilter: 'blur(16px)' }}
-                            exit={{ backdropFilter: 'blur(0px)' }}
-                            transition={{ duration: 0.3 }}
-                            className="absolute inset-0 bg-black/60"
-                            onClick={closeSearch}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsOpen(false)}
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
                         />
 
-                        {/* Search Container */}
+                        {/* Search Modal Content */}
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="relative w-full max-w-2xl bg-black/80 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-50"
                         >
-                            {/* Search Input Header */}
-                            <div className="flex items-center gap-4 p-4 border-b border-white/10">
-                                <Search className="h-5 w-5 text-muted-foreground" />
-                                <input
-                                    ref={inputRef}
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    type="text"
-                                    placeholder="Search ThriftGram..."
-                                    className="flex-1 bg-transparent text-lg text-white placeholder:text-muted-foreground/50 outline-none"
-                                />
-                                <button
-                                    onClick={closeSearch}
-                                    className="p-1 text-muted-foreground hover:text-white transition-colors rounded-full hover:bg-white/10"
-                                >
-                                    <X className="h-5 w-5" />
-                                </button>
-                            </div>
-
-                            {/* Suggestions / Results */}
-                            <div className="p-2">
-                                <div className="text-xs font-medium text-muted-foreground px-4 py-2 uppercase tracking-wider">
-                                    Suggested
+                            <div className="bg-card rounded-3xl p-6 shadow-2xl border border-border">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-base-03">Search ThriftGram</h3>
+                                    <button
+                                        onClick={() => setIsOpen(false)}
+                                        className="p-2 rounded-full hover:bg-base-2 transition-colors"
+                                    >
+                                        <X className="w-5 h-5 text-base-02" />
+                                    </button>
                                 </div>
-                                <div className="grid gap-1">
-                                    {suggestions.map((item, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => {
-                                                setQuery(item.text);
-                                                window.location.href = `/?search=${encodeURIComponent(item.text)}`;
-                                            }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors group"
-                                        >
-                                            {item.type === 'history' ? (
-                                                <Clock className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                            ) : (
-                                                <TrendingUp className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
-                                            )}
-                                            <span>{item.text}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div className="px-4 py-3 bg-white/5 border-t border-white/5 text-xs text-muted-foreground flex justify-between">
-                                <span>Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-[10px]">ESC</kbd> to close</span>
-                                <span>Search by <span className="text-primary">ThriftGram</span></span>
+                                <SearchAutocomplete />
                             </div>
                         </motion.div>
-                    </motion.div>
+                    </>
                 )}
             </AnimatePresence>
         </>
     );
 }
-

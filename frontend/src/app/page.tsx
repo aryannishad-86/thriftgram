@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Feed from "@/components/Feed";
-import SearchAutocomplete from "@/components/SearchAutocomplete";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 
 function HomeContent() {
@@ -58,11 +57,6 @@ function HomeContent() {
             Discover curated vintage and pre-loved fashion in a premium, immersive marketplace.
             Sustainable style meets digital art.
           </p>
-
-          {/* Search Bar */}
-          <div className="mt-10 flex justify-center">
-            <SearchAutocomplete />
-          </div>
 
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <a href="#feed" className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all hover:scale-105">
