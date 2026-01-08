@@ -2,9 +2,15 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from core.models import Like
+from core.models import Like, Order, Follow
 from chat.models import Message
 from .models import Notification
+from core.emails import (
+    send_order_confirmation,
+    send_new_order_notification,
+    send_new_message_notification,
+    send_new_follower_notification,
+)
 
 @receiver(post_save, sender=Like)
 def create_like_notification(sender, instance, created, **kwargs):
@@ -60,3 +66,21 @@ def create_message_notification(sender, instance, created, **kwargs):
                     }
                 }
             )
+            
+            # Send Email Notification
+            send_new_message_notification(instance)
+
+@receiver(post_save, sender=Order)
+def order_created(sender, instance, created, **kwargs):
+    """Send emails when order is created"""
+    if created:
+        # Send confirmation to buyer
+        send_order_confirmation(instance)
+        # Send notification to seller
+        send_new_order_notification(instance)
+
+@receiver(post_save, sender=Follow)
+def follow_created(sender, instance, created, **kwargs):
+    """Send email when someone follows"""
+    if created:
+        send_new_follower_notification(instance)

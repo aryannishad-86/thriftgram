@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Follower</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #586e75;
+            background-color: #fdf6e3;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+
+        .header {
+            background: #d33682;
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 30px 20px;
+            background: #fdf6e3;
+        }
+
+        .content p {
+            margin: 0 0 15px 0;
+        }
+
+        .follower-box {
+            background: #eee8d5;
+            border-left: 4px solid #d33682;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            background: #d33682;
+            color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: #073642;
+            color: #93a1a1;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👥 New Follower!</h1>
+        </div>
+        <div class="content">
+            <p>Hi <strong>{{ user_name }}</strong>,</p>
+            <p>You have a new follower on ThriftGram!</p>
+
+            <div class="follower-box">
+                <h2 style="margin: 0; color: #073642;">@{{ follower_name }}</h2>
+                <p style="margin: 10px 0 0 0; color: #93a1a1;">started following you</p>
+            </div>
+
+            <p>Check out their profile to see what they're selling and maybe follow them back!</p>
+
+            <center>
+                <a href="{{ profile_url }}" class="button">View Profile</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>© 2024 ThriftGram - Sustainable Style Marketplace</p>
+            <p>This email was sent because someone followed you on ThriftGram.</p>
+        </div>
+    </div>
+</body>
+
+</html>
