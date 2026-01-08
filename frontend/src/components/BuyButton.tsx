@@ -25,7 +25,7 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
     const handleBuy = async () => {
         setLoading(true);
         try {
-            const response = await api.post(`/items/${itemId}/create_checkout_session/`);
+            const response = await api.post(`/api/items/${itemId}/create_checkout_session/`);
             const { url } = response.data;
             if (url) {
                 window.location.href = url;

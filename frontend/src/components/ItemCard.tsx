@@ -43,9 +43,9 @@ export default function ItemCard({ item: initialItem }: { item: Item }) {
 
         try {
             if (previousState.is_liked) {
-                await api.post(`/items/${item.id}/unlike/`);
+                await api.post(`/api/items/${item.id}/unlike/`);
             } else {
-                await api.post(`/items/${item.id}/like/`);
+                await api.post(`/api/items/${item.id}/like/`);
             }
         } catch (error) {
             // Revert on failure

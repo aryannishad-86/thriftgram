@@ -45,7 +45,7 @@ export default function ItemDetailPage() {
     useEffect(() => {
         const fetchItem = async () => {
             try {
-                const res = await api.get(`/items/${params.id}/`);
+                const res = await api.get(`/api/items/${params.id}/`);
                 setItem(res.data);
             } catch (error) {
                 console.error('Failed to fetch item', error);
@@ -60,7 +60,7 @@ export default function ItemDetailPage() {
         if (!item) return;
         setAnalyzing(true);
         try {
-            const res = await api.post(`/items/${item.id}/analyze/`);
+            const res = await api.post(`/api/items/${item.id}/analyze/`);
             setItem(prev => prev ? { ...prev, ai_analysis: res.data } : null);
         } catch (error) {
             console.error('Failed to analyze item', error);
@@ -73,7 +73,7 @@ export default function ItemDetailPage() {
         if (!item) return;
         setMatching(true);
         try {
-            const res = await api.get(`/items/${item.id}/match_outfit/`);
+            const res = await api.get(`/api/items/${item.id}/match_outfit/`);
             setMatches(res.data);
             setShowMatches(true);
         } catch (error) {
