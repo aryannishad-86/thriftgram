@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/Providers";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import CartDrawer from "@/components/CartDrawer";
 import SmoothScrolling from "@/components/SmoothScrolling";
 
@@ -33,16 +34,17 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <SmoothScrolling>
-            <Navbar />
-            <CartDrawer />
-            <main className="min-h-screen">
-              {children}
-            </main>
-          </SmoothScrolling>
+          <ErrorBoundary>
+            <SmoothScrolling>
+              <Navbar />
+              <CartDrawer />
+              <main className="min-h-screen">
+                {children}
+              </main>
+            </SmoothScrolling>
+          </ErrorBoundary>
         </Providers>
       </body>
     </html>
   );
 }
-
