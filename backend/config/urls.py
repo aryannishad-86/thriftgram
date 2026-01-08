@@ -29,6 +29,7 @@ from core.views import (
     ReviewViewSet, WishlistViewSet
 )
 from notifications.views import NotificationViewSet
+from chat.views import ConversationViewSet, MessageViewSet
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet, basename='item')
@@ -40,6 +41,8 @@ router.register(r'drops', DropEventViewSet, basename='drops')
 router.register(r'orders', OrderViewSet, basename='order')
 router.register(r'reviews', ReviewViewSet, basename='review')
 router.register(r'wishlist', WishlistViewSet, basename='wishlist')
+router.register(r'conversations', ConversationViewSet, basename='conversation')
+router.register(r'messages', MessageViewSet, basename='message')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
