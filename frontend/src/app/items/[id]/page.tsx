@@ -85,8 +85,8 @@ export default function ItemDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-black pt-24 px-4 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+            <div className="min-h-screen bg-background pt-24 px-4 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
         );
     }
@@ -94,9 +94,10 @@ export default function ItemDetailPage() {
     if (!item) return null;
 
     return (
-        <main className="min-h-screen bg-black selection:bg-purple-500/30 pt-24 pb-12 px-4 relative overflow-hidden">
+        <main className="min-h-screen bg-background selection:bg-primary/20 pt-24 pb-12 px-4 relative overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-purple-900/20 via-black to-black" />
+            <div className="absolute inset-0 -z-30 bg-base-3" />
+            <div className="absolute inset-0 -z-20 bg-[url('/grid.svg')] bg-center opacity-[0.03]" />
 
             <div className="container mx-auto max-w-6xl">
                 <div className="grid md:grid-cols-2 gap-12">
@@ -104,7 +105,7 @@ export default function ItemDetailPage() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-white/5 border border-white/10"
+                        className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-card border border-border shadow-lg"
                     >
                         <img
                             src={item.images[0]?.image}
@@ -112,7 +113,7 @@ export default function ItemDetailPage() {
                             className="w-full h-full object-cover"
                         />
                         {item.ai_analysis?.is_verified && (
-                            <div className="absolute top-4 right-4 bg-green-500/20 backdrop-blur-md border border-green-500/30 text-green-400 px-4 py-2 rounded-full font-bold flex items-center gap-2">
+                            <div className="absolute top-4 right-4 bg-success/20 backdrop-blur-md border border-success/30 text-success px-4 py-2 rounded-full font-bold flex items-center gap-2">
                                 <Sparkles className="w-4 h-4" /> AI Verified
                             </div>
                         )}
@@ -125,34 +126,34 @@ export default function ItemDetailPage() {
                         className="space-y-8"
                     >
                         <div>
-                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{item.title}</h1>
-                            <p className="text-2xl text-purple-400 font-mono">${item.price}</p>
+                            <h1 className="text-4xl md:text-5xl font-bold text-base-03 mb-2">{item.title}</h1>
+                            <p className="text-2xl text-primary font-mono">${item.price}</p>
                         </div>
 
                         <div className="flex gap-4">
-                            <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-white/80">
-                                Size: <span className="text-white font-bold">{item.size}</span>
+                            <div className="bg-card border border-border px-4 py-2 rounded-xl text-base-02">
+                                Size: <span className="text-base-03 font-bold">{item.size}</span>
                             </div>
-                            <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-white/80">
-                                Condition: <span className="text-white font-bold">{item.condition}</span>
+                            <div className="bg-card border border-border px-4 py-2 rounded-xl text-base-02">
+                                Condition: <span className="text-base-03 font-bold">{item.condition}</span>
                             </div>
                         </div>
 
-                        <p className="text-lg text-white/60 leading-relaxed">
+                        <p className="text-lg text-base-02 leading-relaxed">
                             {item.description}
                         </p>
 
                         {/* AI Analysis Section */}
-                        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">
+                        <div className="bg-card border border-border rounded-3xl p-6 shadow-lg">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <Sparkles className="w-5 h-5 text-purple-400" />
+                                <h3 className="text-xl font-bold text-base-03 flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-primary" />
                                     AI Quality Verification
                                 </h3>
                                 <Button
                                     onClick={handleAnalyze}
                                     disabled={analyzing || !!item.ai_analysis}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full"
+                                    className="bg-primary hover:bg-primary/90 text-white rounded-full"
                                 >
                                     {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
                                 </Button>
@@ -161,64 +162,64 @@ export default function ItemDetailPage() {
                             {item.ai_analysis ? (
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-black/20 p-4 rounded-2xl">
-                                            <div className="text-xs text-white/40 mb-1">Detected Brand</div>
-                                            <div className="text-lg font-bold text-white">{item.ai_analysis.detected_brand}</div>
+                                        <div className="bg-base-2 p-4 rounded-2xl border border-border">
+                                            <div className="text-xs text-base-01 mb-1">Detected Brand</div>
+                                            <div className="text-lg font-bold text-base-03">{item.ai_analysis.detected_brand}</div>
                                         </div>
-                                        <div className="bg-black/20 p-4 rounded-2xl">
-                                            <div className="text-xs text-white/40 mb-1">Material</div>
-                                            <div className="text-lg font-bold text-white">{item.ai_analysis.fabric_type}</div>
+                                        <div className="bg-base-2 p-4 rounded-2xl border border-border">
+                                            <div className="text-xs text-base-01 mb-1">Material</div>
+                                            <div className="text-lg font-bold text-base-03">{item.ai_analysis.fabric_type}</div>
                                         </div>
                                     </div>
 
                                     <div>
                                         <div className="flex justify-between text-sm mb-2">
-                                            <span className="text-white/60">Condition Rating</span>
-                                            <span className="text-green-400 font-bold">{item.ai_analysis.condition_rating}/10</span>
+                                            <span className="text-base-02">Condition Rating</span>
+                                            <span className="text-success font-bold">{item.ai_analysis.condition_rating}/10</span>
                                         </div>
-                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                        <div className="h-2 bg-base-2 rounded-full overflow-hidden">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${item.ai_analysis.condition_rating * 10}%` }}
-                                                className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
+                                                className="h-full bg-gradient-to-r from-success to-emerald-400"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="bg-black/20 p-4 rounded-2xl">
-                                        <div className="text-xs text-white/40 mb-2">Defect Analysis</div>
+                                    <div className="bg-base-2 p-4 rounded-2xl border border-border">
+                                        <div className="text-xs text-base-01 mb-2">Defect Analysis</div>
                                         {item.ai_analysis.detected_defects.length > 0 ? (
-                                            <ul className="list-disc list-inside text-red-400 text-sm">
+                                            <ul className="list-disc list-inside text-error text-sm">
                                                 {item.ai_analysis.detected_defects.map((defect: string, i: number) => (
                                                     <li key={i}>{defect}</li>
                                                 ))}
                                             </ul>
                                         ) : (
-                                            <div className="flex items-center gap-2 text-green-400 text-sm">
+                                            <div className="flex items-center gap-2 text-success text-sm">
                                                 <CheckCircle className="w-4 h-4" /> No defects detected
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-center py-8 text-white/40 text-sm">
+                                <div className="text-center py-8 text-base-01 text-sm">
                                     Click "Run AI Analysis" to verify authenticity and condition.
                                 </div>
                             )}
                         </div>
 
                         {/* Wardrobe Matcher Section */}
-                        <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">
+                        <div className="bg-card border border-border rounded-3xl p-6 shadow-lg">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <Shirt className="w-5 h-5 text-blue-400" />
+                                <h3 className="text-xl font-bold text-base-03 flex items-center gap-2">
+                                    <Shirt className="w-5 h-5 text-primary" />
                                     Wardrobe Matcher
                                 </h3>
                                 <Button
                                     onClick={handleMatchOutfit}
                                     disabled={matching}
                                     variant="outline"
-                                    className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 rounded-full"
+                                    className="border-primary/30 text-primary hover:bg-primary/10 rounded-full"
                                 >
                                     {matching ? 'Matching...' : 'Match with My Closet'}
                                 </Button>
@@ -226,17 +227,17 @@ export default function ItemDetailPage() {
 
                             {showMatches && (
                                 <div className="mt-6">
-                                    <p className="text-white/60 mb-4">This item pairs well with:</p>
+                                    <p className="text-base-02 mb-4">This item pairs well with:</p>
                                     {matches.length > 0 ? (
                                         <div className="grid grid-cols-3 gap-4">
                                             {matches.map((match) => (
-                                                <div key={match.id} className="aspect-[3/4] rounded-xl overflow-hidden bg-black/40 border border-white/10">
+                                                <div key={match.id} className="aspect-[3/4] rounded-xl overflow-hidden bg-base-2 border border-border">
                                                     <img src={match.image} alt={match.category} className="w-full h-full object-cover" />
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-white/40 text-sm italic">No matches found in your closet yet. Try adding more items!</p>
+                                        <p className="text-base-01 text-sm italic">No matches found in your closet yet. Try adding more items!</p>
                                     )}
                                 </div>
                             )}
