@@ -25,7 +25,9 @@ function ChatContent() {
 
     useEffect(() => {
         // Connect to WebSocket
-        const socket = new WebSocket(`ws://localhost:8000/ws/chat/${roomName}/`);
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = process.env.NEXT_PUBLIC_WS_URL || 'localhost:8000';
+        const socket = new WebSocket(`${wsProtocol}//${wsHost}/ws/chat/${roomName}/`);
         socketRef.current = socket;
 
         socket.onopen = () => {
@@ -39,6 +41,10 @@ function ChatContent() {
 
         socket.onclose = () => {
             console.log('WebSocket disconnected');
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
         };
 
         return () => {

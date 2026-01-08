@@ -35,7 +35,9 @@ export default function NotificationBell() {
         fetchNotifications();
 
         // Connect to WebSocket
-        const socket = new WebSocket('ws://localhost:8000/ws/notifications/');
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = process.env.NEXT_PUBLIC_WS_URL || 'localhost:8000';
+        const socket = new WebSocket(`${wsProtocol}//${wsHost}/ws/notifications/`);
         socketRef.current = socket;
 
         socket.onopen = () => {
@@ -50,6 +52,10 @@ export default function NotificationBell() {
 
         socket.onclose = () => {
             console.log('Notification WebSocket disconnected');
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
         };
 
         return () => {
