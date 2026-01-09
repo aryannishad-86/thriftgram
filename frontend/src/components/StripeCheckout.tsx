@@ -1,11 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import api from '@/lib/api';
 import { motion } from 'framer-motion';
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface StripeCheckoutProps {
     itemId: number;
@@ -33,24 +30,15 @@ export default function StripeCheckout({ itemId, itemTitle, price, isSold = fals
                 item_id: itemId
             });
 
-            // Redirect to Stripe checkout
-            const stripe = await stripePromise;
-
-            if (!stripe) {
-                throw new Error('Stripe failed to load');
-            }
-
-            const { error: stripeError } = await stripe.redirectToCheckout({
-                sessionId: data.sessionId
-            });
-
-            if (stripeError) {
-                setError(stripeError.message || 'Payment failed');
+            // Redirect to Stripe Checkout URL
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error('No checkout URL returned');
             }
         } catch (err: any) {
             const errorMessage = err.response?.data?.error || err.message || 'Failed to initiate checkout';
             setError(errorMessage);
-        } finally {
             setLoading(false);
         }
     };
