@@ -15,10 +15,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const Comp = asChild ? Slot : "button"
 
         const variants = {
-            default: "bg-primary text-primary-foreground hover:bg-primary/90",
-            outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-            ghost: "hover:bg-accent hover:text-accent-foreground",
-            link: "text-primary underline-offset-4 hover:underline",
+            default: "bg-base-03 text-white hover:bg-base-03/90 shadow-md hover:shadow-lg",
+            outline: "border-2 border-base-03 bg-transparent text-base-03 hover:bg-base-03 hover:text-white",
+            ghost: "hover:bg-base-03/10 hover:text-base-03",
+            link: "text-base-03 underline-offset-4 hover:underline",
         }
 
         const sizes = {
@@ -31,7 +31,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const buttonContent = (
             <Comp
                 className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-bold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-03 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
                     variants[variant],
                     sizes[size],
                     className
@@ -47,8 +47,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
         return (
             <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 className="inline-block"
             >
                 {buttonContent}

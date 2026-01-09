@@ -53,7 +53,7 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
             <Button
                 onClick={handleAddToCart}
                 variant="outline"
-                className="flex-1 border-primary/50 text-primary hover:bg-primary/10 font-bold py-6 text-lg rounded-xl transition-all duration-300"
+                className="flex-1 border-primary/50 text-base-03 hover:bg-primary/10 font-bold py-6 text-lg rounded-xl transition-all duration-300"
             >
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Add to Cart
@@ -61,7 +61,7 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
             <Button
                 onClick={handleBuy}
                 disabled={loading}
-                className="flex-[2] bg-primary hover:bg-primary/90 text-white font-bold py-6 text-lg rounded-xl shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.7)] transition-all duration-300"
+                className="flex-[2] bg-base-03 hover:bg-base-03/90 text-white font-bold py-6 text-lg rounded-xl shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.7)] transition-all duration-300"
             >
                 {loading ? (
                     <span className="flex items-center gap-2">

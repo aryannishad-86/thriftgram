@@ -145,7 +145,7 @@ export default function Feed({ filters }: { filters?: Record<string, unknown> })
             {/* Loading More Indicator */}
             {loadingMore && (
                 <div className="flex justify-center items-center py-8">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    <Loader2 className="w-8 h-8 text-base-03 animate-spin" />
                     <span className="ml-3 text-base-02">Loading more items...</span>
                 </div>
             )}

@@ -40,12 +40,12 @@ export default function NavActions({ username }: NavActionsProps) {
             {username ? (
                 <UserDropdown username={username} />
             ) : (
-                <Link href="/login" className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/login" className="p-2 text-muted-foreground hover:text-base-03 transition-colors">
                     <UserIcon className="h-6 w-6" />
                 </Link>
             )}
 
-            <Link href="/sell" className="md:hidden p-2 text-muted-foreground hover:text-primary transition-colors">
+            <Link href="/sell" className="md:hidden p-2 text-muted-foreground hover:text-base-03 transition-colors">
                 <PlusCircle className="h-6 w-6" />
             </Link>
         </div>

@@ -35,7 +35,7 @@ export default function UserDropdown({ username }: UserDropdownProps) {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                className="p-2 text-muted-foreground hover:text-base-03 transition-colors focus:outline-none"
             >
                 <User className="h-6 w-6" />
             </button>

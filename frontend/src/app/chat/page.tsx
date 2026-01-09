@@ -102,7 +102,7 @@ function ChatContent() {
                     placeholder="Type a message..."
                     className="bg-white/5 border-white/10 focus:border-primary/50 text-white"
                 />
-                <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90">
+                <Button type="submit" size="icon" className="bg-base-03 hover:bg-base-03/90">
                     <Send className="h-4 w-4" />
                 </Button>
             </form>

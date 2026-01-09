@@ -62,7 +62,7 @@ function HomeContent() {
             <a href="#feed" className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all hover:scale-105">
               Explore Feed
             </a>
-            <a href="/sell" className="text-sm font-semibold leading-6 text-base-03 hover:text-primary transition-colors">
+            <a href="/sell" className="text-sm font-semibold leading-6 text-base-03 hover:text-base-03 transition-colors">
               Start Selling <span aria-hidden="true">→</span>
             </a>
           </div>

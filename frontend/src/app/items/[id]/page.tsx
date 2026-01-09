@@ -127,7 +127,7 @@ export default function ItemDetailPage() {
                     >
                         <div>
                             <h1 className="text-4xl md:text-5xl font-bold text-base-03 mb-2">{item.title}</h1>
-                            <p className="text-2xl text-primary font-mono">${item.price}</p>
+                            <p className="text-2xl text-base-03 font-mono">${item.price}</p>
                         </div>
 
                         <div className="flex gap-4">
@@ -147,13 +147,13 @@ export default function ItemDetailPage() {
                         <div className="bg-card border border-border rounded-3xl p-6 shadow-lg">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold text-base-03 flex items-center gap-2">
-                                    <Sparkles className="w-5 h-5 text-primary" />
+                                    <Sparkles className="w-5 h-5 text-base-03" />
                                     AI Quality Verification
                                 </h3>
                                 <Button
                                     onClick={handleAnalyze}
                                     disabled={analyzing || !!item.ai_analysis}
-                                    className="bg-primary hover:bg-primary/90 text-white rounded-full"
+                                    className="bg-base-03 hover:bg-base-03/90 text-white rounded-full"
                                 >
                                     {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
                                 </Button>
@@ -212,14 +212,14 @@ export default function ItemDetailPage() {
                         <div className="bg-card border border-border rounded-3xl p-6 shadow-lg">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-xl font-bold text-base-03 flex items-center gap-2">
-                                    <Shirt className="w-5 h-5 text-primary" />
+                                    <Shirt className="w-5 h-5 text-base-03" />
                                     Wardrobe Matcher
                                 </h3>
                                 <Button
                                     onClick={handleMatchOutfit}
                                     disabled={matching}
                                     variant="outline"
-                                    className="border-primary/30 text-primary hover:bg-primary/10 rounded-full"
+                                    className="border-primary/30 text-base-03 hover:bg-primary/10 rounded-full"
                                 >
                                     {matching ? 'Matching...' : 'Match with My Closet'}
                                 </Button>

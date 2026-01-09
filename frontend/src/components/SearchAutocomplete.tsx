@@ -216,7 +216,7 @@ export default function SearchAutocomplete() {
                                                         <div className="text-sm font-medium text-base-03 line-clamp-1">
                                                             {item.title}
                                                         </div>
-                                                        <div className="text-sm text-primary font-semibold">
+                                                        <div className="text-sm text-base-03 font-semibold">
                                                             ${parseFloat(item.price).toFixed(2)}
                                                         </div>
                                                     </div>

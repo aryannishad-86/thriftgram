@@ -94,7 +94,7 @@ export default function OrdersPage() {
                     <button
                         onClick={() => setActiveTab('purchases')}
                         className={`px-6 py-3 font-semibold transition-colors relative ${activeTab === 'purchases'
-                            ? 'text-primary'
+                            ? 'text-base-03'
                             : 'text-base-02 hover:text-base-03'
                             }`}
                     >
@@ -110,7 +110,7 @@ export default function OrdersPage() {
                     <button
                         onClick={() => setActiveTab('sales')}
                         className={`px-6 py-3 font-semibold transition-colors relative ${activeTab === 'sales'
-                            ? 'text-primary'
+                            ? 'text-base-03'
                             : 'text-base-02 hover:text-base-03'
                             }`}
                     >

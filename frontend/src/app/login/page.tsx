@@ -135,13 +135,13 @@ export default function LoginPage() {
                         <div className="flex items-center gap-4 pt-6">
                             <div className="flex -space-x-4">
                                 {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="w-12 h-12 rounded-full border-2 border-base-2 bg-card flex items-center justify-center text-xs font-bold text-primary">
+                                    <div key={i} className="w-12 h-12 rounded-full border-2 border-base-2 bg-card flex items-center justify-center text-xs font-bold text-base-03">
                                         <Sparkles className="w-4 h-4" />
                                     </div>
                                 ))}
                             </div>
                             <div className="text-sm text-base-02 font-medium">
-                                <span className="text-primary font-bold">10k+</span> active thrifters
+                                <span className="text-base-03 font-bold">10k+</span> active thrifters
                             </div>
                         </div>
                     </div>
@@ -213,7 +213,7 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-3 text-muted hover:text-primary transition-colors"
+                                            className="absolute right-3 top-3 text-muted hover:text-base-03 transition-colors"
                                         >
                                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
@@ -221,7 +221,7 @@ export default function LoginPage() {
                                 </div>
 
                                 <div className="flex items-center justify-end">
-                                    <Link href="#" className="text-sm text-primary hover:text-accent transition-colors">
+                                    <Link href="#" className="text-sm text-base-03 hover:text-accent transition-colors">
                                         Forgot password?
                                     </Link>
                                 </div>
@@ -293,7 +293,7 @@ export default function LoginPage() {
                                 <div className="mt-8 text-center">
                                     <p className="text-sm text-muted">
                                         Don't have an account?{' '}
-                                        <Link href="/register" className="text-primary hover:text-accent font-medium transition-colors relative group">
+                                        <Link href="/register" className="text-base-03 hover:text-accent font-medium transition-colors relative group">
                                             Sign up
                                             <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
                                         </Link>

@@ -137,7 +137,7 @@ export default function WishlistPage() {
                                             by @{wishlistItem.item.seller.username}
                                         </p>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xl font-bold text-primary">
+                                            <span className="text-xl font-bold text-base-03">
                                                 ${parseFloat(wishlistItem.item.price).toFixed(2)}
                                             </span>
                                             <span className="text-xs text-base-01">

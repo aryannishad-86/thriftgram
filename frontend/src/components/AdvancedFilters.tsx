@@ -205,7 +205,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
             {activeFilterCount > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                     {filters.minPrice !== null && (
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2">
                             Min: ${filters.minPrice}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, minPrice: null })}
@@ -216,7 +216,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                         </span>
                     )}
                     {filters.maxPrice !== null && (
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2">
                             Max: ${filters.maxPrice}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, maxPrice: null })}
@@ -229,7 +229,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                     {filters.sizes.map((size) => (
                         <span
                             key={size}
-                            className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-2"
+                            className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2"
                         >
                             Size: {size}
                             <button
@@ -241,7 +241,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                         </span>
                     ))}
                     {filters.condition && (
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2">
                             {filters.condition}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, condition: null })}

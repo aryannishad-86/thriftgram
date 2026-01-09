@@ -33,7 +33,7 @@ export default function CartDrawer() {
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-white/10">
                             <div className="flex items-center gap-3">
-                                <ShoppingBag className="h-5 w-5 text-primary" />
+                                <ShoppingBag className="h-5 w-5 text-base-03" />
                                 <h2 className="text-xl font-bold">Your Cart ({items.length})</h2>
                             </div>
                             <button
@@ -78,7 +78,7 @@ export default function CartDrawer() {
                                                 <p className="text-sm text-muted-foreground">Size: {item.size || 'N/A'}</p>
                                             </div>
                                             <div className="flex items-center justify-between mt-2">
-                                                <span className="font-bold text-primary">${item.price}</span>
+                                                <span className="font-bold text-base-03">${item.price}</span>
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
                                                     className="text-muted-foreground hover:text-red-400 transition-colors"
@@ -102,7 +102,7 @@ export default function CartDrawer() {
                                 <p className="text-xs text-muted-foreground mb-6 text-center">
                                     Shipping and taxes calculated at checkout.
                                 </p>
-                                <Button className="w-full py-6 text-lg font-bold bg-primary hover:bg-primary/90">
+                                <Button className="w-full py-6 text-lg font-bold bg-base-03 hover:bg-base-03/90">
                                     Checkout <ArrowRight className="ml-2 h-5 w-5" />
                                 </Button>
                             </div>

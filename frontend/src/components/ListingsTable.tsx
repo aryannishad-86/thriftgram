@@ -92,7 +92,7 @@ export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <span className="font-medium text-base-03 group-hover:text-primary transition-colors">{item.title}</span>
+                                                <span className="font-medium text-base-03 group-hover:text-base-03 transition-colors">{item.title}</span>
                                             </div>
                                         </td>
                                         <td className="p-4 text-base-03 font-semibold">${item.price}</td>
@@ -105,7 +105,7 @@ export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                                    className="h-8 w-8 text-base-03 hover:text-base-03 hover:bg-primary/10"
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>

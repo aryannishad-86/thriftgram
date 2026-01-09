@@ -193,7 +193,7 @@ export default function ProfilePage() {
                                     CO₂ saved
                                 </div>
                                 <div className="flex items-center gap-2 text-base-02">
-                                    <span className="font-semibold text-primary">{user.water_saved.toFixed(0)}L</span>
+                                    <span className="font-semibold text-base-03">{user.water_saved.toFixed(0)}L</span>
                                     Water saved
                                 </div>
                             </div>

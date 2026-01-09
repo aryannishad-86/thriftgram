@@ -207,7 +207,7 @@ export default function RegisterPage() {
                     >
                         <Button
                             type="submit"
-                            className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6 shadow-md transition-all"
+                            className="w-full bg-base-03 hover:bg-base-03/90 text-white font-medium py-6 shadow-md transition-all"
                             disabled={loading}
                         >
                             {loading ? (
@@ -260,7 +260,7 @@ export default function RegisterPage() {
                         className="text-center text-sm"
                     >
                         <span className="text-muted">Already have an account? </span>
-                        <Link href="/login" className="font-medium text-primary hover:text-secondary transition-colors relative group">
+                        <Link href="/login" className="font-medium text-base-03 hover:text-secondary transition-colors relative group">
                             Sign in
                             <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-secondary transition-all group-hover:w-full" />
                         </Link>
