@@ -87,25 +87,25 @@ export default function SellPage() {
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Image Upload */}
                         <div className="space-y-3">
-                            <label className="text-sm font-medium text-foreground ml-1">Photos</label>
+                            <label className="text-sm font-medium text-base-03 ml-1">Photos</label>
                             <ImageUpload onChange={setFiles} />
                         </div>
 
                         {/* Details */}
                         <div className="grid gap-6 sm:grid-cols-2">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground ml-1">Title</label>
+                                <label className="text-sm font-medium text-base-03 ml-1">Title</label>
                                 <Input
                                     required
                                     placeholder="e.g. Vintage Levi's 501"
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="bg-background border-border focus:border-primary text-foreground placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
+                                    className="bg-background border-border focus:border-primary text-base-03 placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground ml-1">Price ($)</label>
+                                <label className="text-sm font-medium text-base-03 ml-1">Price ($)</label>
                                 <Input
                                     required
                                     type="number"
@@ -114,33 +114,33 @@ export default function SellPage() {
                                     placeholder="0.00"
                                     value={formData.price}
                                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                    className="bg-background border-border focus:border-primary text-foreground placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
+                                    className="bg-background border-border focus:border-primary text-base-03 placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground ml-1">Size</label>
+                                <label className="text-sm font-medium text-base-03 ml-1">Size</label>
                                 <Input
                                     required
                                     placeholder="e.g. M, 32, 10"
                                     value={formData.size}
                                     onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                                    className="bg-background border-border focus:border-primary text-foreground placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
+                                    className="bg-background border-border focus:border-primary text-base-03 placeholder:text-muted h-12 transition-all duration-300 hover:border-primary/50"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground ml-1">Condition</label>
+                                <label className="text-sm font-medium text-base-03 ml-1">Condition</label>
                                 <div className="relative">
                                     <select
-                                        className="flex h-12 w-full appearance-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:border-primary/50"
+                                        className="flex h-12 w-full appearance-none rounded-md border border-border bg-background px-3 py-2 text-sm text-base-03 ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:border-primary/50"
                                         value={formData.condition}
                                         onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
                                     >
-                                        <option value="NEW" className="bg-card text-foreground">New with Tags</option>
-                                        <option value="LIKE_NEW" className="bg-card text-foreground">Like New</option>
-                                        <option value="GOOD" className="bg-card text-foreground">Good</option>
-                                        <option value="FAIR" className="bg-card text-foreground">Fair</option>
+                                        <option value="NEW" className="bg-card text-base-03">New with Tags</option>
+                                        <option value="LIKE_NEW" className="bg-card text-base-03">Like New</option>
+                                        <option value="GOOD" className="bg-card text-base-03">Good</option>
+                                        <option value="FAIR" className="bg-card text-base-03">Fair</option>
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted">
                                         <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
@@ -150,12 +150,12 @@ export default function SellPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground ml-1">Description</label>
+                            <label className="text-sm font-medium text-base-03 ml-1">Description</label>
                             <textarea
                                 required
                                 rows={4}
                                 placeholder="Describe your item..."
-                                className="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:border-primary/50 resize-none"
+                                className="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-base-03 ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:border-primary/50 resize-none"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             />
