@@ -132,7 +132,7 @@ export default function DashboardPage() {
 
                 {/* Listings Table */}
                 <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-base-01">Your Listings</h2>
+                    <h2 className="text-2xl font-bold text-base-03">Your Listings</h2>
                     {loading ? (
                         <Skeleton className="h-64 rounded-2xl bg-base-2" />
                     ) : (
