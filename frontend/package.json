@@ -11,7 +11,8 @@
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
     "@react-oauth/google": "^0.12.1",
-    "@stripe/stripe-js": "^8.5.2",
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.6.1",
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",

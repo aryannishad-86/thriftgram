@@ -6,39 +6,65 @@ import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import { useCart } from '@/context/CartContext';
+import { motion } from 'framer-motion';
 
-// Placeholder key - in production this should be an env var
-const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface BuyButtonProps {
     itemId: number;
     price: number;
-    title?: string; // Added title for cart
-    image?: string; // Added image for cart
-    size?: string;  // Added size for cart
+    title?: string;
+    image?: string;
+    size?: string;
+    isSold?: boolean;
 }
 
-export default function BuyButton({ itemId, price, title = 'Item', image = '', size }: BuyButtonProps) {
+export default function BuyButton({ itemId, price, title = 'Item', image = '', size, isSold = false }: BuyButtonProps) {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { addToCart } = useCart();
 
     const handleBuy = async () => {
+        if (isSold) {
+            setError('This item has already been sold');
+            return;
+        }
+
         setLoading(true);
+        setError(null);
+
         try {
-            const response = await api.post(`/api/items/${itemId}/create_checkout_session/`);
-            const { url } = response.data;
-            if (url) {
-                window.location.href = url;
+            // Create checkout session
+            const { data } = await api.post('/api/create-checkout-session/', {
+                item_id: itemId
+            });
+
+            // Redirect to Stripe checkout
+            const stripe = await stripePromise;
+
+            if (!stripe) {
+                throw new Error('Stripe failed to load');
             }
-        } catch (error) {
-            console.error('Error creating checkout session:', error);
-            alert('Failed to start checkout process. Please try again.');
+
+            const { error: stripeError } = await stripe.redirectToCheckout({
+                sessionId: data.sessionId
+            });
+
+            if (stripeError) {
+                setError(stripeError.message || 'Payment failed');
+            }
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.error || err.message || 'Failed to initiate checkout';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
     const handleAddToCart = () => {
+        if (isSold) {
+            return;
+        }
         addToCart({
             id: itemId,
             title,
@@ -49,33 +75,60 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
     };
 
     return (
-        <div className="flex gap-3 w-full">
-            <Button
-                onClick={handleAddToCart}
-                variant="outline"
-                className="flex-1 border-primary/50 text-base-03 hover:bg-primary/10 font-bold py-6 text-lg rounded-xl transition-all duration-300"
-            >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                Add to Cart
-            </Button>
-            <Button
-                onClick={handleBuy}
-                disabled={loading}
-                className="flex-[2] bg-base-03 hover:bg-base-03/90 text-white font-bold py-6 text-lg rounded-xl shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.7)] transition-all duration-300"
-            >
-                {loading ? (
-                    <span className="flex items-center gap-2">
-                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        Processing...
-                    </span>
-                ) : (
-                    <span className="flex items-center gap-2">
-                        <ShoppingBag className="h-5 w-5" />
-                        Buy Now - ${price}
-                    </span>
-                )}
-            </Button>
+        <div className="w-full">
+            <div className="flex gap-3 w-full">
+                <Button
+                    onClick={handleAddToCart}
+                    disabled={isSold}
+                    variant="outline"
+                    className="flex-1 border-base-03/50 text-base-03 hover:bg-base-03/10 font-bold py-6 text-lg rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    {isSold ? 'Sold' : 'Add to Cart'}
+                </Button>
+
+                <motion.div
+                    whileHover={{ scale: loading || isSold ? 1 : 1.02 }}
+                    whileTap={{ scale: loading || isSold ? 1 : 0.98 }}
+                    className="flex-[2]"
+                >
+                    <Button
+                        onClick={handleBuy}
+                        disabled={loading || isSold}
+                        className="w-full bg-base-03 hover:bg-base-03/90 text-white font-bold py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? (
+                            <span className="flex items-center gap-2">
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                Processing...
+                            </span>
+                        ) : isSold ? (
+                            <span>Sold Out</span>
+                        ) : (
+                            <span className="flex items-center gap-2">
+                                <ShoppingBag className="h-5 w-5" />
+                                Buy Now - ${price.toFixed(2)}
+                            </span>
+                        )}
+                    </Button>
+                </motion.div>
+            </div>
+
+            {error && (
+                <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 text-sm text-red-600 font-medium"
+                >
+                    {error}
+                </motion.p>
+            )}
+
+            {!isSold && (
+                <p className="mt-2 text-xs text-base-02 text-center">
+                    Secure payment powered by Stripe
+                </p>
+            )}
         </div>
     );
 }
-
