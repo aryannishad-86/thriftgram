@@ -22,7 +22,7 @@ export default function NavActions({ username }: NavActionsProps) {
             </Button>
 
             {/* Eco Points Badge */}
-            <Link href="/leaderboard" className="hidden md:flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full text-green-400 text-sm font-bold hover:bg-green-500/20 transition-colors">
+            <Link href="/leaderboard" className="hidden md:flex items-center gap-1.5 bg-base-03/10 border-2 border-base-03/20 px-3 py-1.5 rounded-full text-base-03 text-sm font-bold hover:bg-base-03/20 transition-colors">
                 <Leaf className="w-3.5 h-3.5" />
                 <span>[★ 350]</span>
             </Link>
