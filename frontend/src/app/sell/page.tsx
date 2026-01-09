@@ -161,19 +161,33 @@ export default function SellPage() {
                             />
                         </div>
 
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6 shadow-md transition-all" disabled={loading}>
-                                {loading ? (
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                        Listing Item...
-                                    </div>
-                                ) : 'List Item'}
-                            </Button>
-                        </motion.div>
+                        <div className="flex justify-center pt-4">
+                            <motion.div
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
+                                <Button 
+                                    type="submit" 
+                                    className="bg-base-03 hover:bg-base-03/90 text-white font-bold py-6 px-12 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-base-03" 
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                            Listing Item...
+                                        </div>
+                                    ) : (
+                                        <span className="flex items-center gap-2">
+                                            List Item
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </span>
+                                    )}
+                                </Button>
+                            </motion.div>
+                        </div>
                     </form>
                 </motion.div>
             </div>
