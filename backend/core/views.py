@@ -383,3 +383,18 @@ class WishlistViewSet(viewsets.ModelViewSet):
         if deleted_count > 0:
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response({'error': 'Item not in wishlist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+from rest_framework.decorators import api_view, permission_classes
+from .models import EcoPointsHistory
+from .serializers import EcoPointsHistorySerializer
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def eco_points_history(request):
+    """Get authenticated user's eco points history"""
+    history = EcoPointsHistory.objects.filter(
+        user=request.user
+    ).order_by('-created_at')[:50]
+    serializer = EcoPointsHistorySerializer(history, many=True)
+    return Response(serializer.data)

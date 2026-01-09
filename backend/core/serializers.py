@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Item, ItemImage, ClosetItem, Like, DropEvent, Follow, Order, Review, Wishlist
+from .models import Item, ItemImage, ClosetItem, Like, DropEvent, Follow, Order, Review, Wishlist, EcoPointsHistory
 
 User = get_user_model()
 
@@ -13,10 +13,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'bio', 'profile_picture', 'social_links',
-            'eco_points', 'co2_saved', 'water_saved',
+            'eco_points', 'eco_tier', 'co2_saved', 'water_saved',
+            'items_sold_count', 'items_bought_count',
             'followers_count', 'following_count', 'is_following'
         ]
-        read_only_fields = ['eco_points', 'co2_saved', 'water_saved']
+        read_only_fields = ['eco_points', 'eco_tier', 'co2_saved', 'water_saved', 'items_sold_count', 'items_bought_count']
     
     def get_followers_count(self, obj):
         return obj.followers.count()
@@ -38,10 +39,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'bio', 'profile_picture', 'social_links',
-            'date_joined', 'eco_points', 'co2_saved', 'water_saved',
+            'date_joined', 'eco_points', 'eco_tier', 'co2_saved', 'water_saved',
+            'items_sold_count', 'items_bought_count',
             'followers_count', 'following_count'
         ]
-        read_only_fields = ['username', 'email', 'date_joined', 'eco_points', 'co2_saved', 'water_saved']
+        read_only_fields = ['username', 'email', 'date_joined', 'eco_points', 'eco_tier', 'co2_saved', 'water_saved', 'items_sold_count', 'items_bought_count']
     
     def get_followers_count(self, obj):
         return obj.followers.count()
@@ -166,3 +168,10 @@ class WishlistSerializer(serializers.ModelSerializer):
         model = Wishlist
         fields = ['id', 'item', 'added_at']
         read_only_fields = ['added_at']
+
+
+class EcoPointsHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EcoPointsHistory
+        fields = ['id', 'action', 'points', 'description', 'created_at']
+        read_only_fields = ['id', 'created_at']

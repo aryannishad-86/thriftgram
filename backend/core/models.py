@@ -3,12 +3,34 @@ from django.db import models
 from django.conf import settings
 
 class CustomUser(AbstractUser):
+    TIER_CHOICES = [
+        ('BRONZE', 'Bronze'),
+        ('SILVER', 'Silver'),
+        ('GOLD', 'Gold'),
+        ('PLATINUM', 'Platinum'),
+    ]
+    
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     social_links = models.JSONField(default=dict, blank=True)  # {instagram, twitter, website}
     eco_points = models.IntegerField(default=0)
+    eco_tier = models.CharField(max_length=20, choices=TIER_CHOICES, default='BRONZE')
     co2_saved = models.FloatField(default=0.0)  # in kg
     water_saved = models.FloatField(default=0.0)  # in liters
+    items_sold_count = models.IntegerField(default=0)
+    items_bought_count = models.IntegerField(default=0)
+
+    def update_tier(self):
+        """Update user tier based on eco points"""
+        if self.eco_points >= 2500:
+            self.eco_tier = 'PLATINUM'
+        elif self.eco_points >= 1000:
+            self.eco_tier = 'GOLD'
+        elif self.eco_points >= 500:
+            self.eco_tier = 'SILVER'
+        else:
+            self.eco_tier = 'BRONZE'
+        self.save(update_fields=['eco_tier'])
 
     def __str__(self):
         return self.username
@@ -168,3 +190,29 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s wishlist: {self.item.title}"
+
+
+class EcoPointsHistory(models.Model):
+    """Track eco points earning history"""
+    ACTION_CHOICES = [
+        ('ITEM_LISTED', 'Item Listed'),
+        ('ITEM_PURCHASED', 'Item Purchased'),
+        ('PROFILE_COMPLETED', 'Profile Completed'),
+        ('SUSTAINABLE_BRAND', 'Sustainable Brand Bonus'),
+        ('LONGEVITY_BONUS', 'Item Longevity Bonus'),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='eco_history')
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    points = models.IntegerField()
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action} (+{self.points})"

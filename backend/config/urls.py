@@ -26,7 +26,7 @@ from rest_framework_simplejwt.views import (
 from core.views import (
     ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet,
     DropEventViewSet, RegisterView, GoogleLogin, OrderViewSet,
-    ReviewViewSet, WishlistViewSet
+    ReviewViewSet, WishlistViewSet, eco_points_history
 )
 from notifications.views import NotificationViewSet
 from chat.views import ConversationViewSet, MessageViewSet
@@ -54,4 +54,5 @@ urlpatterns = [
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('api/auth/google/', GoogleLogin.as_view(), name='google_login'),
+    path('api/eco-points-history/', eco_points_history, name='eco_points_history'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
