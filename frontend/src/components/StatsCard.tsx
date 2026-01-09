@@ -20,7 +20,7 @@ export default function StatsCard({ title, value, icon, trend, description }: St
                 transition: { duration: 0.3, type: "spring", stiffness: 300 }
             }}
             transition={{ duration: 0.4 }}
-            className="group relative rounded-3xl border-2 border-primary/20 bg-card p-6 shadow-lg hover:shadow-2xl hover:border-primary transition-all duration-300 overflow-hidden"
+            className="group relative rounded-3xl border-2 border-primary/20  p-6 shadow-lg hover:shadow-2xl hover:border-primary transition-all duration-300 overflow-hidden" style={{ backgroundColor: "#F7F1E3" }}
         >
             {/* Animated background shimmer on hover */}
             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
