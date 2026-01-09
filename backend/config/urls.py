@@ -26,7 +26,8 @@ from rest_framework_simplejwt.views import (
 from core.views import (
     ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet,
     DropEventViewSet, RegisterView, GoogleLogin, OrderViewSet,
-    ReviewViewSet, WishlistViewSet, eco_points_history
+    ReviewViewSet, WishlistViewSet, eco_points_history,
+    create_checkout_session, stripe_webhook
 )
 from notifications.views import NotificationViewSet
 from chat.views import ConversationViewSet, MessageViewSet
@@ -55,4 +56,6 @@ urlpatterns = [
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('api/auth/google/', GoogleLogin.as_view(), name='google_login'),
     path('api/eco-points-history/', eco_points_history, name='eco_points_history'),
+    path('api/create-checkout-session/', create_checkout_session, name='create_checkout_session'),
+    path('api/stripe-webhook/', stripe_webhook, name='stripe_webhook'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

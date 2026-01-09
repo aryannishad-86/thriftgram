@@ -398,3 +398,140 @@ def eco_points_history(request):
     ).order_by('-created_at')[:50]
     serializer = EcoPointsHistorySerializer(history, many=True)
     return Response(serializer.data)
+
+
+from rest_framework.decorators import api_view, permission_classes
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from .stripe_service import StripeService
+import stripe
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def create_checkout_session(request):
+    """Create Stripe checkout session for item purchase"""
+    item_id = request.data.get('item_id')
+    item = get_object_or_404(Item, id=item_id)
+    
+    # Prevent buying own items
+    if item.seller == request.user:
+        return Response(
+            {'error': 'Cannot purchase your own item'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Prevent buying already sold items
+    if item.is_sold:
+        return Response(
+            {'error': 'This item has already been sold'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Create checkout session
+    frontend_url = settings.FRONTEND_URL if hasattr(settings, 'FRONTEND_URL') else 'http://localhost:3000'
+    success_url = f"{frontend_url}/orders?success=true&session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{frontend_url}/items/{item_id}"
+    
+    try:
+        session = StripeService.create_checkout_session(
+            item, success_url, cancel_url
+        )
+        
+        # Create pending order
+        Order.objects.create(
+            buyer=request.user,
+            item=item,
+            status='PENDING',
+            stripe_payment_intent=session.payment_intent if hasattr(session, 'payment_intent') else session.id,
+            total_amount=item.price
+        )
+        
+        return Response({'sessionId': session.id, 'url': session.url})
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@csrf_exempt
+def stripe_webhook(request):
+    """Handle Stripe webhooks"""
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    
+    if not sig_header:
+        return Response({'error': 'Missing signature'}, status=400)
+    
+    try:
+        webhook_secret = settings.STRIPE_WEBHOOK_SECRET
+        event = StripeService.construct_webhook_event(
+            payload, sig_header, webhook_secret
+        )
+    except ValueError as e:
+        return Response({'error': 'Invalid payload'}, status=400)
+    except stripe.error.SignatureVerificationError as e:
+        return Response({'error': 'Invalid signature'}, status=400)
+    
+    # Handle the event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        handle_checkout_completion(session)
+    elif event['type'] == 'payment_intent.succeeded':
+        payment_intent = event['data']['object']
+        # Handle successful payment intent if needed
+        pass
+    
+    return Response({'status': 'success'})
+
+
+def handle_checkout_completion(session):
+    """Handle successful checkout session completion"""
+    try:
+        item_id = session['metadata'].get('item_id')
+        if not item_id:
+            return
+        
+        # Get payment intent ID
+        payment_intent_id = session.get('payment_intent') or session.get('id')
+        
+        # Find and update order
+        try:
+            order = Order.objects.get(stripe_payment_intent=payment_intent_id)
+            order.status = 'PAID'
+            order.save()
+            
+            # Mark item as sold
+            item = Item.objects.get(id=item_id)
+            item.is_sold = True
+            item.save()
+            
+            # Award eco points to buyer (+20)
+            buyer = order.buyer
+            buyer.eco_points += 20
+            buyer.items_bought_count += 1
+            buyer.save()
+            
+            # Update buyer's tier
+            buyer.update_tier()
+            
+            # Create eco points history
+            from .models import EcoPointsHistory
+            EcoPointsHistory.objects.create(
+                user=buyer,
+                action='ITEM_PURCHASED',
+                points=20,
+                description=f'Purchased "{item.title}"'
+            )
+            
+            # TODO: Create notification for seller
+            # TODO: Send confirmation email to buyer
+            
+        except Order.DoesNotExist:
+            # Order not found, log error
+            pass
+            
+    except Exception as e:
+        # Log error
+        print(f"Error handling checkout completion: {str(e)}")
