@@ -20,13 +20,14 @@ export default function StatsCard({ title, value, icon, trend, description }: St
                 transition: { duration: 0.3, type: "spring", stiffness: 300 }
             }}
             transition={{ duration: 0.4 }}
-            className="group relative rounded-3xl border-2 border-primary/20  p-6 shadow-lg hover:shadow-2xl hover:border-primary transition-all duration-300 overflow-hidden" style={{ backgroundColor: "#F7F1E3" }}
+            className="group relative rounded-3xl border-2 border-base-03/20 p-6 shadow-lg hover:shadow-2xl hover:border-base-03 transition-all duration-300 overflow-hidden"
+            style={{ backgroundColor: "#F7F1E3" }}
         >
             {/* Animated background shimmer on hover */}
-            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-base-03/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
             {/* Decorative corner element */}
-            <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-500" />
+            <div className="absolute -top-8 -right-8 w-24 h-24 bg-base-03/5 rounded-full blur-2xl group-hover:bg-base-03/10 transition-colors duration-500" />
 
             <div className="relative flex items-start justify-between">
                 <div className="flex-1 space-y-2">
@@ -87,7 +88,7 @@ export default function StatsCard({ title, value, icon, trend, description }: St
                         scale: 1.1
                     }}
                     transition={{ duration: 0.5 }}
-                    className="flex-shrink-0 rounded-xl bg-primary/10 p-3.5 text-primary border-2 border-primary/20 shadow-md group-hover:shadow-lg group-hover:bg-primary/15 transition-all duration-300"
+                    className="flex-shrink-0 rounded-xl bg-base-03/10 p-3.5 text-base-03 border-2 border-base-03/20 shadow-md group-hover:shadow-lg group-hover:bg-base-03/15 transition-all duration-300"
                 >
                     {icon}
                 </motion.div>
@@ -95,7 +96,7 @@ export default function StatsCard({ title, value, icon, trend, description }: St
 
             {/* Bottom accent line that grows on hover */}
             <motion.div
-                className="absolute bottom-0 left-0 h-1 bg-primary"
+                className="absolute bottom-0 left-0 h-1 bg-base-03"
                 initial={{ width: "0%" }}
                 animate={{ width: "0%" }}
                 whileHover={{ width: "100%" }}
