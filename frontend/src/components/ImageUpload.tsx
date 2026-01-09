@@ -37,7 +37,7 @@ export default function ImageUpload({ onChange }: ImageUploadProps) {
         <div className="space-y-4">
             <div
                 onClick={() => fileInputRef.current?.click()}
-                className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/10 bg-white/5 p-10 transition-all hover:border-primary/50 hover:bg-white/10 cursor-pointer"
+                className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-base-03/30 bg-base-2 p-10 transition-all hover:border-base-03 hover:bg-base-2/80 cursor-pointer"
             >
                 <input
                     type="file"
@@ -47,13 +47,13 @@ export default function ImageUpload({ onChange }: ImageUploadProps) {
                     ref={fileInputRef}
                     onChange={handleFileSelect}
                 />
-                <div className="rounded-full bg-primary/10 p-4 text-primary mb-4">
+                <div className="rounded-full bg-base-03/10 p-4 text-base-03 mb-4">
                     <Upload className="h-8 w-8" />
                 </div>
-                <p className="text-sm font-medium text-white">
+                <p className="text-sm font-medium text-base-03">
                     Click to upload or drag and drop
                 </p>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-xs text-base-02 mt-2">
                     SVG, PNG, JPG or GIF (max. 800x400px)
                 </p>
             </div>
@@ -61,7 +61,7 @@ export default function ImageUpload({ onChange }: ImageUploadProps) {
             {previews.length > 0 && (
                 <div className="grid grid-cols-3 gap-4 sm:grid-cols-4">
                     {previews.map((preview, index) => (
-                        <div key={index} className="group relative aspect-square overflow-hidden rounded-lg border border-white/10 bg-secondary/50">
+                        <div key={index} className="group relative aspect-square overflow-hidden rounded-lg border-2 border-border bg-base-2">
                             <Image
                                 src={preview}
                                 alt={`Preview ${index}`}
