@@ -59,7 +59,7 @@ function HomeContent() {
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <a href="#feed" className="rounded-full bg-base-03 px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all hover:scale-105">
+            <a href="#feed" className="rounded-full bg-base-03 px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-base-03/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-base-03 transition-all hover:scale-105">
               Explore Feed
             </a>
             <a href="/sell" className="text-sm font-semibold leading-6 text-base-03 hover:text-base-03 transition-colors">
