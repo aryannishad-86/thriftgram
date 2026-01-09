@@ -31,7 +31,7 @@ export default function StatsCard({ title, value, icon, trend, description }: St
             <div className="relative flex items-start justify-between">
                 <div className="flex-1 space-y-2">
                     <motion.p
-                        className="text-xs font-bold text-primary uppercase tracking-wider"
+                        className="text-xs font-bold text-base-03 uppercase tracking-wider"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.1 }}
@@ -61,7 +61,7 @@ export default function StatsCard({ title, value, icon, trend, description }: St
 
                     {trend && (
                         <motion.div
-                            className="flex items-center gap-1.5 text-sm font-bold text-primary mt-2"
+                            className="flex items-center gap-1.5 text-sm font-bold text-base-03 mt-2"
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.4 }}
