@@ -34,7 +34,7 @@ export default function LeaderboardPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-background selection:bg-primary/20 pt-24 pb-12 px-4 relative overflow-hidden">
+        <main className="min-h-screen bg-background selection:bg-base-03/20 pt-24 pb-12 px-4 relative overflow-hidden">
             {/* Background Elements */}
             <div className="absolute inset-0 -z-10 bg-base-3" />
 
@@ -57,40 +57,40 @@ export default function LeaderboardPage() {
                     </motion.p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-sm">
-                    <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-                        <div className="font-bold text-white">Rank</div>
-                        <div className="font-bold text-white flex-1 ml-8">User</div>
+                <div className="rounded-3xl border-2 border-border overflow-hidden shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
+                    <div className="p-6 border-b-2 border-border flex justify-between items-center bg-base-2">
+                        <div className="font-bold text-base-03">Rank</div>
+                        <div className="font-bold text-base-03 flex-1 ml-8">User</div>
                         <div className="font-bold text-base-03">Eco-Points</div>
                     </div>
 
                     {loading ? (
                         <div className="p-6 space-y-4">
                             {[...Array(5)].map((_, i) => (
-                                <Skeleton key={i} className="h-16 w-full bg-white/5 rounded-xl" />
+                                <Skeleton key={i} className="h-16 w-full bg-base-2 rounded-xl" />
                             ))}
                         </div>
                     ) : (
-                        <div className="divide-y divide-white/5">
+                        <div className="divide-y-2 divide-border">
                             {users.map((user, index) => (
                                 <motion.div
                                     key={user.id}
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="p-6 flex items-center hover:bg-white/5 transition-colors"
+                                    className="p-6 flex items-center hover:bg-base-2 transition-colors"
                                 >
-                                    <div className="w-8 font-bold text-2xl text-white/50">
+                                    <div className="w-8 font-bold text-2xl text-base-03">
                                         {index + 1 === 1 ? '🥇' : index + 1 === 2 ? '🥈' : index + 1 === 3 ? '🥉' : `#${index + 1}`}
                                     </div>
 
                                     <div className="flex-1 ml-8 flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-blue-500 p-[2px]">
-                                            <div className="w-full h-full rounded-full bg-black overflow-hidden relative">
+                                        <div className="w-12 h-12 rounded-full bg-base-03 p-[2px]">
+                                            <div className="w-full h-full rounded-full bg-base-2 overflow-hidden relative">
                                                 {user.profile_picture ? (
                                                     <img src={user.profile_picture} alt={user.username} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-white/10 text-white">
+                                                    <div className="w-full h-full flex items-center justify-center bg-base-2 text-base-03">
                                                         <UserIcon className="w-6 h-6" />
                                                     </div>
                                                 )}
@@ -105,7 +105,7 @@ export default function LeaderboardPage() {
                                         </div>
                                     </div>
 
-                                    <div className="font-bold text-2xl text-green-400 font-mono">
+                                    <div className="font-bold text-2xl text-base-03 font-mono">
                                         {user.eco_points}
                                     </div>
                                 </motion.div>
