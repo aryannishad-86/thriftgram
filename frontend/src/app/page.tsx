@@ -36,7 +36,7 @@ function HomeContent() {
   return (
     <main className="min-h-screen bg-background selection:bg-primary/20">
       {/* Hero Section */}
-      <div className="relative overflow-hidden border-b border-border py-24 sm:py-32 isolate">
+      <div className="relative overflow-hidden py-24 sm:py-32 isolate">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
