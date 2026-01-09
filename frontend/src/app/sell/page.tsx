@@ -81,7 +81,8 @@ export default function SellPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.5 }}
-                    className="rounded-3xl border border-border bg-card p-8 shadow-lg relative"
+                    className="rounded-2xl border-2 border-border p-8 shadow-md relative"
+                    style={{ backgroundColor: "#F7F1E3" }}
                 >
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Image Upload */}
