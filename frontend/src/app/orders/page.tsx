@@ -139,7 +139,7 @@ export default function OrdersPage() {
                         </p>
                         <button
                             onClick={() => router.push(activeTab === 'purchases' ? '/' : '/sell')}
-                            className="px-6 py-3 rounded-full bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+                            className="px-6 py-3 rounded-full bg-base-03 text-white font-semibold hover:bg-primary/90 transition-colors"
                         >
                             {activeTab === 'purchases' ? 'Browse Items' : 'List an Item'}
                         </button>

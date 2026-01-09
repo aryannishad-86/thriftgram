@@ -232,7 +232,7 @@ export default function ProfileEditPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 px-6 py-3 rounded-full bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-1 px-6 py-3 rounded-full bg-base-03 text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 <Save className="w-5 h-5" />
                                 {loading ? 'Saving...' : 'Save Changes'}

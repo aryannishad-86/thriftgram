@@ -90,7 +90,7 @@ export default function ClosetPage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                     >
-                        <Button className="relative overflow-hidden bg-primary text-white hover:bg-primary/90 rounded-full px-6 py-6 text-lg font-bold group">
+                        <Button className="relative overflow-hidden bg-base-03 text-white hover:bg-base-03/90 rounded-full px-6 py-6 text-lg font-bold group">
                             <input
                                 type="file"
                                 accept="image/*"
