@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0001_initial'),  # Update this to match your last migration
+        ('core', '0008_customuser_social_links_follow_order_review_wishlist'),  # Update this to match your last migration
     ]
 
     operations = [
