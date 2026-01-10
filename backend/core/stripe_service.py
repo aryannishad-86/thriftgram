@@ -1,11 +1,18 @@
 import stripe
 from django.conf import settings
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+# Only set API key if it's configured
+if settings.STRIPE_SECRET_KEY:
+    stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class StripeService:
     """Service for handling Stripe payment operations"""
+    
+    @staticmethod
+    def is_configured():
+        """Check if Stripe is properly configured"""
+        return bool(settings.STRIPE_SECRET_KEY)
     
     @staticmethod
     def create_payment_intent(amount, item_id, buyer_email):
@@ -20,9 +27,12 @@ class StripeService:
         Returns:
             Stripe PaymentIntent object
         """
+        if not StripeService.is_configured():
+            raise ValueError("Stripe is not configured. Please set STRIPE_SECRET_KEY.")
+            
         intent = stripe.PaymentIntent.create(
             amount=int(amount * 100),  # Convert dollars to cents
-            currency='usd',
+            currency='inr',
             metadata={
                 'item_id': str(item_id),
             },
@@ -43,6 +53,9 @@ class StripeService:
         Returns:
             Stripe Checkout Session object
         """
+        if not StripeService.is_configured():
+            raise ValueError("Stripe is not configured. Please set STRIPE_SECRET_KEY.")
+        
         # Get first image URL or use placeholder
         image_url = None
         if item.images.exists():
@@ -89,6 +102,9 @@ class StripeService:
         Returns:
             Stripe Session object
         """
+        if not StripeService.is_configured():
+            raise ValueError("Stripe is not configured. Please set STRIPE_SECRET_KEY.")
+            
         return stripe.checkout.Session.retrieve(session_id)
     
     @staticmethod
