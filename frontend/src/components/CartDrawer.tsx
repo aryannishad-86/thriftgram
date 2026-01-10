@@ -97,7 +97,7 @@ export default function CartDrawer() {
                             <div className="p-6 border-t border-white/10 bg-black/50 backdrop-blur-xl">
                                 <div className="flex items-center justify-between mb-4 text-lg font-bold">
                                     <span>Subtotal</span>
-                                    <span>${cartTotal.toFixed(2)}</span>
+                                    <span>₹{cartTotal.toFixed(2)}</span>
                                 </div>
                                 <p className="text-xs text-muted-foreground mb-6 text-center">
                                     Shipping and taxes calculated at checkout.
