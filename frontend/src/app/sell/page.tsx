@@ -105,7 +105,7 @@ export default function SellPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-base-03 ml-1">Price ($)</label>
+                                <label className="text-sm font-medium text-base-03 ml-1">Price (₹)</label>
                                 <Input
                                     required
                                     type="number"

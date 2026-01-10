@@ -95,7 +95,7 @@ export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
                                                 <span className="font-medium text-base-03 group-hover:text-base-03 transition-colors">{item.title}</span>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-base-03 font-semibold">${item.price}</td>
+                                        <td className="p-4 text-base-03 font-semibold">₹{item.price}</td>
                                         <td className="p-4 text-base-02">{item.likes_count}</td>
                                         <td className="p-4 text-base-02">
                                             {new Date(item.created_at).toLocaleDateString()}

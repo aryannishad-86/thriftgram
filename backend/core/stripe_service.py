@@ -54,7 +54,7 @@ class StripeService:
             'payment_method_types': ['card'],
             'line_items': [{
                 'price_data': {
-                    'currency': 'usd',
+                    'currency': 'inr',
                     'product_data': {
                         'name': item.title,
                         'description': item.description[:500] if len(item.description) > 500 else item.description,

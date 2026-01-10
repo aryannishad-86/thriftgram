@@ -78,7 +78,7 @@ export default function CartDrawer() {
                                                 <p className="text-sm text-muted-foreground">Size: {item.size || 'N/A'}</p>
                                             </div>
                                             <div className="flex items-center justify-between mt-2">
-                                                <span className="font-bold text-base-03">${item.price}</span>
+                                                <span className="font-bold text-base-03">₹{item.price}</span>
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
                                                     className="text-muted-foreground hover:text-red-400 transition-colors"

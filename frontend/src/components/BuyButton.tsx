@@ -95,7 +95,7 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
                         ) : (
                             <span className="flex items-center gap-2">
                                 <ShoppingBag className="h-5 w-5" />
-                                Buy Now - ${price.toFixed(2)}
+                                Buy Now - ₹{price.toFixed(2)}
                             </span>
                         )}
                     </Button>

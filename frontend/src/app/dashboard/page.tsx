@@ -109,7 +109,7 @@ export default function DashboardPage() {
                             />
                             <StatsCard
                                 title="Total Sales"
-                                value={`$${stats?.total_sales || 0}`}
+                                value={`₹${stats?.total_sales || 0}`}
                                 icon={<DollarSign className="w-6 h-6" />}
                                 description="Lifetime earnings"
                             />

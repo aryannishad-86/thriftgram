@@ -217,7 +217,7 @@ export default function SearchAutocomplete() {
                                                             {item.title}
                                                         </div>
                                                         <div className="text-sm text-base-03 font-semibold">
-                                                            ${parseFloat(item.price).toFixed(2)}
+                                                            ₹{parseFloat(item.price).toFixed(2)}
                                                         </div>
                                                     </div>
                                                 </button>

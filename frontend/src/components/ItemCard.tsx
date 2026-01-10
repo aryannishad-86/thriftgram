@@ -83,7 +83,7 @@ export default function ItemCard({ item: initialItem }: { item: Item }) {
                 <div className="absolute bottom-0 left-0 w-full p-4 translate-y-2 opacity-90 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                     <div className="flex justify-between items-end mb-1">
                         <div className="flex-1 min-w-0 mr-2">
-                            <p className="font-bold text-white text-xl tracking-tight">${item.price}</p>
+                            <p className="font-bold text-white text-xl tracking-tight">₹{item.price}</p>
                             <h3 className="font-medium text-white/90 line-clamp-1 text-sm truncate">{item.title}</h3>
                         </div>
                         <div className="text-xs text-white/70 flex items-center gap-1 bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm border border-white/5">

@@ -183,7 +183,7 @@ export default function OrdersPage() {
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-xl font-bold text-base-03">
-                                                    ${parseFloat(order.total_amount).toFixed(2)}
+                                                    ₹{parseFloat(order.total_amount).toFixed(2)}
                                                 </div>
                                             </div>
                                         </div>

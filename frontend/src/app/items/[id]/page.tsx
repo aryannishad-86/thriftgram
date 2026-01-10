@@ -127,7 +127,7 @@ export default function ItemDetailPage() {
                     >
                         <div>
                             <h1 className="text-4xl md:text-5xl font-bold text-base-03 mb-2">{item.title}</h1>
-                            <p className="text-2xl text-base-03 font-mono">${item.price}</p>
+                            <p className="text-2xl text-base-03 font-mono">₹{item.price}</p>
                         </div>
 
                         <div className="flex gap-4">
