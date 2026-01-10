@@ -26,7 +26,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
     };
 
     return (
-        <div className="border-t border-border p-4 bg-card">
+        <div className="border-t-2 border-border p-4" style={{ backgroundColor: '#F7F1E3' }}>
             <div className="flex gap-3 items-end">
                 <textarea
                     value={message}
@@ -35,7 +35,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
                     placeholder="Type a message..."
                     disabled={disabled}
                     rows={1}
-                    className="flex-1 px-4 py-3 rounded-2xl border border-border bg-background text-base-03 resize-none focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-3 rounded-2xl border-2 border-border bg-white text-base-03 resize-none focus:outline-none focus:ring-2 focus:ring-base-03/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                         minHeight: '48px',
                         maxHeight: '120px',
@@ -44,7 +44,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
                 <button
                     onClick={handleSend}
                     disabled={!message.trim() || disabled}
-                    className="p-3 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    className="p-3 rounded-full bg-base-03 text-white hover:bg-base-03/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                 >
                     <Send className="w-5 h-5" />
                 </button>

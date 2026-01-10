@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, Share2, ArrowLeft, ShieldCheck, Sparkles, Tag, Layers, Shirt, CheckCircle } from 'lucide-react';
+import { Heart, Share2, ArrowLeft, ShieldCheck, Sparkles, Tag, Layers, Shirt, CheckCircle, MessageCircle } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +22,11 @@ interface Item {
     condition: string;
     description: string;
     images: { image: string }[];
+    seller: {
+        id: number;
+        username: string;
+        profile_picture?: string | null;
+    };
     ai_analysis?: {
         is_verified: boolean;
         detected_brand: string;
@@ -33,6 +38,7 @@ interface Item {
 
 export default function ItemDetailPage() {
     const params = useParams();
+    const router = useRouter();
     const [item, setItem] = useState<Item | null>(null);
     const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false);
@@ -41,6 +47,7 @@ export default function ItemDetailPage() {
     const [matching, setMatching] = useState(false);
     const [matches, setMatches] = useState<any[]>([]);
     const [showMatches, setShowMatches] = useState(false);
+    const [messagingLoading, setMessagingLoading] = useState(false);
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -80,6 +87,24 @@ export default function ItemDetailPage() {
             console.error('Failed to match outfit', error);
         } finally {
             setMatching(false);
+        }
+    };
+
+    const handleMessageSeller = async () => {
+        if (!item) return;
+        setMessagingLoading(true);
+        try {
+            // Create or get existing conversation
+            const res = await api.post('/api/conversations/', {
+                other_user: item.seller.id,
+                item: item.id
+            });
+            // Redirect to messages with conversation selected
+            router.push(`/messages?conversation=${res.data.id}`);
+        } catch (error) {
+            console.error('Failed to start conversation', error);
+        } finally {
+            setMessagingLoading(false);
         }
     };
 
@@ -243,7 +268,7 @@ export default function ItemDetailPage() {
                             )}
                         </div>
 
-                        <div className="flex gap-4 pt-4">
+                        <div className="flex flex-col gap-4 pt-4">
                             <BuyButton
                                 itemId={item.id}
                                 price={parseFloat(item.price)}
@@ -252,12 +277,36 @@ export default function ItemDetailPage() {
                                 size={item.size}
                             />
 
-                            <Button variant="outline" className="h-14 w-14 rounded-full border-white/20 hover:bg-white/10">
-                                <Heart className="w-6 h-6" />
+                            {/* Message Seller Button */}
+                            <Button
+                                onClick={handleMessageSeller}
+                                disabled={messagingLoading}
+                                variant="outline"
+                                className="w-full py-6 text-lg font-bold border-2 border-base-03/30 text-base-03 hover:bg-base-03/10 rounded-xl transition-all"
+                            >
+                                {messagingLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-base-03 border-t-transparent" />
+                                        Starting chat...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        <MessageCircle className="w-5 h-5" />
+                                        Message Seller
+                                    </span>
+                                )}
                             </Button>
-                            <Button variant="outline" className="h-14 w-14 rounded-full border-white/20 hover:bg-white/10">
-                                <Share2 className="w-6 h-6" />
-                            </Button>
+
+                            <div className="flex gap-4">
+                                <Button variant="outline" className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10">
+                                    <Heart className="w-5 h-5 mr-2" />
+                                    Save
+                                </Button>
+                                <Button variant="outline" className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10">
+                                    <Share2 className="w-5 h-5 mr-2" />
+                                    Share
+                                </Button>
+                            </div>
                         </div>
                     </motion.div>
                 </div>

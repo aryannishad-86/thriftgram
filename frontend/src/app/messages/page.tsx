@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import ConversationList from '@/components/ConversationList';
 import ChatWindow from '@/components/ChatWindow';
@@ -36,8 +36,9 @@ interface Message {
     is_read?: boolean;
 }
 
-export default function MessagesPage() {
+function MessagesContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConversation, setActiveConversation] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -64,6 +65,17 @@ export default function MessagesPage() {
     useEffect(() => {
         fetchConversations();
     }, []);
+
+    // Handle URL parameter for pre-selecting conversation
+    useEffect(() => {
+        const conversationId = searchParams.get('conversation');
+        if (conversationId && conversations.length > 0) {
+            const id = parseInt(conversationId);
+            if (!isNaN(id)) {
+                handleSelectConversation(id);
+            }
+        }
+    }, [searchParams, conversations]);
 
     // Poll for new messages when a conversation is active
     useEffect(() => {
@@ -140,8 +152,8 @@ export default function MessagesPage() {
 
                 <div className="grid md:grid-cols-[350px_1fr] gap-6 h-[calc(100vh-200px)]">
                     {/* Conversation List */}
-                    <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                        <div className="p-4 border-b border-border">
+                    <div className="rounded-2xl border-2 border-border overflow-hidden shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
+                        <div className="p-4 border-b-2 border-border bg-base-2">
                             <h2 className="font-semibold text-base-03">Conversations</h2>
                         </div>
                         <ConversationList
@@ -154,13 +166,13 @@ export default function MessagesPage() {
                     </div>
 
                     {/* Chat Window */}
-                    <div className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col">
+                    <div className="rounded-2xl border-2 border-border overflow-hidden flex flex-col shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
                         {activeConversation ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="p-4 border-b border-border flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-base-2 flex items-center justify-center">
-                                        <MessageCircle className="w-5 h-5 text-base-01" />
+                                <div className="p-4 border-b-2 border-border flex items-center gap-3 bg-base-2">
+                                    <div className="w-10 h-10 rounded-full bg-base-03/10 flex items-center justify-center">
+                                        <MessageCircle className="w-5 h-5 text-base-03" />
                                     </div>
                                     <div>
                                         <h2 className="font-semibold text-base-03">
@@ -184,7 +196,7 @@ export default function MessagesPage() {
                             </>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                                <MessageCircle className="w-16 h-16 text-base-01 mb-4" />
+                                <MessageCircle className="w-16 h-16 text-base-02 mb-4" />
                                 <h3 className="text-lg font-semibold text-base-03 mb-2">
                                     Select a conversation
                                 </h3>
@@ -197,5 +209,19 @@ export default function MessagesPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function MessagesPage() {
+    return (
+        <Suspense fallback={
+            <main className="min-h-screen bg-background pt-20">
+                <div className="container mx-auto px-4 py-8">
+                    <div className="text-base-02">Loading messages...</div>
+                </div>
+            </main>
+        }>
+            <MessagesContent />
+        </Suspense>
     );
 }

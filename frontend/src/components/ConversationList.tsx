@@ -85,7 +85,7 @@ export default function ConversationList({
                         onClick={() => onSelectConversation(conversation.id)}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`w-full p-4 flex gap-3 items-start border-b border-border hover:bg-base-2 transition-colors text-left ${isActive ? 'bg-base-2 border-l-4 border-primary' : ''
+                        className={`w-full p-4 flex gap-3 items-start border-b border-border hover:bg-base-2 transition-colors text-left ${isActive ? 'bg-base-2 border-l-4 border-base-03' : ''
                             }`}
                     >
                         {/* Avatar */}
