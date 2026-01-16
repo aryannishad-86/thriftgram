@@ -20,16 +20,25 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['eco_points', 'eco_tier', 'co2_saved', 'water_saved', 'items_sold_count', 'items_bought_count']
     
     def get_followers_count(self, obj):
-        return obj.followers.count()
+        try:
+            return obj.followers.count()
+        except Exception:
+            return 0
     
     def get_following_count(self, obj):
-        return obj.following.count()
+        try:
+            return obj.following.count()
+        except Exception:
+            return 0
     
     def get_is_following(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return Follow.objects.filter(follower=request.user, following=obj).exists()
-        return False
+        try:
+            request = self.context.get('request')
+            if request and request.user.is_authenticated:
+                return Follow.objects.filter(follower=request.user, following=obj).exists()
+            return False
+        except Exception:
+            return False
 
 class UserProfileSerializer(serializers.ModelSerializer):
     followers_count = serializers.SerializerMethodField()

@@ -58,4 +58,8 @@ urlpatterns = [
     path('api/eco-points-history/', eco_points_history, name='eco_points_history'),
     path('api/create-checkout-session/', create_checkout_session, name='create_checkout_session'),
     path('api/stripe-webhook/', stripe_webhook, name='stripe_webhook'),
+    path('api/health/', lambda request: __import__('django.http', fromlist=['JsonResponse']).JsonResponse({
+        'status': 'ok',
+        'database': 'connected' if __import__('django.db', fromlist=['connection']).connection.ensure_connection() is None else 'error'
+    }), name='health_check'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
