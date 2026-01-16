@@ -441,12 +441,12 @@ def create_checkout_session(request):
             item, success_url, cancel_url
         )
         
-        # Create pending order
+        # Create pending order - use session.id if payment_intent is not yet available
         Order.objects.create(
             buyer=request.user,
             item=item,
             status='PENDING',
-            stripe_payment_intent=session.payment_intent if hasattr(session, 'payment_intent') else session.id,
+            stripe_payment_intent=session.payment_intent or session.id,
             total_amount=item.price
         )
         
