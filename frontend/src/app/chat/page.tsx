@@ -23,33 +23,45 @@ function ChatContent() {
     const socketRef = useRef<WebSocket | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    const [wsError, setWsError] = useState<string | null>(null);
+
     useEffect(() => {
-        // Connect to WebSocket
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsHost = process.env.NEXT_PUBLIC_WS_URL || 'localhost:8000';
-        const socket = new WebSocket(`${wsProtocol}//${wsHost}/ws/chat/${roomName}/`);
-        socketRef.current = socket;
+        // Connect to WebSocket only if WS_URL is explicitly set
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+        if (!wsUrl) {
+            setWsError('Real-time messaging is not available in this environment.');
+            return;
+        }
 
-        socket.onopen = () => {
-            console.log('WebSocket connected');
-        };
+        try {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const socket = new WebSocket(`${wsProtocol}//${wsUrl}/ws/chat/${roomName}/`);
+            socketRef.current = socket;
 
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setMessages((prev) => [...prev, data]);
-        };
+            socket.onopen = () => {
+                console.log('WebSocket connected');
+                setWsError(null);
+            };
 
-        socket.onclose = () => {
-            console.log('WebSocket disconnected');
-        };
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                setMessages((prev) => [...prev, data]);
+            };
 
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
+            socket.onclose = () => {
+                console.log('WebSocket disconnected');
+            };
 
-        return () => {
-            socket.close();
-        };
+            socket.onerror = () => {
+                setWsError('Connection lost. Messages may not update in real-time.');
+            };
+
+            return () => {
+                socket.close();
+            };
+        } catch (error) {
+            setWsError('Could not connect to chat server.');
+        }
     }, [roomName]);
 
     useEffect(() => {

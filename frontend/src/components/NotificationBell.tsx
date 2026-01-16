@@ -29,38 +29,49 @@ export default function NotificationBell() {
                 const unread = response.data.filter((n: any) => !n.is_read).length;
                 setUnreadCount(unread);
             } catch (error) {
-                console.error('Failed to fetch notifications', error);
+                // Silently ignore if user is not authenticated
+                console.log('Could not fetch notifications:', error);
             }
         };
         fetchNotifications();
 
-        // Connect to WebSocket
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsHost = process.env.NEXT_PUBLIC_WS_URL || 'localhost:8000';
-        const socket = new WebSocket(`${wsProtocol}//${wsHost}/ws/notifications/`);
-        socketRef.current = socket;
+        // Connect to WebSocket only if WS_URL is explicitly set
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+        if (!wsUrl) {
+            // WebSocket not configured for this environment, skip connection
+            console.log('WebSocket URL not configured, skipping real-time notifications');
+            return;
+        }
 
-        socket.onopen = () => {
-            console.log('Notification WebSocket connected');
-        };
+        try {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const socket = new WebSocket(`${wsProtocol}//${wsUrl}/ws/notifications/`);
+            socketRef.current = socket;
 
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setNotifications((prev) => [data, ...prev]);
-            setUnreadCount((prev) => prev + 1);
-        };
+            socket.onopen = () => {
+                console.log('Notification WebSocket connected');
+            };
 
-        socket.onclose = () => {
-            console.log('Notification WebSocket disconnected');
-        };
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                setNotifications((prev) => [data, ...prev]);
+                setUnreadCount((prev) => prev + 1);
+            };
 
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
+            socket.onclose = () => {
+                console.log('Notification WebSocket disconnected');
+            };
 
-        return () => {
-            socket.close();
-        };
+            socket.onerror = (error) => {
+                console.log('WebSocket not available:', error);
+            };
+
+            return () => {
+                socket.close();
+            };
+        } catch (error) {
+            console.log('WebSocket connection failed:', error);
+        }
     }, []);
 
     // Close dropdown when clicking outside
