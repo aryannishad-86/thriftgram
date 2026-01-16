@@ -91,7 +91,9 @@ function MessagesContent() {
     const fetchConversations = async () => {
         try {
             const response = await api.get('/api/conversations/');
-            setConversations(response.data);
+            // Handle paginated response
+            const data = response.data.results || response.data;
+            setConversations(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch conversations', error);
         } finally {
@@ -106,7 +108,9 @@ function MessagesContent() {
 
         try {
             const response = await api.get(`/api/conversations/${conversationId}/messages/`);
-            setMessages(response.data);
+            // Handle paginated response
+            const data = response.data.results || response.data;
+            setMessages(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch messages', error);
         } finally {
