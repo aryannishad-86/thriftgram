@@ -56,7 +56,9 @@ export default function OrdersPage() {
         const fetchOrders = async () => {
             try {
                 const response = await api.get('/api/orders/');
-                setOrders(response.data);
+                // Handle paginated response
+                const data = response.data.results || response.data;
+                setOrders(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error('Failed to fetch orders', err);
             } finally {
