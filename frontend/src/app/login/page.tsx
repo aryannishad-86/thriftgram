@@ -177,7 +177,7 @@ export default function LoginPage() {
                                                 scale: focusedInput === 'username' || username ? 0.85 : 1,
                                                 color: focusedInput === 'username' ? '#268bd2' : '#93a1a1'
                                             }}
-                                            className="absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors z-10 bg-card px-1"
+                                            className={`absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors z-10 px-1 ${focusedInput === 'username' || username ? 'bg-card' : ''}`}
                                         >
                                             Username
                                         </motion.label>
@@ -198,7 +198,7 @@ export default function LoginPage() {
                                                 scale: focusedInput === 'password' || password ? 0.85 : 1,
                                                 color: focusedInput === 'password' ? '#268bd2' : '#93a1a1'
                                             }}
-                                            className="absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors z-10 bg-card px-1"
+                                            className={`absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors z-10 px-1 ${focusedInput === 'password' || password ? 'bg-card' : ''}`}
                                         >
                                             Password
                                         </motion.label>
