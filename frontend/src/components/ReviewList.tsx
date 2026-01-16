@@ -35,11 +35,13 @@ export default function ReviewList({ itemId, refreshTrigger = 0 }: ReviewListPro
     const fetchReviews = async () => {
         try {
             const response = await api.get(`/api/reviews/?item=${itemId}`);
-            setReviews(response.data);
+            // Handle paginated response - extract results array
+            const reviewsData = response.data.results || response.data;
+            setReviews(Array.isArray(reviewsData) ? reviewsData : []);
 
             // Calculate average rating
-            if (response.data.length > 0) {
-                const avg = response.data.reduce((sum: number, r: Review) => sum + r.rating, 0) / response.data.length;
+            if (Array.isArray(reviewsData) && reviewsData.length > 0) {
+                const avg = reviewsData.reduce((sum: number, r: Review) => sum + r.rating, 0) / reviewsData.length;
                 setAverageRating(avg);
             }
         } catch (err) {
