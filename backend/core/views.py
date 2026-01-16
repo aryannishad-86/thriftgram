@@ -165,14 +165,18 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         })
 
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all().order_by('-created_at')
+    queryset = Item.objects.all().select_related('seller').prefetch_related(
+        'images', 'likes', 'reviews'
+    ).order_by('-created_at')
     serializer_class = ItemSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'description']
 
     def get_queryset(self):
-        queryset = Item.objects.all().order_by('-created_at')
+        queryset = Item.objects.all().select_related('seller').prefetch_related(
+            'images', 'likes', 'reviews'
+        ).order_by('-created_at')
         seller_username = self.request.query_params.get('seller_username', None)
         if seller_username is not None:
             queryset = queryset.filter(seller__username=seller_username)

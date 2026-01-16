@@ -32,9 +32,23 @@ export default function Feed({ filters }: { filters?: Record<string, unknown> })
 
                 setItems(data);
                 setHasMore(hasNext);
-            } catch (err) {
+            } catch (err: unknown) {
                 console.error(err);
-                setError('Failed to load items. Please try again later.');
+                // Provide more specific error messages
+                if (err && typeof err === 'object' && 'response' in err) {
+                    const axiosError = err as { response?: { status?: number } };
+                    if (axiosError.response?.status === 500) {
+                        setError('Server error. The backend service may be waking up - please wait a moment and try again.');
+                    } else if (axiosError.response?.status === 503) {
+                        setError('Service unavailable. The server is temporarily unavailable.');
+                    } else {
+                        setError('Failed to load items. Please try again later.');
+                    }
+                } else if (err && typeof err === 'object' && 'code' in err && (err as { code?: string }).code === 'ECONNABORTED') {
+                    setError('Request timeout. The server may be starting up - please try again.');
+                } else {
+                    setError('Failed to load items. Please check your connection.');
+                }
             } finally {
                 setLoading(false);
             }

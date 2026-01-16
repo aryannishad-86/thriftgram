@@ -86,27 +86,39 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'seller', 'title', 'description', 'price', 'size', 'condition',
             'images', 'uploaded_images', 'likes_count', 'is_liked',
-            'average_rating', 'reviews_count', 'created_at', 'ai_analysis'
+            'average_rating', 'reviews_count', 'created_at', 'ai_analysis', 'is_sold'
         ]
         read_only_fields = ['seller', 'created_at', 'ai_analysis']
 
     def get_likes_count(self, obj):
-        return obj.likes.count()
+        try:
+            return obj.likes.count()
+        except Exception:
+            return 0
 
     def get_is_liked(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.likes.filter(user=request.user).exists()
-        return False
+        try:
+            request = self.context.get('request')
+            if request and request.user.is_authenticated:
+                return obj.likes.filter(user=request.user).exists()
+            return False
+        except Exception:
+            return False
     
     def get_average_rating(self, obj):
-        reviews = obj.reviews.all()
-        if reviews:
-            return sum(r.rating for r in reviews) / len(reviews)
-        return None
+        try:
+            reviews = obj.reviews.all()
+            if reviews:
+                return sum(r.rating for r in reviews) / len(reviews)
+            return None
+        except Exception:
+            return None
     
     def get_reviews_count(self, obj):
-        return obj.reviews.count()
+        try:
+            return obj.reviews.count()
+        except Exception:
+            return 0
 
     def create(self, validated_data):
         uploaded_images = validated_data.pop('uploaded_images', [])
