@@ -18,7 +18,7 @@ interface DashboardStats {
 export default function DashboardPage() {
     const router = useRouter();
     const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
 
@@ -49,7 +49,9 @@ export default function DashboardPage() {
                     const itemsRes = await api.get('/api/items/', {
                         params: { seller_username: statsRes.data.username }
                     });
-                    setItems(itemsRes.data);
+                    // Handle paginated response - extract results array
+                    const itemsData = itemsRes.data.results ?? itemsRes.data;
+                    setItems(Array.isArray(itemsData) ? itemsData : []);
                 }
 
             } catch (error) {

@@ -24,6 +24,9 @@ interface ListingsTableProps {
 export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
+    // Ensure items is always an array to prevent .map errors
+    const safeItems = Array.isArray(items) ? items : [];
+
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this item?')) return;
 
@@ -54,7 +57,7 @@ export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
                     </thead>
                     <tbody className="divide-y divide-border">
                         <AnimatePresence>
-                            {items.length === 0 ? (
+                            {safeItems.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="p-12 text-center">
                                         <div className="flex flex-col items-center justify-center">
@@ -67,7 +70,7 @@ export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
                                     </td>
                                 </tr>
                             ) : (
-                                items.map((item, index) => (
+                                safeItems.map((item, index) => (
                                     <motion.tr
                                         key={item.id}
                                         initial={{ opacity: 0, y: 20 }}
