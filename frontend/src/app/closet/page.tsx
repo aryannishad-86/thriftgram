@@ -29,7 +29,8 @@ export default function ClosetPage() {
     const fetchCloset = async () => {
         try {
             const res = await api.get('/api/closet/');
-            setItems(res.data);
+            const itemsData = res.data.results ?? res.data;
+            setItems(Array.isArray(itemsData) ? itemsData : []);
         } catch (error) {
             console.error('Failed to fetch closet', error);
         } finally {
