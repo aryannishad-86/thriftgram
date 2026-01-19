@@ -17,9 +17,11 @@ from .eco_service import EcoService
 User = get_user_model()
 
 from rest_framework.views import APIView
+from .security import LoginRateThrottle, RegisterRateThrottle
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [RegisterRateThrottle]
 
     def post(self, request):
         username = request.data.get('username')
@@ -236,6 +238,7 @@ import requests
 
 class GoogleLogin(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [LoginRateThrottle]
 
     def post(self, request):
         access_token = request.data.get('access_token')
