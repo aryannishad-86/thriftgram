@@ -25,8 +25,10 @@ export default function NotificationBell() {
         const fetchNotifications = async () => {
             try {
                 const response = await api.get('/api/notifications/');
-                setNotifications(response.data);
-                const unread = response.data.filter((n: any) => !n.is_read).length;
+                // Handle paginated response - extract the results array
+                const notificationsData = response.data.results || response.data || [];
+                setNotifications(Array.isArray(notificationsData) ? notificationsData : []);
+                const unread = (Array.isArray(notificationsData) ? notificationsData : []).filter((n: any) => !n.is_read).length;
                 setUnreadCount(unread);
             } catch (error) {
                 // Silently ignore if user is not authenticated
