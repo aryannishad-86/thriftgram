@@ -6,13 +6,13 @@ A marketplace for thrifted fashion — think Instagram meets Depop. Built as a f
 
 ThriftGram lets users buy and sell secondhand clothing with features you'd expect from a modern marketplace:
 
-- **Listings** — Post items with photos, prices, condition ratings
-- **Messaging** — Real-time chat between buyers and sellers (WebSockets via Django Channels)
-- **Payments** — Stripe integration for checkout
-- **Drops** — Time-limited product releases with countdowns
-- **Closet sync** — Upload your wardrobe and match items with listings
-- **Social stuff** — Follow users, like items, build wishlists
-- **Eco tracking** — Gamified sustainability points with tiered badges
+- **Listings** - Post items with photos, prices, condition ratings
+- **Messaging** - Real-time chat between buyers and sellers (WebSockets via Django Channels)
+- **Payments** - Stripe integration for checkout
+- **Drops** - Time-limited product releases with countdowns
+- **Closet sync** - Upload your wardrobe and match items with listings
+- **Social stuff** - Follow users, like items, build wishlists
+- **Eco tracking** - Gamified sustainability points with tiered badges
 
 The frontend has some nice scroll animations and a clean UI. Nothing groundbreaking, but it feels polished.
 
