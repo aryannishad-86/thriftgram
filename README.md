@@ -1,6 +1,6 @@
 # ThriftGram
 
-A marketplace for thrifted fashion — think Instagram meets Depop. Built as a fullstack project to explore real-time features, payment processing, and social commerce patterns.
+A marketplace for thrifted fashion - think Instagram meets Depop. Built as a fullstack project to explore real-time features, payment processing, and social commerce patterns.
 
 ## What it does
 
@@ -14,7 +14,6 @@ ThriftGram lets users buy and sell secondhand clothing with features you'd expec
 - **Social stuff** - Follow users, like items, build wishlists
 - **Eco tracking** - Gamified sustainability points with tiered badges
 
-The frontend has some nice scroll animations and a clean UI. Nothing groundbreaking, but it feels polished.
 
 ## Stack
 
@@ -132,7 +131,7 @@ WS     /ws/chat/{room}/        # Real-time messaging
 
 - Mobile responsiveness could use work in some spots
 - No email verification yet (on the roadmap)
-- Search is basic — would benefit from Elasticsearch for production
+- Search is basic - would benefit from Elasticsearch for production
 
 ---
 
