@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Feed from "@/components/Feed";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
+import WaveGallery from "@/components/WaveGallery";
 
 function HomeContent() {
   const router = useRouter();
@@ -68,6 +69,9 @@ function HomeContent() {
           </div>
         </div>
       </div>
+
+      {/* WaveGallery Section */}
+      <WaveGallery />
 
       {/* Feed Section */}
       <div id="feed" className="container mx-auto px-4 py-16">

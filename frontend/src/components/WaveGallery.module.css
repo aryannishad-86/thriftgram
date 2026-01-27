@@ -1,0 +1,158 @@
+/* WaveGallery CSS Module - Pure CSS 3D Wave Animation */
+
+/* Scale factor for responsive sizing */
+:root {
+    --index: calc(1vw + 1vh);
+}
+
+/* Main wrapper with white background */
+.wrapper {
+    background: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: calc(var(--index) * 2) 0;
+}
+
+/* Gallery container with 3D perspective */
+.gallery {
+    display: flex;
+    gap: calc(var(--index) * 0.4);
+    perspective: calc(var(--index) * 35);
+    perspective-origin: center center;
+}
+
+/* Individual gallery items */
+.item {
+    width: calc(var(--index) * 10);
+    height: calc(var(--index) * 14);
+    position: relative;
+    border-radius: calc(var(--index) * 0.6);
+    overflow: hidden;
+    cursor: pointer;
+
+    /* Idle state: monochrome and dimmed */
+    filter: grayscale(1) brightness(0.5);
+
+    /* Performance optimization */
+    will-change: transform, filter;
+
+    /* Smooth, snappy animation */
+    transition: transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        filter 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* 3D transform preserve */
+    transform-style: preserve-3d;
+    transform: translateZ(0);
+}
+
+/* Item image styling */
+.item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    transition: transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ===== HOVER EFFECTS ===== */
+
+/* Active item: full color + forward translation */
+.item:hover {
+    filter: grayscale(0) brightness(1);
+    transform: translateZ(calc(var(--index) * 6));
+}
+
+.item:hover img {
+    transform: scale(1.05);
+}
+
+/* ===== RIGHT NEIGHBORS (using + sibling selector) ===== */
+
+/* 1st right neighbor */
+.item:hover+.item {
+    filter: grayscale(0.2) brightness(0.85);
+    transform: translateZ(calc(var(--index) * 4.5)) rotateY(-8deg);
+}
+
+/* 2nd right neighbor */
+.item:hover+.item+.item {
+    filter: grayscale(0.5) brightness(0.7);
+    transform: translateZ(calc(var(--index) * 3)) rotateY(-12deg);
+}
+
+/* 3rd right neighbor */
+.item:hover+.item+.item+.item {
+    filter: grayscale(0.8) brightness(0.55);
+    transform: translateZ(calc(var(--index) * 1.5)) rotateY(-15deg);
+}
+
+/* 4th right neighbor */
+.item:hover+.item+.item+.item+.item {
+    filter: grayscale(1) brightness(0.5);
+    transform: translateZ(calc(var(--index) * 0.5)) rotateY(-18deg);
+}
+
+/* ===== LEFT NEIGHBORS (using :has() selector) ===== */
+
+/* 1st left neighbor */
+.item:has(+ .item:hover) {
+    filter: grayscale(0.2) brightness(0.85);
+    transform: translateZ(calc(var(--index) * 4.5)) rotateY(8deg);
+}
+
+/* 2nd left neighbor */
+.item:has(+ .item + .item:hover) {
+    filter: grayscale(0.5) brightness(0.7);
+    transform: translateZ(calc(var(--index) * 3)) rotateY(12deg);
+}
+
+/* 3rd left neighbor */
+.item:has(+ .item + .item + .item:hover) {
+    filter: grayscale(0.8) brightness(0.55);
+    transform: translateZ(calc(var(--index) * 1.5)) rotateY(15deg);
+}
+
+/* 4th left neighbor */
+.item:has(+ .item + .item + .item + .item:hover) {
+    filter: grayscale(1) brightness(0.5);
+    transform: translateZ(calc(var(--index) * 0.5)) rotateY(18deg);
+}
+
+/* ===== SECTION TITLE ===== */
+.sectionTitle {
+    text-align: center;
+    margin-bottom: calc(var(--index) * 2);
+    color: #1a1a1a;
+    font-size: calc(var(--index) * 2.5);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+@media (max-width: 768px) {
+    .gallery {
+        gap: calc(var(--index) * 0.3);
+    }
+
+    .item {
+        width: calc(var(--index) * 8);
+        height: calc(var(--index) * 12);
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: calc(var(--index) * 0.5);
+    }
+
+    .item {
+        width: calc(var(--index) * 12);
+        height: calc(var(--index) * 16);
+    }
+}
