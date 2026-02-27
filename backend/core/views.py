@@ -4,7 +4,7 @@ from django.db.models import Q
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth import get_user_model
 from .models import Item, Like, ClosetItem, DropEvent, Follow, Order, Review, Wishlist
 from .serializers import (
@@ -76,6 +76,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
