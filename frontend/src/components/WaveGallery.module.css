@@ -7,7 +7,7 @@
 
 /* Main wrapper with white background */
 .wrapper {
-    background: #ffffff;
+    background: var(--background, #fdf6e3);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -34,6 +34,8 @@
     cursor: pointer;
     display: block;
     text-decoration: none;
+    border: 1px solid var(--border, #d3cbb8);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(101, 123, 131, 0.05));
     color: inherit;
 
     /* Idle state: monochrome and dimmed */
@@ -128,7 +130,7 @@
 .sectionTitle {
     text-align: center;
     margin-bottom: calc(var(--index) * 2);
-    color: #1a1a1a;
+    color: var(--base03, #002b36);
     font-size: calc(var(--index) * 2.5);
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -198,9 +200,10 @@
 
 /* ===== SKELETON LOADING ===== */
 .skeleton {
-    background: linear-gradient(110deg, #e0e0e0 8%, #f0f0f0 18%, #e0e0e0 33%);
+    background: linear-gradient(110deg, var(--base2, #eee8d5) 8%, var(--base3, #fdf6e3) 18%, var(--base2, #eee8d5) 33%);
     background-size: 200% 100%;
     animation: shimmer 1.5s linear infinite;
+    border: 1px solid var(--border, #d3cbb8);
 }
 
 @keyframes shimmer {
