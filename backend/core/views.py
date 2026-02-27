@@ -89,7 +89,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 serializer = UserProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                return Response(serializer.data)
+                # Use the GET serializer for response to avoid recursion issues
+                request.user.refresh_from_db()
+                response_serializer = UserSerializer(request.user, context={'request': request})
+                return Response(response_serializer.data)
             except Exception as e:
                 import traceback
                 traceback.print_exc()
