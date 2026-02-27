@@ -95,9 +95,10 @@ export default function ProfileEditPage() {
                 router.push(`/profile/${username}`);
             }, 1500);
         } catch (err: any) {
+            console.error('Profile update error:', err.response?.status, err.response?.data, err);
             const data = err.response?.data;
             const detail = data?.detail
-                || (typeof data === 'object' ? Object.values(data).flat().join(', ') : null)
+                || (typeof data === 'object' && data !== null ? Object.values(data).flat().join(', ') : null)
                 || 'Failed to update profile';
             setError(detail);
         } finally {
