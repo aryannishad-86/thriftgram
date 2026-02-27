@@ -89,10 +89,25 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 serializer = UserProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                # Use the GET serializer for response to avoid recursion issues
-                request.user.refresh_from_db()
-                response_serializer = UserSerializer(request.user, context={'request': request})
-                return Response(response_serializer.data)
+                # Build response manually to avoid Cloudinary ImageField recursion
+                user = request.user
+                user.refresh_from_db()
+                profile_pic = None
+                if user.profile_picture:
+                    try:
+                        profile_pic = user.profile_picture.url
+                    except Exception:
+                        profile_pic = str(user.profile_picture)
+                return Response({
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'bio': user.bio,
+                    'profile_picture': profile_pic,
+                    'social_links': user.social_links,
+                    'eco_points': user.eco_points,
+                    'eco_tier': user.eco_tier,
+                })
             except Exception as e:
                 import traceback
                 traceback.print_exc()
