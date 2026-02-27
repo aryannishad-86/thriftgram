@@ -55,10 +55,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['username', 'email', 'date_joined', 'eco_points', 'eco_tier', 'co2_saved', 'water_saved', 'items_sold_count', 'items_bought_count']
     
     def get_followers_count(self, obj):
-        return obj.followers.count()
+        try:
+            return obj.followers.count()
+        except Exception:
+            return 0
     
     def get_following_count(self, obj):
-        return obj.following.count()
+        try:
+            return obj.following.count()
+        except Exception:
+            return 0
 
 class ItemImageSerializer(serializers.ModelSerializer):
     class Meta:

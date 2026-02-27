@@ -85,10 +85,15 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             serializer = self.get_serializer(request.user, context={'request': request})
             return Response(serializer.data)
         elif request.method == 'PATCH':
-            serializer = UserProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+            try:
+                serializer = UserProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def follow(self, request, username=None):
