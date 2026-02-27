@@ -219,6 +219,15 @@ class ItemViewSet(viewsets.ModelViewSet):
         serializer = ClosetItemSerializer(matches, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def featured(self, request):
+        """Return featured items for the homepage gallery"""
+        items = Item.objects.filter(is_sold=False).select_related('seller').prefetch_related(
+            'images', 'likes', 'reviews'
+        ).order_by('-created_at')[:12]
+        serializer = self.get_serializer(items, many=True, context={'request': request})
+        return Response(serializer.data)
+
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
         item = self.get_object()
