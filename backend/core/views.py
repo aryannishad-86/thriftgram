@@ -173,21 +173,20 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
     def debug_config(self, request):
-        from django.conf import settings
+        from django.conf import settings as django_settings
+        if not django_settings.DEBUG:
+            return Response({'error': 'Only available in DEBUG mode'}, status=status.HTTP_403_FORBIDDEN)
         import os
-        
         cloudinary_url = os.getenv('CLOUDINARY_URL', '')
         masked_url = cloudinary_url[:15] + '...' if cloudinary_url else 'Not Set'
-        
-        storage_conf = getattr(settings, 'CLOUDINARY_STORAGE', None)
+        storage_conf = getattr(django_settings, 'CLOUDINARY_STORAGE', None)
         masked_conf = {k: '***' for k in storage_conf.keys()} if storage_conf else 'Not Set'
-        
         return Response({
-            'DEFAULT_FILE_STORAGE': getattr(settings, 'DEFAULT_FILE_STORAGE', 'Not Set'),
+            'DEFAULT_FILE_STORAGE': getattr(django_settings, 'DEFAULT_FILE_STORAGE', 'Not Set'),
             'CLOUDINARY_URL': masked_url,
             'CLOUDINARY_STORAGE': masked_conf,
-            'MEDIA_ROOT': str(settings.MEDIA_ROOT),
-            'MEDIA_URL': settings.MEDIA_URL,
+            'MEDIA_ROOT': str(django_settings.MEDIA_ROOT),
+            'MEDIA_URL': django_settings.MEDIA_URL,
         })
 
 class ItemViewSet(viewsets.ModelViewSet):
@@ -209,9 +208,8 @@ class ItemViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        item = serializer.save(seller=self.request.user)
-        # Award points for listing an item (encouraging circular economy)
-        EcoService.award_points(self.request.user, action_type='list')
+        serializer.save(seller=self.request.user)
+        # Eco points awarded by post_save signal in core/signals.py
 
     @action(detail=True, methods=['post'])
     def analyze(self, request, pk=None):
@@ -296,24 +294,22 @@ class GoogleLogin(APIView):
             if not email:
                 return Response({'error': 'Email not provided by Google'}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Get or create user
+            # Generate unique username before creating user
+            base_username = email.split('@')[0]
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
             user, created = User.objects.get_or_create(
                 email=email,
                 defaults={
-                    'username': email.split('@')[0],  # Use email prefix as username
+                    'username': username,
                     'first_name': name.split()[0] if name else '',
                     'last_name': ' '.join(name.split()[1:]) if len(name.split()) > 1 else '',
                 }
             )
-            
-            # If username already exists, append a number
-            if created and User.objects.filter(username=user.username).exclude(id=user.id).exists():
-                base_username = user.username
-                counter = 1
-                while User.objects.filter(username=f"{base_username}{counter}").exists():
-                    counter += 1
-                user.username = f"{base_username}{counter}"
-                user.save()
             
             # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
@@ -330,7 +326,10 @@ class GoogleLogin(APIView):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 # Phase 1 ViewSets
@@ -476,13 +475,13 @@ def create_checkout_session(request):
         session = StripeService.create_checkout_session(
             item, success_url, cancel_url
         )
-        
-        # Create pending order - use session.id if payment_intent is not yet available
+
+        # Always store session.id as the lookup key — payment_intent may be None at creation time
         Order.objects.create(
             buyer=request.user,
             item=item,
             status='PENDING',
-            stripe_payment_intent=session.payment_intent or session.id,
+            stripe_payment_intent=session.id,
             total_amount=item.price
         )
         
@@ -532,46 +531,24 @@ def handle_checkout_completion(session):
         item_id = session['metadata'].get('item_id')
         if not item_id:
             return
-        
-        # Get payment intent ID
-        payment_intent_id = session.get('payment_intent') or session.get('id')
-        
-        # Find and update order
+
+        # Always look up by session.id — that's what we stored at order creation
+        session_id = session.get('id')
+
         try:
-            order = Order.objects.get(stripe_payment_intent=payment_intent_id)
-            order.status = 'PAID'
-            order.save()
-            
-            # Mark item as sold
-            item = Item.objects.get(id=item_id)
-            item.is_sold = True
-            item.save()
-            
-            # Award eco points to buyer (+20)
-            buyer = order.buyer
-            buyer.eco_points += 20
-            buyer.items_bought_count += 1
-            buyer.save()
-            
-            # Update buyer's tier
-            buyer.update_tier()
-            
-            # Create eco points history
-            from .models import EcoPointsHistory
-            EcoPointsHistory.objects.create(
-                user=buyer,
-                action='ITEM_PURCHASED',
-                points=20,
-                description=f'Purchased "{item.title}"'
-            )
-            
-            # TODO: Create notification for seller
-            # TODO: Send confirmation email to buyer
-            
+            order = Order.objects.get(stripe_payment_intent=session_id)
         except Order.DoesNotExist:
-            # Order not found, log error
-            pass
-            
+            print(f"Stripe webhook: order not found for session {session_id}")
+            return
+
+        if order.status == 'PAID':
+            return  # Already processed, skip
+
+        order.status = 'PAID'
+        order.save()  # post_save signal (award_points_for_purchase) handles eco points
+
+        # Mark item as sold
+        Item.objects.filter(id=item_id).update(is_sold=True)
+
     except Exception as e:
-        # Log error
         print(f"Error handling checkout completion: {str(e)}")

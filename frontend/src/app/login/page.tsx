@@ -79,16 +79,12 @@ export default function LoginPage() {
                 const res = await api.post('/api/auth/google/', {
                     access_token: tokenResponse.access_token,
                 });
-                console.log('Google Login Response:', res.data); // DEBUG LOG
-                // ALERT FOR DEBUGGING
-                alert(JSON.stringify(res.data, null, 2));
 
                 localStorage.setItem('access_token', res.data.access);
                 localStorage.setItem('refresh_token', res.data.refresh);
                 if (res.data.user) {
                     localStorage.setItem('username', res.data.user.username);
                 }
-                console.log('Token saved to localStorage:', localStorage.getItem('access_token')); // DEBUG LOG
                 window.location.href = '/';
             } catch (err) {
                 console.error('Google login failed', err);
@@ -221,9 +217,7 @@ export default function LoginPage() {
                                 </div>
 
                                 <div className="flex items-center justify-end">
-                                    <Link href="#" className="text-sm text-base-03 hover:text-accent transition-colors">
-                                        Forgot password?
-                                    </Link>
+                                    {/* Forgot password not yet implemented */}
                                 </div>
 
                                 {error && (

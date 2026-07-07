@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from .models import Item, Order, EcoPointsHistory, CustomUser
 
@@ -29,28 +29,46 @@ def award_points_for_listing(sender, instance, created, **kwargs):
         user.update_tier()
 
 
+@receiver(pre_save, sender=Order)
+def capture_old_order_status(sender, instance, **kwargs):
+    """Capture the previous status before saving so post_save can detect transitions"""
+    if instance.pk:
+        try:
+            instance._old_status = Order.objects.get(pk=instance.pk).status
+        except Order.DoesNotExist:
+            instance._old_status = None
+    else:
+        instance._old_status = None
+
+
 @receiver(post_save, sender=Order)
 def award_points_for_purchase(sender, instance, created, **kwargs):
-    """Award eco points when a user purchases an item"""
-    if created and instance.status == 'PAID':
-        user = instance.buyer
-        points = 20
-        
-        # Update user stats
-        user.eco_points += points
-        user.items_bought_count += 1
-        user.save()
-        
-        # Create history record
-        EcoPointsHistory.objects.create(
-            user=user,
-            action='ITEM_PURCHASED',
-            points=points,
-            description=f'Purchased "{instance.item.title}"'
-        )
-        
-        # Update tier
-        user.update_tier()
+    """Award eco points when an order transitions to PAID status"""
+    old_status = getattr(instance, '_old_status', None)
+    transitioned_to_paid = instance.status == 'PAID' and old_status != 'PAID'
+    
+    if not transitioned_to_paid:
+        return
+
+    user = instance.buyer
+    points = 20
+    
+    # Update user stats
+    user.eco_points += points
+    user.items_bought_count += 1
+    user.save()
+    
+    # Create history record
+    EcoPointsHistory.objects.create(
+        user=user,
+        action='ITEM_PURCHASED',
+        points=points,
+        description=f'Purchased "{instance.item.title}"'
+    )
+    
+    # Update tier
+    user.update_tier()
+
 
 
 @receiver(post_save, sender=CustomUser)

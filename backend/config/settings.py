@@ -152,6 +152,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "https://*.onrender.com",  # Render deployment
+    "https://*.run.app",       # GCP Cloud Run deployment
 ] + CORS_ALLOWED_ORIGINS
 
 # DRF Configuration
@@ -212,8 +213,9 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'core.CustomUser'
 
-# Email Configuration (Prevent SMTP timeouts)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Use console backend locally, SMTP in production
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Password validation

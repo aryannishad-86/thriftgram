@@ -17,10 +17,5 @@ django-cloudinary-storage
 whitenoise
 daphne
 djangorestframework-simplejwt
-django-cors-headers
 channels
-google-generativeai
-django-allauth
-dj-rest-auth
 requests
-

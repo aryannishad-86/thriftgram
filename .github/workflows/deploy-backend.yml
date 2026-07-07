@@ -1,0 +1,58 @@
+name: Deploy Backend to GCP Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: gen-lang-client-0181120216
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy thriftgram-backend \
+            --source ./backend \
+            --region asia-south1 \
+            --allow-unauthenticated \
+            --min-instances 0 \
+            --max-instances 3 \
+            --port 8080 \
+            --set-env-vars "\
+          DEBUG=False,\
+          ALLOWED_HOSTS=*,\
+          SECRET_KEY=${{ secrets.SECRET_KEY }},\
+          DATABASE_URL=${{ secrets.DATABASE_URL }},\
+          CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }},\
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},\
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }},\
+          CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }},\
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }},\
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }},\
+          STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }},\
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+            --quiet
+
+      - name: Verify deployment
+        run: |
+          curl -sf https://thriftgram-backend-591997315244.asia-south1.run.app/api/health/ \
+            | grep '"status":"ok"' \
+            && echo "Health check passed ✅" \
+            || (echo "Health check failed ❌" && exit 1)

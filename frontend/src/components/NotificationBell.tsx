@@ -91,8 +91,9 @@ export default function NotificationBell() {
 
     const handleBellClick = () => {
         setIsOpen(!isOpen);
-        if (!isOpen) {
-            setUnreadCount(0); // Mark as read locally for now
+        if (!isOpen && unreadCount > 0) {
+            setUnreadCount(0);
+            api.post('/api/notifications/mark_all_read/').catch(() => {});
         }
     };
 

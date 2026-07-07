@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Feed from "@/components/Feed";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 import WaveGallery from "@/components/WaveGallery";
 
 function HomeContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<FilterState>({
     minPrice: null,
@@ -17,12 +16,6 @@ function HomeContent() {
     ordering: '-created_at',
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      router.push('/login');
-    }
-  }, [router]);
 
   // Build filter object for Feed component
   const feedFilters = {

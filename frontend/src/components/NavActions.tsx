@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Leaf, ShoppingBag, User as UserIcon, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,6 +8,7 @@ import NotificationBell from './NotificationBell';
 import UserDropdown from './UserDropdown';
 import { useCart } from '@/context/CartContext';
 import GradientIconButton from './GradientIconButton';
+import api from '@/lib/api';
 
 interface NavActionsProps {
     username: string | null;
@@ -12,6 +16,14 @@ interface NavActionsProps {
 
 export default function NavActions({ username }: NavActionsProps) {
     const { openCart, items } = useCart();
+    const [ecoPoints, setEcoPoints] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (!username) return;
+        api.get('/api/users/me/').then((res) => {
+            setEcoPoints(res.data.eco_points ?? null);
+        }).catch(() => {});
+    }, [username]);
 
     return (
         <div className="flex items-center gap-4">
@@ -21,11 +33,13 @@ export default function NavActions({ username }: NavActionsProps) {
                 </Link>
             </Button>
 
-            {/* Eco Points Badge */}
-            <Link href="/leaderboard" className="hidden md:flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-full text-sm font-bold hover:bg-white/90 transition-all hover:scale-105">
-                <Leaf className="w-3.5 h-3.5" />
-                <span>[★ 350]</span>
-            </Link>
+            {/* Eco Points Badge — real data */}
+            {username && ecoPoints !== null && (
+                <Link href="/leaderboard" className="hidden md:flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-full text-sm font-bold hover:bg-white/90 transition-all hover:scale-105">
+                    <Leaf className="w-3.5 h-3.5" />
+                    <span>★ {ecoPoints}</span>
+                </Link>
+            )}
 
             <NotificationBell />
 
@@ -51,4 +65,3 @@ export default function NavActions({ username }: NavActionsProps) {
         </div>
     );
 }
-

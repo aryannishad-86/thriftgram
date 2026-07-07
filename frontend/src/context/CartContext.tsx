@@ -47,7 +47,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const closeCart = () => setIsCartOpen(false);
 
     const addToCart = (item: CartItem) => {
-        setItems((prev) => [...prev, item]);
+        setItems((prev) => {
+            if (prev.some((i) => i.id === item.id)) return prev; // deduplicate
+            return [...prev, item];
+        });
         openCart();
     };
 
