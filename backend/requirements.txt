@@ -19,3 +19,4 @@ daphne
 djangorestframework-simplejwt
 channels
 requests
+
