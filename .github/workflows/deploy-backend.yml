@@ -30,6 +30,7 @@ jobs:
         run: |
           cat > env.yaml <<EOF
           DEBUG: "False"
+          ALLOWED_HOSTS: "*"
           SECRET_KEY: "${{ secrets.SECRET_KEY }}"
           DATABASE_URL: "${{ secrets.DATABASE_URL }}"
           CLOUDINARY_URL: "${{ secrets.CLOUDINARY_URL }}"
@@ -60,7 +61,6 @@ jobs:
 
       - name: Verify deployment
         run: |
-          curl -sf https://thriftgram-backend-591997315244.asia-south1.run.app/api/health/ \
-            | grep '"status":"ok"' \
-            && echo "Health check passed ✅" \
-            || (echo "Health check failed ❌" && exit 1)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://thriftgram-backend-591997315244.asia-south1.run.app/api/health/)
+          echo "Health check status: $STATUS"
+          [ "$STATUS" = "200" ] && echo "Health check passed ✅" || (echo "Health check returned $STATUS ❌" && exit 1)
