@@ -13,7 +13,6 @@ from .serializers import (
     DropEventSerializer, FollowSerializer, OrderSerializer, ReviewSerializer, WishlistSerializer
 )
 from .ai_service import AIService
-from .eco_service import EcoService
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -78,6 +77,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
@@ -502,9 +502,11 @@ def create_checkout_session(request):
 
 
 @api_view(['POST'])
+@permission_classes([permissions.AllowAny])
 @csrf_exempt
 def stripe_webhook(request):
-    """Handle Stripe webhooks"""
+    """Handle Stripe webhooks. Called by Stripe unauthenticated — signature is
+    the auth. Must stay AllowAny now that the global default requires auth for writes."""
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     

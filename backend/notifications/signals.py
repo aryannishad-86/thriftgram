@@ -71,13 +71,14 @@ def create_message_notification(sender, instance, created, **kwargs):
             send_new_message_notification(instance)
 
 @receiver(post_save, sender=Order)
-def order_created(sender, instance, created, **kwargs):
-    """Send emails when order is created"""
-    if created:
-        # Send confirmation to buyer
-        send_order_confirmation(instance)
-        # Send notification to seller
-        send_new_order_notification(instance)
+def order_paid(sender, instance, created, **kwargs):
+    """Send order emails only once the order is actually PAID — never on the
+    PENDING order created at checkout. Relies on _old_status set by the pre_save
+    hook in core.signals.capture_old_order_status."""
+    old_status = getattr(instance, '_old_status', None)
+    if instance.status == 'PAID' and old_status != 'PAID':
+        send_order_confirmation(instance)     # to buyer
+        send_new_order_notification(instance)  # to seller
 
 @receiver(post_save, sender=Follow)
 def follow_created(sender, instance, created, **kwargs):

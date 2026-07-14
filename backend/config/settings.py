@@ -161,6 +161,12 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
+    # Safe default: anonymous can read, only authenticated can write. Endpoints
+    # that must stay fully open (registration, token, Stripe webhook) set
+    # AllowAny explicitly.
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
@@ -298,6 +304,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+
+# Gemini Vision (AI item analysis). If unset, analyze_image returns clearly
+# labeled mock data instead of real analysis — see core/ai_service.py.
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 
 # Frontend URL for redirects
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')

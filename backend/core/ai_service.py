@@ -1,9 +1,13 @@
 import os
+import logging
 import google.generativeai as genai
 import requests
 from PIL import Image
 from io import BytesIO
 import json
+
+logger = logging.getLogger(__name__)
+
 
 class AIService:
     @staticmethod
@@ -11,10 +15,12 @@ class AIService:
         """
         Analyzes an item image using Google Gemini Vision.
         Returns a dictionary with condition, brand, and other details.
+        The result carries a 'mock' flag so callers never present fabricated
+        sample data as if it were a real analysis.
         """
         api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
-            print("GEMINI_API_KEY not found. Using mock data.")
+            logger.warning('GEMINI_API_KEY not set — returning mock analysis for %s', image_url)
             return AIService._get_mock_data(image_url)
 
         try:
@@ -61,11 +67,12 @@ class AIService:
                 }
                 condition_str = result['condition_rating'].lower()
                 result['condition_rating'] = rating_map.get(condition_str, 7)
-            
+
+            result['mock'] = False
             return result
 
-        except Exception as e:
-            print(f"AI Analysis failed: {e}")
+        except Exception:
+            logger.exception('AI analysis failed for %s — returning mock', image_url)
             return AIService._get_mock_data(image_url)
 
     @staticmethod
@@ -90,5 +97,6 @@ class AIService:
             'detected_brand': random.choice(brands),
             'fabric_type': random.choice(fabrics),
             'detected_defects': random.choice(defects_options),
-            'is_verified': random.choice([True, True, True, False])  # Mostly true
+            'is_verified': random.choice([True, True, True, False]),  # Mostly true
+            'mock': True,  # sample data — AI unavailable; callers must label it
         }

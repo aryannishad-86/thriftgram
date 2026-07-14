@@ -33,6 +33,7 @@ interface Item {
         fabric_type: string;
         condition_rating: number;
         detected_defects: string[];
+        mock?: boolean;
     };
 }
 
@@ -186,6 +187,11 @@ export default function ItemDetailPage() {
 
                             {item.ai_analysis ? (
                                 <div className="space-y-4">
+                                    {item.ai_analysis.mock && (
+                                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                                            Sample analysis — AI is currently unavailable, so these values are illustrative only.
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-base-2 p-4 rounded-2xl border border-border">
                                             <div className="text-xs text-base-01 mb-1">Detected Brand</div>

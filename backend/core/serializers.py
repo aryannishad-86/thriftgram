@@ -4,11 +4,21 @@ from .models import Item, ItemImage, ClosetItem, Like, DropEvent, Follow, Order,
 
 User = get_user_model()
 
+def _owner_only_email(serializer, obj):
+    """Return the email only to the authenticated owner of this profile — never
+    leak other users' emails through public list/retrieve/leaderboard reads."""
+    request = serializer.context.get('request')
+    if request and request.user.is_authenticated and request.user.id == obj.id:
+        return obj.email
+    return None
+
+
 class UserSerializer(serializers.ModelSerializer):
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
     is_following = serializers.SerializerMethodField()
-    
+    email = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -18,7 +28,10 @@ class UserSerializer(serializers.ModelSerializer):
             'followers_count', 'following_count', 'is_following'
         ]
         read_only_fields = ['eco_points', 'eco_tier', 'co2_saved', 'water_saved', 'items_sold_count', 'items_bought_count']
-    
+
+    def get_email(self, obj):
+        return _owner_only_email(self, obj)
+
     def get_followers_count(self, obj):
         try:
             return obj.followers.count()
@@ -43,7 +56,8 @@ class UserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
-    
+    email = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -52,8 +66,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'items_sold_count', 'items_bought_count',
             'followers_count', 'following_count'
         ]
-        read_only_fields = ['username', 'email', 'date_joined', 'eco_points', 'eco_tier', 'co2_saved', 'water_saved', 'items_sold_count', 'items_bought_count']
-    
+        read_only_fields = ['username', 'date_joined', 'eco_points', 'eco_tier', 'co2_saved', 'water_saved', 'items_sold_count', 'items_bought_count']
+
+    def get_email(self, obj):
+        return _owner_only_email(self, obj)
+
     def get_followers_count(self, obj):
         try:
             return obj.followers.count()
