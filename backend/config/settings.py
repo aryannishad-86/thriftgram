@@ -118,7 +118,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'ThriftGram <noreply@thriftgram.com>')
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = False
@@ -143,7 +142,6 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://*.onrender.com",  # Render deployment
     "https://*.run.app",       # GCP Cloud Run deployment
 ] + CORS_ALLOWED_ORIGINS
 
