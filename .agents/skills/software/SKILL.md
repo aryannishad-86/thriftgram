@@ -15,7 +15,9 @@ You are the Software Agent for ThriftGram. You write code.
 
 **No half-finished work.** If you can't complete something, say so clearly.
 
-**Always read the file before editing it.** Use `view_file` to see the current content and line numbers, then use `replace_file_content` or `multi_replace_file_content`.
+**Always read the file before editing it.** See the current content and line numbers first, then edit.
+
+**Every backend change ships with a test.** Tests live in `backend/core/tests/` and run under `pytest` + `pytest-django` (fixtures in `conftest.py`: `api_client`, `auth_client`, `user_factory`, `item_factory`). Every API endpoint you touch gets an end-to-end test through the DRF test client — the request/response cycle exercised for real, external services (Stripe, Cloudinary, Gemini, email) mocked. Signal behavior (eco points, order emails) gets a test that asserts *when* it fires, not just that it does. A task is not done until its tests pass.
 
 ## Stack
 
@@ -24,12 +26,12 @@ You are the Software Agent for ThriftGram. You write code.
 - **DB:** Supabase PostgreSQL via `dj-database-url` + `DATABASE_URL` env var
 - **Storage:** Cloudinary via `django-cloudinary-storage` + `CLOUDINARY_URL` env var
 - **Payments:** Stripe Checkout Sessions (not PaymentIntents) — currency is INR
-- **Email:** Django SMTP (currently console backend — fix is in progress)
-- **WebSockets:** Django Channels + Daphne with InMemoryChannelLayer
+- **Email:** Django SMTP; console backend only when `DEBUG=True`, real SMTP in prod
+- **Real-time:** polling, not WebSockets. Channels/Daphne were removed — the service runs WSGI (`gunicorn config.wsgi`) on scale-to-zero Cloud Run, where an in-memory channel layer can't work and Redis isn't free. Notifications and messages poll on an interval.
 - **Config:** All secrets via `os.getenv()`, loaded from `.env` by `python-dotenv`
 
 ### Frontend (Next.js 15, App Router, TypeScript)
-- **API client:** `src/lib/api.ts` — axios instance, baseURL = `NEXT_PUBLIC_API_URL + /api`
+- **API client:** `src/lib/api.ts` — the single axios instance. Its baseURL is normalized so a trailing `/api` on `NEXT_PUBLIC_API_URL` is stripped; **every call path carries its own `/api/` prefix.** Never add a second axios instance or a raw `fetch`.
 - **Auth:** JWT tokens stored in `localStorage` (`access_token`, `refresh_token`, `username`)
 - **Styling:** Tailwind CSS + custom design tokens (`base-03`, `base-02`, `base-01`, `primary`, `card`, `border`, etc.)
 - **Animation:** `framer-motion` throughout
@@ -72,7 +74,7 @@ frontend/src/
 ### Frontend
 - All API calls via `api` from `@/lib/api` — never raw fetch
 - Gate auth-required actions on `localStorage.getItem('access_token')` check
-- Use `useEffect` cleanup for WebSocket connections and event listeners
+- Use `useEffect` cleanup for polling intervals and event listeners; pause polling on `document.hidden`
 - Prefer `motion.div` for animated elements, not CSS keyframes
 - No inline styles — use Tailwind classes only
 
