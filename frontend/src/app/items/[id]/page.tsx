@@ -49,6 +49,13 @@ export default function ItemDetailPage() {
     const [matches, setMatches] = useState<any[]>([]);
     const [showMatches, setShowMatches] = useState(false);
     const [messagingLoading, setMessagingLoading] = useState(false);
+    const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+
+    useEffect(() => {
+        setCurrentUsername(localStorage.getItem('username'));
+    }, []);
+
+    const isOwner = !!item && item.seller?.username === currentUsername;
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -176,13 +183,15 @@ export default function ItemDetailPage() {
                                     <Sparkles className="w-5 h-5 text-base-03" />
                                     AI Quality Verification
                                 </h3>
-                                <Button
-                                    onClick={handleAnalyze}
-                                    disabled={analyzing || !!item.ai_analysis}
-                                    className="bg-base-03 hover:bg-base-03/90 text-white rounded-full"
-                                >
-                                    {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
-                                </Button>
+                                {isOwner && (
+                                    <Button
+                                        onClick={handleAnalyze}
+                                        disabled={analyzing || !!item.ai_analysis}
+                                        className="bg-base-03 hover:bg-base-03/90 text-white rounded-full"
+                                    >
+                                        {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
+                                    </Button>
+                                )}
                             </div>
 
                             {item.ai_analysis ? (
@@ -234,7 +243,9 @@ export default function ItemDetailPage() {
                                 </div>
                             ) : (
                                 <div className="text-center py-8 text-base-01 text-sm">
-                                    Click "Run AI Analysis" to verify authenticity and condition.
+                                    {isOwner
+                                        ? 'Click "Run AI Analysis" to verify authenticity and condition.'
+                                        : 'No AI analysis available for this item yet.'}
                                 </div>
                             )}
                         </div>

@@ -18,7 +18,7 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 from rest_framework.views import APIView
-from .security import LoginRateThrottle, RegisterRateThrottle
+from .security import LoginRateThrottle, RegisterRateThrottle, IsOwnerOrReadOnly
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -196,7 +196,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         'images', 'likes', 'reviews'
     ).order_by('-created_at')
     serializer_class = ItemSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'description']
 

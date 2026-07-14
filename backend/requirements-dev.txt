@@ -1,0 +1,4 @@
+# Test/dev-only dependencies. Not installed into the prod Cloud Run image.
+-r requirements.txt
+pytest==8.3.4
+pytest-django==4.9.0

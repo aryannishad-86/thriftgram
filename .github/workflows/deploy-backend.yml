@@ -8,8 +8,29 @@ on:
       - 'backend/**'
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: pip install -r requirements-dev.txt
+
+      - name: Run tests
+        working-directory: ./backend
+        run: python -m pytest
+
   deploy:
     name: Build & Deploy
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
