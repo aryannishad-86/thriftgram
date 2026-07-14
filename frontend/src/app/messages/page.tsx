@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import ConversationList from '@/components/ConversationList';
 import ChatWindow from '@/components/ChatWindow';
-import api from '@/lib/api';
+import api, { unwrap } from '@/lib/api';
 
 interface Conversation {
     id: number;
@@ -77,13 +77,16 @@ function MessagesContent() {
         }
     }, [searchParams, conversations]);
 
-    // Poll for new messages when a conversation is active
+    // Poll the open conversation and the conversation list every 5s. Skip while
+    // the tab is hidden so a backgrounded tab makes no requests.
     useEffect(() => {
         if (!activeConversation) return;
 
         const interval = setInterval(() => {
+            if (document.hidden) return;
             fetchMessages(activeConversation, false);
-        }, 5000); // Poll every 5 seconds
+            fetchConversations();
+        }, 5000);
 
         return () => clearInterval(interval);
     }, [activeConversation]);
@@ -91,9 +94,7 @@ function MessagesContent() {
     const fetchConversations = async () => {
         try {
             const response = await api.get('/api/conversations/');
-            // Handle paginated response
-            const data = response.data.results || response.data;
-            setConversations(Array.isArray(data) ? data : []);
+            setConversations(unwrap<Conversation>(response));
         } catch (error) {
             console.error('Failed to fetch conversations', error);
         } finally {
@@ -108,9 +109,7 @@ function MessagesContent() {
 
         try {
             const response = await api.get(`/api/conversations/${conversationId}/messages/`);
-            // Handle paginated response
-            const data = response.data.results || response.data;
-            setMessages(Array.isArray(data) ? data : []);
+            setMessages(unwrap<Message>(response));
         } catch (error) {
             console.error('Failed to fetch messages', error);
         } finally {

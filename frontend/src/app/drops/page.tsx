@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Calendar, Flame, ArrowRight } from 'lucide-react';
+import { Calendar, Flame, ArrowRight } from 'lucide-react';
 import api, { unwrap } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface CountdownTimerProps {
     targetDate: string;
@@ -15,6 +15,8 @@ interface TimeLeft {
 
 export default function CountdownTimer({ targetDate, onComplete }: CountdownTimerProps) {
     const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
+    const onCompleteRef = useRef(onComplete);
+    onCompleteRef.current = onComplete;
 
     function calculateTimeLeft(): TimeLeft {
         const difference = +new Date(targetDate) - +new Date();
@@ -35,7 +37,7 @@ export default function CountdownTimer({ targetDate, onComplete }: CountdownTime
     }
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        const timer = setInterval(() => {
             const newTimeLeft = calculateTimeLeft();
             setTimeLeft(newTimeLeft);
 
@@ -45,12 +47,14 @@ export default function CountdownTimer({ targetDate, onComplete }: CountdownTime
                 newTimeLeft.minutes === 0 &&
                 newTimeLeft.seconds === 0
             ) {
-                if (onComplete) onComplete();
+                onCompleteRef.current?.();
+                clearInterval(timer);
             }
         }, 1000);
 
-        return () => clearTimeout(timer);
-    });
+        return () => clearInterval(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [targetDate]);
 
     const timerComponents: React.ReactNode[] = [];
 

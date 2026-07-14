@@ -52,7 +52,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'cloudinary_storage',
     'cloudinary',
     'django.contrib.admin',
@@ -110,7 +109,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-ASGI_APPLICATION = 'config.asgi.application'
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -121,12 +119,6 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'ThriftGram <noreply@thriftgram.com>')
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
 
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = False
@@ -212,7 +204,7 @@ REST_USE_JWT = True
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgres://postgres:password@localhost:5432/thriftgram'),
+        default=os.getenv('DATABASE_URL', 'postgres://postgres@localhost:5432/thriftgram'),
         conn_max_age=600
     )
 }
@@ -293,7 +285,8 @@ if CLOUDINARY_URL:
             'API_SECRET': api_secret,
         }
     except Exception as e:
-        print(f"Error parsing CLOUDINARY_URL: {e}")
+        import logging
+        logging.getLogger(__name__).warning('Could not parse CLOUDINARY_URL: %s', e)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

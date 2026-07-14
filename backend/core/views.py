@@ -17,6 +17,19 @@ from .ai_service import AIService
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
+
+def health_check(request):
+    """Liveness + DB connectivity probe used by the deploy workflow."""
+    from django.http import JsonResponse
+    from django.db import connection
+    try:
+        connection.ensure_connection()
+        db_status = 'connected'
+    except Exception:
+        db_status = 'error'
+    return JsonResponse({'status': 'ok', 'database': db_status})
+
+
 from rest_framework.views import APIView
 from .security import LoginRateThrottle, RegisterRateThrottle, IsOwnerOrReadOnly
 
@@ -111,8 +124,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                     'eco_tier': user.eco_tier,
                 })
             except Exception as e:
-                import traceback
-                traceback.print_exc()
+                logger.exception('Failed to update profile for %s', request.user)
                 return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -331,8 +343,7 @@ class GoogleLogin(APIView):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            logger.exception('Google login failed')
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -444,7 +455,6 @@ def eco_points_history(request):
     return Response(serializer.data)
 
 
-from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from .stripe_service import StripeService

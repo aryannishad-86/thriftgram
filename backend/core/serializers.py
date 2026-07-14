@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Item, ItemImage, ClosetItem, Like, DropEvent, Follow, Order, Review, Wishlist, EcoPointsHistory
+from .models import Item, ItemImage, ClosetItem, DropEvent, Follow, Order, Review, Wishlist, EcoPointsHistory
 
 User = get_user_model()
 
@@ -158,13 +158,6 @@ class ItemSerializer(serializers.ModelSerializer):
         for image in uploaded_images:
             ItemImage.objects.create(item=item, image=image)
         return item
-
-class LikeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Like
-        fields = ['id', 'user', 'item', 'created_at']
-        read_only_fields = ['user']
-
 
 # New Phase 1 Serializers
 

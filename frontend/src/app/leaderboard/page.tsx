@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Leaf, Droplets, User as UserIcon } from 'lucide-react';
+import { Leaf, Droplets, User as UserIcon } from 'lucide-react';
 import api, { unwrap } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 

@@ -27,7 +27,7 @@ from core.views import (
     ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet,
     DropEventViewSet, RegisterView, GoogleLogin, OrderViewSet,
     ReviewViewSet, WishlistViewSet, eco_points_history,
-    create_checkout_session, stripe_webhook
+    create_checkout_session, stripe_webhook, health_check
 )
 from notifications.views import NotificationViewSet
 from chat.views import ConversationViewSet, MessageViewSet
@@ -47,7 +47,6 @@ router.register(r'messages', MessageViewSet, basename='message')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/notifications/', include('notifications.urls')),
     path('api/', include(router.urls)),
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -58,8 +57,5 @@ urlpatterns = [
     path('api/eco-points-history/', eco_points_history, name='eco_points_history'),
     path('api/create-checkout-session/', create_checkout_session, name='create_checkout_session'),
     path('api/stripe-webhook/', stripe_webhook, name='stripe_webhook'),
-    path('api/health/', lambda request: __import__('django.http', fromlist=['JsonResponse']).JsonResponse({
-        'status': 'ok',
-        'database': 'connected' if __import__('django.db', fromlist=['connection']).connection.ensure_connection() is None else 'error'
-    }), name='health_check'),
+    path('api/health/', health_check, name='health_check'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
