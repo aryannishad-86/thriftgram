@@ -1,4 +1,20 @@
 import axios from 'axios';
+import type { AxiosResponse } from 'axios';
+
+// The backend host, with any trailing /api stripped so every call path can carry
+// its own /api/ prefix uniformly. Tolerates NEXT_PUBLIC_API_URL being set with or
+// without the suffix — the two forms have silently broken each other before.
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const baseURL = rawBaseUrl.replace(/\/+$/, '').replace(/\/api$/, '');
+
+// DRF paginates list endpoints globally, so list responses are
+// { count, next, previous, results }. Non-list responses are the bare object.
+// unwrap() returns the array in either case.
+export function unwrap<T = unknown>(res: AxiosResponse): T[] {
+    const data = res.data;
+    if (data && Array.isArray(data.results)) return data.results as T[];
+    return (Array.isArray(data) ? data : []) as T[];
+}
 
 // Event emitter for cold start detection
 export const coldStartEvents = {
@@ -13,7 +29,7 @@ export const coldStartEvents = {
 };
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
+    baseURL,
     headers: {
         'Content-Type': 'application/json',
     },

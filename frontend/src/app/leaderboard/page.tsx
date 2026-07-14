@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Leaf, Droplets, User as UserIcon } from 'lucide-react';
-import api from '@/lib/api';
+import api, { unwrap } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface User {
@@ -22,8 +22,8 @@ export default function LeaderboardPage() {
     useEffect(() => {
         const fetchLeaderboard = async () => {
             try {
-                const res = await api.get('/leaderboard/');
-                setUsers(res.data);
+                const res = await api.get('/api/leaderboard/');
+                setUsers(unwrap<User>(res));
             } catch (error) {
                 console.error('Failed to fetch leaderboard', error);
             } finally {

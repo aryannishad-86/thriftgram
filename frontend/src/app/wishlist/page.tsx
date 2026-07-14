@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Heart, Trash2 } from 'lucide-react';
-import api from '@/lib/api';
+import api, { unwrap } from '@/lib/api';
 
 interface WishlistItem {
     id: number;
@@ -32,7 +32,7 @@ export default function WishlistPage() {
     const fetchWishlist = async () => {
         try {
             const response = await api.get('/api/wishlist/');
-            setWishlist(response.data);
+            setWishlist(unwrap<WishlistItem>(response));
         } catch (err) {
             console.error('Failed to fetch wishlist', err);
         } finally {

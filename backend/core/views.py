@@ -1,3 +1,4 @@
+import logging
 import os
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
@@ -15,6 +16,7 @@ from .ai_service import AIService
 from .eco_service import EcoService
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 from rest_framework.views import APIView
 from .security import LoginRateThrottle, RegisterRateThrottle
@@ -205,6 +207,9 @@ class ItemViewSet(viewsets.ModelViewSet):
         seller_username = self.request.query_params.get('seller_username', None)
         if seller_username is not None:
             queryset = queryset.filter(seller__username=seller_username)
+        drop = self.request.query_params.get('drop', None)
+        if drop is not None:
+            queryset = queryset.filter(drops__id=drop)
         return queryset
 
     def perform_create(self, serializer):
@@ -448,49 +453,52 @@ import stripe
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def create_checkout_session(request):
-    """Create Stripe checkout session for item purchase"""
-    item_id = request.data.get('item_id')
-    item = get_object_or_404(Item, id=item_id)
-    
-    # Prevent buying own items
-    if item.seller == request.user:
-        return Response(
-            {'error': 'Cannot purchase your own item'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    
-    # Prevent buying already sold items
-    if item.is_sold:
-        return Response(
-            {'error': 'This item has already been sold'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    
-    # Create checkout session
+    """Create a Stripe checkout session for one item (item_id) or a cart (item_ids)."""
+    raw_ids = request.data.get('item_ids')
+    if not raw_ids:
+        single = request.data.get('item_id')
+        raw_ids = [single] if single else []
+
+    # Dedupe while preserving intent; each physical item is unique so quantity is always 1
+    try:
+        item_ids = list(dict.fromkeys(int(x) for x in raw_ids))
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid item ids'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not item_ids:
+        return Response({'error': 'No items provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+    items = list(Item.objects.filter(id__in=item_ids))
+    if len(items) != len(item_ids):
+        return Response({'error': 'One or more items were not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Validate every item up front — never create a session for a partially-valid cart
+    for item in items:
+        if item.seller == request.user:
+            return Response({'error': f'Cannot purchase your own item: {item.title}'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if item.is_sold:
+            return Response({'error': f'Already sold: {item.title}'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
     frontend_url = settings.FRONTEND_URL if hasattr(settings, 'FRONTEND_URL') else 'http://localhost:3000'
     success_url = f"{frontend_url}/orders?success=true&session_id={{CHECKOUT_SESSION_ID}}"
-    cancel_url = f"{frontend_url}/items/{item_id}"
-    
-    try:
-        session = StripeService.create_checkout_session(
-            item, success_url, cancel_url
-        )
+    cancel_url = f"{frontend_url}/items/{items[0].id}" if len(items) == 1 else f"{frontend_url}/"
 
-        # Always store session.id as the lookup key — payment_intent may be None at creation time
-        Order.objects.create(
-            buyer=request.user,
-            item=item,
-            status='PENDING',
-            stripe_payment_intent=session.id,
-            total_amount=item.price
-        )
-        
+    try:
+        session = StripeService.create_checkout_session(items, success_url, cancel_url)
+
+        # One Order per item, all keyed to session.id (payment_intent is None at creation time)
+        Order.objects.bulk_create([
+            Order(buyer=request.user, item=item, status='PENDING',
+                  stripe_payment_intent=session.id, total_amount=item.price)
+            for item in items
+        ])
+
         return Response({'sessionId': session.id, 'url': session.url})
     except Exception as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        logger.exception('Stripe checkout session creation failed')
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -508,9 +516,9 @@ def stripe_webhook(request):
         event = StripeService.construct_webhook_event(
             payload, sig_header, webhook_secret
         )
-    except ValueError as e:
+    except ValueError:
         return Response({'error': 'Invalid payload'}, status=400)
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError:
         return Response({'error': 'Invalid signature'}, status=400)
     
     # Handle the event
@@ -526,29 +534,17 @@ def stripe_webhook(request):
 
 
 def handle_checkout_completion(session):
-    """Handle successful checkout session completion"""
-    try:
-        item_id = session['metadata'].get('item_id')
-        if not item_id:
-            return
+    """Mark every order for this checkout session PAID. Idempotent: a replayed
+    webhook skips orders already PAID, so no double eco points or emails."""
+    session_id = session.get('id')
+    orders = Order.objects.filter(stripe_payment_intent=session_id)
+    if not orders:
+        logger.warning('Stripe webhook: no orders found for session %s', session_id)
+        return
 
-        # Always look up by session.id — that's what we stored at order creation
-        session_id = session.get('id')
-
-        try:
-            order = Order.objects.get(stripe_payment_intent=session_id)
-        except Order.DoesNotExist:
-            print(f"Stripe webhook: order not found for session {session_id}")
-            return
-
+    for order in orders:
         if order.status == 'PAID':
-            return  # Already processed, skip
-
+            continue
         order.status = 'PAID'
-        order.save()  # post_save signal (award_points_for_purchase) handles eco points
-
-        # Mark item as sold
-        Item.objects.filter(id=item_id).update(is_sold=True)
-
-    except Exception as e:
-        print(f"Error handling checkout completion: {str(e)}")
+        order.save()  # PENDING→PAID triggers award_points_for_purchase + order emails
+        Item.objects.filter(id=order.item_id).update(is_sold=True)
