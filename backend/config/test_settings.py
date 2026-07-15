@@ -6,6 +6,14 @@ itself is monkeypatched in the tests that exercise checkout).
 """
 from .settings import *  # noqa: F401,F403
 
+# Hermetic: CI has no .env, so never depend on env-provided config. Without
+# these, an env-less run gets an empty SECRET_KEY (boot failure) and DEBUG=False
+# (SECURE_SSL_REDIRECT 301s every test request to https://).
+SECRET_KEY = 'test-only-secret-key-not-used-anywhere-real'
+DEBUG = True
+ALLOWED_HOSTS = ['testserver', 'localhost']
+SECURE_SSL_REDIRECT = False
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
