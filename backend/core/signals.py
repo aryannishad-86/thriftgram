@@ -5,27 +5,23 @@ from .models import Item, Order, EcoPointsHistory, CustomUser
 
 @receiver(post_save, sender=Item)
 def award_points_for_listing(sender, instance, created, **kwargs):
-    """Award eco points when a user lists an item"""
+    """Award eco points for listing an item. Environmental impact and the
+    sold-count are NOT credited here — an item that's merely listed hasn't been
+    reused yet. Those land on the sale (award_points_for_purchase)."""
     if created:
         user = instance.seller
         points = 50
-        
-        # Update user stats
+
         user.eco_points += points
-        user.items_sold_count += 1
-        user.co2_saved += 5.5  # Average CO2 saved per garment
-        user.water_saved += 2700  # Average water saved per garment
         user.save()
-        
-        # Create history record
+
         EcoPointsHistory.objects.create(
             user=user,
             action='ITEM_LISTED',
             points=points,
             description=f'Listed "{instance.title}"'
         )
-        
-        # Update tier
+
         user.update_tier()
 
 
@@ -50,24 +46,28 @@ def award_points_for_purchase(sender, instance, created, **kwargs):
     if not transitioned_to_paid:
         return
 
-    user = instance.buyer
+    # Buyer: purchase points + bought count
+    buyer = instance.buyer
     points = 20
-    
-    # Update user stats
-    user.eco_points += points
-    user.items_bought_count += 1
-    user.save()
-    
-    # Create history record
+    buyer.eco_points += points
+    buyer.items_bought_count += 1
+    buyer.save()
+
     EcoPointsHistory.objects.create(
-        user=user,
+        user=buyer,
         action='ITEM_PURCHASED',
         points=points,
         description=f'Purchased "{instance.item.title}"'
     )
-    
-    # Update tier
-    user.update_tier()
+    buyer.update_tier()
+
+    # Seller: the sale is the real reuse event — credit sold count + impact now
+    seller = instance.item.seller
+    seller.items_sold_count += 1
+    seller.co2_saved += 5.5   # avg CO2 saved by reusing one garment (kg)
+    seller.water_saved += 2700  # avg water saved by reusing one garment (L)
+    seller.save()
+    seller.update_tier()
 
 
 

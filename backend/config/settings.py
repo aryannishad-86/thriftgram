@@ -52,7 +52,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'cloudinary_storage',
     'cloudinary',
     'django.contrib.admin',
@@ -110,7 +109,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-ASGI_APPLICATION = 'config.asgi.application'
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -120,13 +118,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'ThriftGram <noreply@thriftgram.com>')
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
 
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = False
@@ -151,7 +142,6 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://*.onrender.com",  # Render deployment
     "https://*.run.app",       # GCP Cloud Run deployment
 ] + CORS_ALLOWED_ORIGINS
 
@@ -160,6 +150,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ),
+    # Safe default: anonymous can read, only authenticated can write. Endpoints
+    # that must stay fully open (registration, token, Stripe webhook) set
+    # AllowAny explicitly.
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -206,7 +202,7 @@ REST_USE_JWT = True
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgres://postgres:password@localhost:5432/thriftgram'),
+        default=os.getenv('DATABASE_URL', 'postgres://postgres@localhost:5432/thriftgram'),
         conn_max_age=600
     )
 }
@@ -287,7 +283,8 @@ if CLOUDINARY_URL:
             'API_SECRET': api_secret,
         }
     except Exception as e:
-        print(f"Error parsing CLOUDINARY_URL: {e}")
+        import logging
+        logging.getLogger(__name__).warning('Could not parse CLOUDINARY_URL: %s', e)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -298,6 +295,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+
+# Gemini Vision (AI item analysis). If unset, analyze_image returns clearly
+# labeled mock data instead of real analysis — see core/ai_service.py.
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 
 # Frontend URL for redirects
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')

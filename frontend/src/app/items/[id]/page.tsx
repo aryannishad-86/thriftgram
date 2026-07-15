@@ -2,13 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, Share2, ArrowLeft, ShieldCheck, Sparkles, Tag, Layers, Shirt, CheckCircle, MessageCircle } from 'lucide-react';
+import { Heart, Share2, Sparkles, Shirt, CheckCircle, MessageCircle } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import BuyButton from '@/components/BuyButton';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewList from '@/components/ReviewList';
@@ -33,6 +30,7 @@ interface Item {
         fabric_type: string;
         condition_rating: number;
         detected_defects: string[];
+        mock?: boolean;
     };
 }
 
@@ -48,6 +46,16 @@ export default function ItemDetailPage() {
     const [matches, setMatches] = useState<any[]>([]);
     const [showMatches, setShowMatches] = useState(false);
     const [messagingLoading, setMessagingLoading] = useState(false);
+    const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
+    const [shared, setShared] = useState(false);
+
+    useEffect(() => {
+        setCurrentUsername(localStorage.getItem('username'));
+    }, []);
+
+    const isOwner = !!item && item.seller?.username === currentUsername;
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -105,6 +113,46 @@ export default function ItemDetailPage() {
             console.error('Failed to start conversation', error);
         } finally {
             setMessagingLoading(false);
+        }
+    };
+
+    const handleToggleWishlist = async () => {
+        if (!item) return;
+        if (!localStorage.getItem('access_token')) {
+            router.push('/login');
+            return;
+        }
+        setWishlistLoading(true);
+        try {
+            if (isWishlisted) {
+                await api.delete('/api/wishlist/remove/', { data: { item: item.id } });
+                setIsWishlisted(false);
+            } else {
+                await api.post('/api/wishlist/', { item: item.id });
+                setIsWishlisted(true);
+            }
+        } catch (err) {
+            // A 400 on add means it's already wishlisted — reflect that
+            const status = (err as { response?: { status?: number } }).response?.status;
+            if (!isWishlisted && status === 400) setIsWishlisted(true);
+            else console.error('Failed to update wishlist', err);
+        } finally {
+            setWishlistLoading(false);
+        }
+    };
+
+    const handleShare = async () => {
+        const url = window.location.href;
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: item?.title, url });
+            } else {
+                await navigator.clipboard.writeText(url);
+                setShared(true);
+                setTimeout(() => setShared(false), 2000);
+            }
+        } catch {
+            // user cancelled the share sheet — nothing to do
         }
     };
 
@@ -175,17 +223,24 @@ export default function ItemDetailPage() {
                                     <Sparkles className="w-5 h-5 text-base-03" />
                                     AI Quality Verification
                                 </h3>
-                                <Button
-                                    onClick={handleAnalyze}
-                                    disabled={analyzing || !!item.ai_analysis}
-                                    className="bg-base-03 hover:bg-base-03/90 text-white rounded-full"
-                                >
-                                    {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
-                                </Button>
+                                {isOwner && (
+                                    <Button
+                                        onClick={handleAnalyze}
+                                        disabled={analyzing || !!item.ai_analysis}
+                                        className="bg-base-03 hover:bg-base-03/90 text-white rounded-full"
+                                    >
+                                        {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
+                                    </Button>
+                                )}
                             </div>
 
                             {item.ai_analysis ? (
                                 <div className="space-y-4">
+                                    {item.ai_analysis.mock && (
+                                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                                            Sample analysis — AI is currently unavailable, so these values are illustrative only.
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-base-2 p-4 rounded-2xl border border-border">
                                             <div className="text-xs text-base-01 mb-1">Detected Brand</div>
@@ -228,7 +283,9 @@ export default function ItemDetailPage() {
                                 </div>
                             ) : (
                                 <div className="text-center py-8 text-base-01 text-sm">
-                                    Click "Run AI Analysis" to verify authenticity and condition.
+                                    {isOwner
+                                        ? 'Click "Run AI Analysis" to verify authenticity and condition.'
+                                        : 'No AI analysis available for this item yet.'}
                                 </div>
                             )}
                         </div>
@@ -298,13 +355,22 @@ export default function ItemDetailPage() {
                             </Button>
 
                             <div className="flex gap-4">
-                                <Button variant="outline" className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10">
-                                    <Heart className="w-5 h-5 mr-2" />
-                                    Save
+                                <Button
+                                    onClick={handleToggleWishlist}
+                                    disabled={wishlistLoading}
+                                    variant="outline"
+                                    className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10"
+                                >
+                                    <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? 'fill-current text-error' : ''}`} />
+                                    {isWishlisted ? 'Saved' : 'Save'}
                                 </Button>
-                                <Button variant="outline" className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10">
+                                <Button
+                                    onClick={handleShare}
+                                    variant="outline"
+                                    className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10"
+                                >
                                     <Share2 className="w-5 h-5 mr-2" />
-                                    Share
+                                    {shared ? 'Copied!' : 'Share'}
                                 </Button>
                             </div>
                         </div>

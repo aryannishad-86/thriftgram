@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Feed from "@/components/Feed";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
@@ -17,15 +17,20 @@ function HomeContent() {
   });
 
 
-  // Build filter object for Feed component
-  const feedFilters = {
-    search: searchParams.get('search') || undefined,
+  // Build filter object for Feed. Memoized so it's referentially stable — Feed
+  // refetches on every change to this object, and a fresh literal each render
+  // would loop.
+  const search = searchParams.get('search') || undefined;
+  const drop = searchParams.get('drop') || undefined;
+  const feedFilters = useMemo(() => ({
+    search,
+    drop,
     min_price: filters.minPrice || undefined,
     max_price: filters.maxPrice || undefined,
     size: filters.sizes.length > 0 ? filters.sizes.join(',') : undefined,
     condition: filters.condition || undefined,
     ordering: filters.ordering,
-  };
+  }), [search, drop, filters]);
 
   return (
     <main className="min-h-screen bg-background selection:bg-primary/20">

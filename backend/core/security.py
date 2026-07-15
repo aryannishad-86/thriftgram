@@ -2,6 +2,18 @@
 Security-related custom classes for ThriftGram.
 """
 from rest_framework.throttling import SimpleRateThrottle
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+
+class IsOwnerOrReadOnly(BasePermission):
+    """Object-level: anyone may read, only the owner may modify. The owner field
+    defaults to 'seller' (Item); set `owner_field` on the view to override."""
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        owner_field = getattr(view, 'owner_field', 'seller')
+        return getattr(obj, owner_field, None) == request.user
 
 
 class LoginRateThrottle(SimpleRateThrottle):

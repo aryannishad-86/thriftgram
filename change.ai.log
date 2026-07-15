@@ -1,0 +1,93 @@
+# ThriftGram — AI Change Log
+
+This log is the institutional memory of the codebase. Every AI session that writes code must add an entry. No exceptions.
+
+Format:
+```
+[YYYY-MM-DD] <one-line summary of the work>
+Files: <comma-separated list of files changed>
+Decisions: <bullet list of non-obvious decisions made — why, not what>
+```
+
+---
+
+[2026-07-07] Full codebase audit — 16 bugs/gaps identified across backend and frontend
+Files: (read-only audit, no files changed)
+Decisions:
+- Snitch pass covered all of: core/views.py, core/models.py, core/signals.py, core/serializers.py, notifications/signals.py, core/stripe_service.py, core/emails.py, config/settings.py, config/urls.py, requirements.txt, frontend/src/lib/api.ts, all components, all pages
+- Critical bugs flagged: double eco-points (signals + views both fire), purchase signal never fires (orders created as PENDING not PAID), Stripe session.id vs payment_intent mismatch, alert() in prod, console email backend overriding SMTP
+- High bugs flagged: hardcoded eco points badge, dead cart checkout button, dead forgot-password link, requirements.txt duplicates
+- Medium: unauthenticated homepage redirect, notifications not marked read on server, cart deduplication missing
+
+[2026-07-07] Fixed all 16 bugs across Phases 1-3 — backend, frontend, and UX
+Files: backend/core/views.py, backend/core/signals.py, backend/config/settings.py, backend/requirements.txt, backend/notifications/views.py, frontend/src/app/login/page.tsx, frontend/src/app/page.tsx, frontend/src/lib/api.ts, frontend/src/context/CartContext.tsx, frontend/src/components/NavActions.tsx, frontend/src/components/NotificationBell.tsx
+Decisions:
+- Purchase signal rewritten with pre_save to capture old status; post_save checks for PENDING→PAID transition — only way to reliably detect status changes in Django ORM
+- Stripe order lookup changed from (session.payment_intent or session.id) to always session.id; payment_intent is null at creation time for Checkout Sessions
+- handle_checkout_completion stripped of manual eco points code; signal now handles all eco points awarding to avoid double-counting
+- debug_config endpoint gated behind DEBUG=True check instead of being removed entirely — still useful for local debugging
+- console EmailBackend removed from override position; now conditional on DEBUG so SMTP fires in production
+- api.ts baseURL changed to template literal so NEXT_PUBLIC_API_URL is always the bare host and /api is always appended — eliminates localhost vs production inconsistency
+- Cart deduplication uses item.id equality — correct for a marketplace where each physical item is unique
+- mark_all_read added as a POST action to NotificationViewSet; NotificationBell only calls it when there are actual unread items (avoids unnecessary requests)
+- NavActions eco points hidden when user is not logged in (ecoPoints null) — avoids a flash of 0 before data loads
+
+[2026-07-14] Phase 0 — realigned .agents/ workflow skills with reality before starting a full seamless pass
+Files: .agents/skills/staff/SKILL.md, .agents/skills/software/SKILL.md, .agents/skills/sre/SKILL.md, .gitignore
+Decisions:
+- Deleted staff's static "Known Issues" registry entirely — 11 of its 13 entries were already fixed per this log, and a stale registry directly violates the skill's own Prime Rule ("never guess"). Replaced with a pointer to this log + a standing "verify with Snitch before planning" rule
+- software skill: added a hard "every backend change ships with a pytest test" rule (repo has zero tests today) and corrected stale claims — email is DEBUG-conditional not "fix in progress"; real-time is polling not Channels/Daphne (WSGI on scale-to-zero Cloud Run can't do in-memory channels, Redis isn't free); api.ts baseURL is normalized (trailing /api stripped, every call carries its own /api) — the earlier log entry describing the opposite is itself stale, live code never appended /api
+- sre skill: rewrote the deploy procedure from the deleted deploy_to_gcp.sh footgun to the real CI-driven flow (push to main touching backend/** = prod deploy); documented migrate-on-startup, GitHub Secrets (not GCP Secret Manager), and hardened the free-tier gate (no Redis, min-instances stays 0)
+- Did NOT change the WS/eco_service file references in code yet — those are Phases 2/3; Phase 0 is docs only
+- Discovered this very file was gitignored by `*.log` and had never been committed — the "institutional memory" existed only on one machine. Added `!change.ai.log` exception so it persists in the repo
+
+[2026-07-14] Phase 1 — fixed the day-one-broken user-facing flows
+Files: frontend/src/lib/api.ts, frontend/src/app/page.tsx, frontend/src/app/drops/page.tsx, frontend/src/app/leaderboard/page.tsx, frontend/src/app/wishlist/page.tsx, frontend/src/app/orders/page.tsx, frontend/src/context/CartContext.tsx, frontend/src/components/CartDrawer.tsx, frontend/next.config.ts, frontend/public/grid.svg, frontend/public/placeholder.jpg, backend/core/views.py, backend/core/stripe_service.py
+Decisions:
+- api.ts baseURL is now normalized (strip trailing /api, default localhost:8000) and every call path carries its own /api/ — this ends the recurring regression where NEXT_PUBLIC_API_URL with vs without the /api suffix broke one set of calls. drops/ and leaderboard/ were the two calls missing the prefix; both fixed
+- Added unwrap<T>(res) to api.ts for the DRF {count,next,results} envelope; used on drops/leaderboard/wishlist/orders. drops and wishlist were previously calling .find/.map on the envelope object and crashing (swallowed by catch → blank pages). Left Feed's own pagination handling alone since it also needs `next`
+- Multi-item cart checkout: StripeService.create_checkout_session now takes a list of items (one line item each); the view accepts item_ids[] (item_id still works for BuyButton), validates every item before creating anything, and writes one PENDING Order per item all keyed to session.id via bulk_create. Webhook handle_checkout_completion loops all orders for the session and is idempotent (skips already-PAID) — a replayed webhook awards nothing twice
+- bulk_create bypasses the Order created-signal, so the (buggy, pre-payment) order-created emails already stop firing on this path — consistent with Phase 2 which removes them entirely
+- Made "Shop Collection" genuinely work instead of just repointing a dead link: added ?drop= filter to ItemViewSet.get_queryset (Item.drops M2M) and had the homepage read ?drop= into the memoized feedFilters; drops link now goes to /?drop=<id>#feed
+- Wrapped homepage feedFilters in useMemo to kill the object-literal-in-deps refetch loop (pulled forward from Phase 3 since I was editing those lines)
+- Stripe success: /orders reads ?success=true, shows a confirmation banner, clears the cart, and strips the param so refresh is clean. Cart is cleared only on successful return, never on the checkout redirect — a cancelled payment keeps the cart intact
+- Created /grid.svg (CSS bg pattern, 7 pages) and /placeholder.jpg (next/image fallback, generated 600x800 via Pillow) — both were 404s. Added **.run.app /media/** to next.config image allowlist; kept the (unused) localhost patterns for local dev
+- Pulled forward from Phase 3 while restructuring stripe_service.py: deleted the dead create_payment_intent and retrieve_session methods
+- Deferred to Phase 3 (they couple with the wishlist keep/delete decision): the no-op Save/Share buttons on items/[id] and the Edit pencil in ListingsTable
+
+[2026-07-14] Phase 2 — data integrity & trust: PII, eco stats, pre-payment emails, honest AI
+Files: backend/core/serializers.py, backend/core/views.py, backend/config/settings.py, backend/core/signals.py, backend/notifications/signals.py, backend/core/ai_service.py, backend/.env.example, .github/workflows/deploy-backend.yml, frontend/src/app/items/[id]/page.tsx (deleted backend/core/eco_service.py)
+Decisions:
+- PII leak closed: email is now an owner-gated SerializerMethodField on both UserSerializer and UserProfileSerializer — public list/retrieve/leaderboard return email=null; only the authenticated owner sees their own. me GET/PATCH still return the owner's email
+- Set global DEFAULT_PERMISSION_CLASSES=IsAuthenticatedOrReadOnly. This alone would have broken the Stripe webhook (Stripe POSTs unauthenticated), so added explicit @permission_classes([AllowAny]) to stripe_webhook. Every other viewset already declared explicit permissions; UserViewSet (the only implicit-AllowAny one) now declares IsAuthenticatedOrReadOnly
+- Eco stats now reflect reality: listing grants only the 50 listing points; items_sold_count + co2/water are credited to the SELLER on the PENDING→PAID transition (the real reuse event), buyer still gets 20 points + bought_count. Deleted eco_service.py — it was dead and its 10.0/700 constants contradicted the signals' 5.5/2700
+- Order emails moved from order-created to the PAID transition (reusing _old_status from core.signals' pre_save) — buyers no longer get "Order Confirmed" before paying. Note bulk_create in Phase 1 already stopped the created-signal firing; this makes the intent explicit and correct for any future single .save() path
+- AI honesty: analyze_image tags results mock:true/false and logs a warning (was print); item detail page shows a "Sample analysis — AI unavailable" banner when mock. emails.py already logged failures via logger.error, left as-is
+- Pre-wired GEMINI_API_KEY + EMAIL_HOST_USER/PASSWORD + DEFAULT_FROM_EMAIL into settings.py, .env.example, and the workflow env.yaml. Unset GitHub secrets expand to "" which is harmless (matches defaults → mock AI / no-op email). To activate: add the GitHub Secrets, zero code change. Caveat: when enabling email, set all three email secrets together — an empty DEFAULT_FROM_EMAIL would override the settings default
+
+[2026-07-14] Phase 5 — test suite (written before the cleanup phases) + one real bug it caught
+Files: backend/requirements-dev.txt, backend/pytest.ini, backend/config/test_settings.py, backend/conftest.py, backend/core/tests/* (auth, items, eco_points, orders, notifications, permissions), backend/core/security.py, backend/core/views.py, frontend/src/app/items/[id]/page.tsx, .github/workflows/deploy-backend.yml (deleted backend/core/tests.py stub)
+Decisions:
+- 25 pytest tests via pytest-django on SQLite in-memory (config.test_settings: throttles neutralized to None so view-level 'register'/'login' scopes still resolve, MD5 hasher, dummy Stripe keys, local file storage). Test deps live in requirements-dev.txt — NOT in the prod image (keeps the Cloud Run image lean/free-tier)
+- Stripe is monkeypatched (StripeService.create_checkout_session → fake session); the webhook idempotency test calls handle_checkout_completion twice and asserts no double eco points. Order emails are spied via notifications.signals to assert they fire on PAID, never on PENDING
+- REAL BUG the suite caught: ItemViewSet had no object-level ownership check — any authenticated user could PATCH/DELETE anyone's item (IDOR). Added IsOwnerOrReadOnly (core/security.py) and applied it to ItemViewSet. As a side effect the analyze action (POST, no per-action perm) is now owner-only, which also protects the Gemini budget from arbitrary triggering — gated the "Run AI Analysis" button to the owner in the UI so non-owners don't hit a 403
+- CI now runs a `test` job that `deploy` needs — a red suite blocks the deploy. chat/tests.py stub isn't collected (pytest python_files=test_*.py); left for Phase 3
+
+[2026-07-14] Phase 3 — kill dead code (WebSockets → polling, backend + frontend cleanup)
+Files (backend): deleted chat/consumers.py, chat/routing.py, notifications/consumers.py, notifications/routing.py, notifications/urls.py; config/asgi.py, config/settings.py, config/urls.py, notifications/signals.py, requirements.txt, core/views.py, core/serializers.py, core/admin.py, notifications/admin.py (new), create_superuser.py, + new __init__.py in notifications/ & core/management[/commands]
+Files (frontend): deleted StripeCheckout.tsx, WishlistButton.tsx, app/chat/page.tsx, 5 boilerplate SVGs; NotificationBell.tsx, app/messages/page.tsx, CountdownTimer.tsx, UserDropdown.tsx, app/items/[id]/page.tsx, ListingsTable.tsx, package.json, and unused-import trims in drops/leaderboard
+Decisions:
+- WebSockets removed entirely (they never worked on WSGI Cloud Run): deleted both apps' consumers/routing, simplified asgi.py to plain Django ASGI, dropped CHANNEL_LAYERS + ASGI_APPLICATION + daphne (INSTALLED_APPS) + daphne/channels (requirements), and stripped the group_send blocks from notifications/signals. Real-time is now polling: NotificationBell polls every 30s (was fetch-once-on-mount — the badge never updated), messages polls the conversation list too; both pause on document.hidden
+- Deduped the notifications route: dropped the `path('api/notifications/', include('notifications.urls'))` shadow and kept the router registration (consistent with every other resource); deleted notifications/urls.py. Same URL/behavior
+- Replaced the `__import__` lambda health check with a real health_check view (core/views.py); removed the duplicate api_view import; swapped both traceback.print_exc() for logger.exception; removed the dead LikeSerializer; registered the 8 unregistered models in admin (+ new notifications/admin.py); added the 3 missing __init__.py (implicit-namespace-package fragility)
+- Hardened two hardcoded-secret spots: create_superuser.py now reads DJANGO_SUPERUSER_* from env and never prints the password; the DB fallback DSN lost its `:password` literal
+- Frontend: wired the two dead item-page buttons — Save toggles the wishlist (existing but unreachable feature), Share uses navigator.share/clipboard; added Orders + Wishlist to the user dropdown so both built-but-unlinked pages are reachable; deleted the now-redundant WishlistButton.tsx; removed the no-op Edit pencil (no edit route exists); dropped the never-imported @stripe/* deps and synced the lockfile; fixed CountdownTimer's dependency-less useEffect (was re-registering a timer every render) with a single interval keyed on targetDate + an onComplete ref
+- Left as pre-existing, out-of-scope-for-dead-code: `any` types, next/image `<img>` warnings, and unused locals in files I didn't otherwise touch (login/register/closet/dashboard). Next 16 build doesn't fail on these, so they don't block deploy
+
+[2026-07-14] Phase 4 — deploy & config hygiene (NOT pushed — awaiting approval)
+Files: backend/Dockerfile, backend/config/settings.py, backend/requirements.txt, backend/core/migrations/0011_rename_*.py (new); deleted backend/Procfile, backend/railway.toml, backend/build.sh, backend/runtime.txt, backend/deploy_to_gcp.sh
+Decisions:
+- Dockerfile CMD now runs `python manage.py migrate --noinput` before `exec gunicorn`. Migrations are idempotent and, at min-instances 0, run only on cold start. Consequence: a deploy that carries a new migration applies it to the live Supabase DB automatically — this is exactly why the push/deploy needs explicit approval
+- Reconciled the Django version: the venv AND the migration stamps were already 5.2.8 while requirements pinned 5.1.4 — prod was deploying a different version than dev tests. Bumped the pin to Django==5.2.8 (what the 25 tests actually validate). This surfaced a pending migration because 5.2 changed the auto index-naming algorithm; generated 0011 — a pure RenameIndex on ecopointshistory (ALTER INDEX ... RENAME, safe/fast). Deploying WILL apply this rename
+- Deleted the four dead deploy targets (Procfile=Heroku, railway.toml=Railway, build.sh=Render, runtime.txt) and deploy_to_gcp.sh (duplicated the CI deploy, hardcoded the project id, and pushed the entire local .env — live Stripe/Cloudinary secrets — to Cloud Run). CI on push-to-main is the only deploy path now
+- Removed the stale `*.onrender.com` CSRF origin (Render is gone) and the duplicate FRONTEND_URL definition

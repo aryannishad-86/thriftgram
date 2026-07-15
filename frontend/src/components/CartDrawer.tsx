@@ -1,13 +1,41 @@
 'use client';
 
+import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
+import { X, ShoppingBag, Trash2, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import api from '@/lib/api';
 
 export default function CartDrawer() {
     const { items, isCartOpen, closeCart, removeFromCart, cartTotal } = useCart();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleCheckout = async () => {
+        if (!localStorage.getItem('access_token')) {
+            window.location.href = '/login';
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            const { data } = await api.post('/api/create-checkout-session/', {
+                item_ids: items.map((i) => i.id),
+            });
+            if (data.url) {
+                // Cart is cleared on the /orders success return, not here — a
+                // cancelled payment must leave the cart intact.
+                window.location.href = data.url;
+            } else {
+                throw new Error('No checkout URL returned');
+            }
+        } catch (err) {
+            const e = err as { response?: { data?: { error?: string } }; message?: string };
+            setError(e.response?.data?.error || e.message || 'Checkout failed');
+            setLoading(false);
+        }
+    };
 
     return (
         <AnimatePresence>
@@ -99,11 +127,22 @@ export default function CartDrawer() {
                                     <span>Subtotal</span>
                                     <span>₹{cartTotal.toFixed(2)}</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground mb-6 text-center">
+                                <p className="text-xs text-muted-foreground mb-2 text-center">
                                     Shipping and taxes calculated at checkout.
                                 </p>
-                                <Button className="w-full py-6 text-lg font-bold bg-base-03 hover:bg-base-03/90">
-                                    Checkout <ArrowRight className="ml-2 h-5 w-5" />
+                                {error && (
+                                    <p className="text-sm text-red-400 mb-4 text-center">{error}</p>
+                                )}
+                                <Button
+                                    onClick={handleCheckout}
+                                    disabled={loading}
+                                    className="w-full py-6 text-lg font-bold bg-base-03 hover:bg-base-03/90 disabled:opacity-50"
+                                >
+                                    {loading ? (
+                                        <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
+                                    ) : (
+                                        <>Checkout <ArrowRight className="ml-2 h-5 w-5" /></>
+                                    )}
                                 </Button>
                             </div>
                         )}

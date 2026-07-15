@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.midjourney.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.run.app',
+        pathname: '/media/**',
+      },
     ],
   },
 };

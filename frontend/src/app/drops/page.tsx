@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Calendar, Flame, ArrowRight } from 'lucide-react';
-import api from '@/lib/api';
+import { Calendar, Flame, ArrowRight } from 'lucide-react';
+import api, { unwrap } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,12 +30,13 @@ export default function DropsPage() {
 
     const fetchDrops = async () => {
         try {
-            const res = await api.get('/drops/');
-            setDrops(res.data);
+            const res = await api.get('/api/drops/');
+            const dropList = unwrap<DropEvent>(res);
+            setDrops(dropList);
 
             // Check for currently active drop
             const now = new Date();
-            const active = res.data.find((d: DropEvent) => {
+            const active = dropList.find((d: DropEvent) => {
                 const start = new Date(d.start_time);
                 const end = new Date(d.end_time);
                 return now >= start && now <= end;
@@ -117,7 +118,7 @@ export default function DropsPage() {
                                 <h2 className="text-4xl font-bold text-base-03 mb-4">{activeDrop.title}</h2>
                                 <p className="text-lg text-base-02 mb-8">{activeDrop.description}</p>
                                 <Button asChild className="bg-red-600 hover:bg-red-700 text-white h-14 px-8 rounded-full text-lg font-bold">
-                                    <Link href={`/search?drop=${activeDrop.id}`}>
+                                    <Link href={`/?drop=${activeDrop.id}#feed`}>
                                         Shop Collection <ArrowRight className="ml-2 w-5 h-5" />
                                     </Link>
                                 </Button>

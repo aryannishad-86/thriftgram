@@ -2,78 +2,49 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import api from '@/lib/api';
+import api, { unwrap } from '@/lib/api';
 import GradientIconButton from './GradientIconButton';
 
 interface Notification {
     id: number;
     message: string;
     type: 'like' | 'message' | 'follow';
+    is_read: boolean;
     created_at: string;
 }
+
+const POLL_MS = 30000;
 
 export default function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
-    const socketRef = useRef<WebSocket | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    // Poll every 30s (WebSockets aren't available on the WSGI backend). Pause
+    // while the tab is hidden so a backgrounded tab makes no requests.
     useEffect(() => {
-        // Fetch initial notifications
+        let cancelled = false;
+
         const fetchNotifications = async () => {
+            if (document.hidden) return;
             try {
                 const response = await api.get('/api/notifications/');
-                // Handle paginated response - extract the results array
-                const notificationsData = response.data.results || response.data || [];
-                setNotifications(Array.isArray(notificationsData) ? notificationsData : []);
-                const unread = (Array.isArray(notificationsData) ? notificationsData : []).filter((n: any) => !n.is_read).length;
-                setUnreadCount(unread);
-            } catch (error) {
-                // Silently ignore if user is not authenticated
-                console.log('Could not fetch notifications:', error);
+                if (cancelled) return;
+                const data = unwrap<Notification>(response);
+                setNotifications(data);
+                setUnreadCount(data.filter((n) => !n.is_read).length);
+            } catch {
+                // Not authenticated / offline — leave state as-is
             }
         };
+
         fetchNotifications();
-
-        // Connect to WebSocket only if WS_URL is explicitly set
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
-        if (!wsUrl) {
-            // WebSocket not configured for this environment, skip connection
-            console.log('WebSocket URL not configured, skipping real-time notifications');
-            return;
-        }
-
-        try {
-            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const socket = new WebSocket(`${wsProtocol}//${wsUrl}/ws/notifications/`);
-            socketRef.current = socket;
-
-            socket.onopen = () => {
-                console.log('Notification WebSocket connected');
-            };
-
-            socket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                setNotifications((prev) => [data, ...prev]);
-                setUnreadCount((prev) => prev + 1);
-            };
-
-            socket.onclose = () => {
-                console.log('Notification WebSocket disconnected');
-            };
-
-            socket.onerror = (error) => {
-                console.log('WebSocket not available:', error);
-            };
-
-            return () => {
-                socket.close();
-            };
-        } catch (error) {
-            console.log('WebSocket connection failed:', error);
-        }
+        const interval = setInterval(fetchNotifications, POLL_MS);
+        return () => {
+            cancelled = true;
+            clearInterval(interval);
+        };
     }, []);
 
     // Close dropdown when clicking outside

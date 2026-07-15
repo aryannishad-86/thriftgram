@@ -30,3 +30,17 @@ Every session that writes code must append an entry to that file.
 - **Frontend:** Next.js 15, Vercel (`https://thriftgram-six.vercel.app`)
 - **Auth:** JWT (simplejwt) + Google OAuth (`@react-oauth/google`)
 - **Payments:** Stripe Checkout Sessions, currency INR
+
+## Rules
+
+### No Deploy Without Approval
+
+**NEVER** do any of the following without **explicit user approval first**:
+
+- `git push` to any remote branch (especially `main`)
+- Run `deploy_to_gcp.sh` or any deploy script
+- Trigger GitHub Actions workflows
+- Modify GitHub Secrets or GCP IAM
+- Run any command that affects production (database migrations, env var changes, etc.)
+
+**Always** present a summary of what will be deployed/pushed and wait for the user to say "yes" or "go ahead" before executing. This rule has **no exceptions** and overrides all other instructions.

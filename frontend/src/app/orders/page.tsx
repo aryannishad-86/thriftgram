@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Package, TrendingUp, ShoppingBag, Clock } from 'lucide-react';
-import api from '@/lib/api';
+import { Package, TrendingUp, ShoppingBag, CheckCircle } from 'lucide-react';
+import api, { unwrap } from '@/lib/api';
+import { useCart } from '@/context/CartContext';
 
 interface Order {
     id: number;
@@ -42,12 +43,24 @@ const STATUS_LABELS = {
     CANCELLED: 'Cancelled',
 };
 
-export default function OrdersPage() {
+function OrdersContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const { clearCart } = useCart();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'purchases' | 'sales'>('purchases');
     const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+    const justPaid = searchParams.get('success') === 'true';
+
+    // A successful return from Stripe empties the cart and strips the params so a
+    // refresh doesn't re-show the banner or re-clear anything.
+    useEffect(() => {
+        if (justPaid) {
+            clearCart();
+            router.replace('/orders');
+        }
+    }, [justPaid, clearCart, router]);
 
     useEffect(() => {
         // Get username from localStorage (client-side only)
@@ -56,9 +69,7 @@ export default function OrdersPage() {
         const fetchOrders = async () => {
             try {
                 const response = await api.get('/api/orders/');
-                // Handle paginated response
-                const data = response.data.results || response.data;
-                setOrders(Array.isArray(data) ? data : []);
+                setOrders(unwrap<Order>(response));
             } catch (err) {
                 console.error('Failed to fetch orders', err);
             } finally {
@@ -85,6 +96,21 @@ export default function OrdersPage() {
     return (
         <main className="min-h-screen bg-background pt-24 pb-12 px-4">
             <div className="container mx-auto max-w-6xl">
+                {/* Payment confirmation */}
+                {justPaid && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-6 py-4 text-green-800"
+                    >
+                        <CheckCircle className="w-6 h-6 flex-shrink-0" />
+                        <div>
+                            <p className="font-semibold">Payment successful</p>
+                            <p className="text-sm text-green-700">Your order is confirmed. It may take a moment to appear below.</p>
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-base-03 mb-2">Orders</h1>
@@ -217,5 +243,13 @@ export default function OrdersPage() {
                 )}
             </div>
         </main>
+    );
+}
+
+export default function OrdersPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center pt-20"><div className="text-base-02">Loading orders...</div></div>}>
+            <OrdersContent />
+        </Suspense>
     );
 }

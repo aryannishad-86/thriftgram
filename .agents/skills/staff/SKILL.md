@@ -21,26 +21,13 @@ ThriftGram is a sustainable fashion marketplace. Users can:
 - `backend/` — Django 5.1 REST API on GCP Cloud Run
 - `frontend/` — Next.js 15 app on Vercel (`https://thriftgram-six.vercel.app`)
 
-## Known Issues (from audit — July 2026)
+## Known Issues
 
-### Critical
-1. Double eco-points on item listing: `core/signals.py:7` + `core/views.py:214`
-2. Double eco-points on purchase: `core/signals.py:32` + `core/views.py:553`
-3. Purchase signal never fires: signal checks `created AND status==PAID` but orders always start as PENDING
-4. Stripe order lookup silently fails: `session.payment_intent` vs `session.id` mismatch
-5. Debug `alert()` in production login: `login/page.tsx:84`
-6. Emails never send: `settings.py:217` overrides SMTP with console backend
+**There is no static issue registry here — that is deliberate.** A hardcoded list of bugs goes stale the moment someone fixes one, and a registry that lies is worse than none: it makes you "know" things that aren't true, which is the exact failure the Prime Rule below exists to prevent.
 
-### High
-7. Eco points badge hardcoded to `★ 350` for all users: `NavActions.tsx:27`
-8. Cart Checkout button does nothing: `CartDrawer.tsx:105`
-9. "Forgot password?" links to `#`: `login/page.tsx:224`
-10. requirements.txt has duplicate packages
-
-### Medium
-11. Homepage force-redirects unauthenticated users: `page.tsx:21-25` (feed is public)
-12. Notifications never marked as read on server
-13. Cart allows duplicate items
+Instead:
+- **`change.ai.log`** at the repo root is the running record of what has been audited and fixed, newest last. Read it at the start of every session.
+- Before planning any fix, **verify the current state with a Snitch pass** — the code is the only source of truth. A finding from a past audit may already be resolved.
 
 ## The Prime Rule: No Guessing
 

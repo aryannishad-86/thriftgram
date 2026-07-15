@@ -15,98 +15,50 @@ class StripeService:
         return bool(settings.STRIPE_SECRET_KEY)
     
     @staticmethod
-    def create_payment_intent(amount, item_id, buyer_email):
+    def create_checkout_session(items, success_url, cancel_url):
         """
-        Create a payment intent for item purchase
-        
+        Create a Stripe Checkout Session for one or more items.
+
         Args:
-            amount: Payment amount in dollars
-            item_id: ID of the item being purchased
-            buyer_email: Email of the buyer
-            
-        Returns:
-            Stripe PaymentIntent object
-        """
-        if not StripeService.is_configured():
-            raise ValueError("Stripe is not configured. Please set STRIPE_SECRET_KEY.")
-            
-        intent = stripe.PaymentIntent.create(
-            amount=int(amount * 100),  # Convert dollars to cents
-            currency='inr',
-            metadata={
-                'item_id': str(item_id),
-            },
-            receipt_email=buyer_email,
-        )
-        return intent
-    
-    @staticmethod
-    def create_checkout_session(item, success_url, cancel_url):
-        """
-        Create Stripe Checkout Session for item purchase
-        
-        Args:
-            item: Item object being purchased
+            items: iterable of Item objects being purchased (one line item each)
             success_url: URL to redirect after successful payment
             cancel_url: URL to redirect if payment is cancelled
-            
+
         Returns:
-            Stripe Checkout Session object
+            Stripe Checkout Session object. metadata['item_ids'] holds the
+            comma-joined item ids, but the webhook resolves purchases from the
+            Orders keyed to the session id rather than trusting this.
         """
         if not StripeService.is_configured():
             raise ValueError("Stripe is not configured. Please set STRIPE_SECRET_KEY.")
-        
-        # Get first image URL or use placeholder
-        image_url = None
-        if item.images.exists():
-            first_image = item.images.first()
-            if first_image.image:
-                image_url = first_image.image.url
-        
-        session_data = {
-            'payment_method_types': ['card'],
-            'line_items': [{
+
+        line_items = []
+        for item in items:
+            product_data = {
+                'name': item.title,
+                'description': item.description[:500] if item.description else item.title,
+            }
+            if item.images.exists() and item.images.first().image:
+                product_data['images'] = [item.images.first().image.url]
+            line_items.append({
                 'price_data': {
                     'currency': 'inr',
-                    'product_data': {
-                        'name': item.title,
-                        'description': item.description[:500] if len(item.description) > 500 else item.description,
-                    },
-                    'unit_amount': int(item.price * 100),  # Convert to cents
+                    'product_data': product_data,
+                    'unit_amount': int(item.price * 100),  # rupees → paise
                 },
                 'quantity': 1,
-            }],
-            'mode': 'payment',
-            'success_url': success_url,
-            'cancel_url': cancel_url,
-            'metadata': {
-                'item_id': str(item.id),
-            },
-        }
-        
-        # Add image if available
-        if image_url:
-            session_data['line_items'][0]['price_data']['product_data']['images'] = [image_url]
-        
-        session = stripe.checkout.Session.create(**session_data)
+            })
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=line_items,
+            mode='payment',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={'item_ids': ','.join(str(item.id) for item in items)},
+        )
         return session
-    
-    @staticmethod
-    def retrieve_session(session_id):
-        """
-        Retrieve a checkout session by ID
-        
-        Args:
-            session_id: Stripe checkout session ID
-            
-        Returns:
-            Stripe Session object
-        """
-        if not StripeService.is_configured():
-            raise ValueError("Stripe is not configured. Please set STRIPE_SECRET_KEY.")
-            
-        return stripe.checkout.Session.retrieve(session_id)
-    
+
     @staticmethod
     def construct_webhook_event(payload, sig_header, webhook_secret):
         """

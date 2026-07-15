@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { User, LogOut, UserCircle } from 'lucide-react';
+import { User, LogOut, UserCircle, ShoppingBag, Heart } from 'lucide-react';
 
 interface UserDropdownProps {
     username: string;
@@ -53,6 +53,24 @@ export default function UserDropdown({ username }: UserDropdownProps) {
                     >
                         <UserCircle className="h-4 w-4" />
                         Profile
+                    </Link>
+
+                    <Link
+                        href="/orders"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        <ShoppingBag className="h-4 w-4" />
+                        Orders
+                    </Link>
+
+                    <Link
+                        href="/wishlist"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        <Heart className="h-4 w-4" />
+                        Wishlist
                     </Link>
 
                     <button
