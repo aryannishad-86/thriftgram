@@ -16,8 +16,7 @@ export default function StatsCard({ title, value, icon, trend, description }: St
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -8 }}
             transition={{ duration: 0.3 }}
-            className="group relative overflow-hidden rounded-2xl border-2 border-border p-6 shadow-md hover:shadow-xl transition-all duration-300"
-            style={{ backgroundColor: '#F7F1E3' }}
+            className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-md hover:shadow-xl transition-all duration-300"
         >
             <div className="flex items-start justify-between">
                 <div className="flex-1">

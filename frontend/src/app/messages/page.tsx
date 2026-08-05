@@ -155,8 +155,8 @@ function MessagesContent() {
 
                 <div className="grid md:grid-cols-[350px_1fr] gap-6 h-[calc(100vh-200px)]">
                     {/* Conversation List */}
-                    <div className="rounded-2xl border-2 border-border overflow-hidden shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
-                        <div className="p-4 border-b-2 border-border bg-base-2">
+                    <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-md">
+                        <div className="p-4 border-b border-border bg-base-2">
                             <h2 className="font-semibold text-base-03">Conversations</h2>
                         </div>
                         <ConversationList
@@ -169,7 +169,7 @@ function MessagesContent() {
                     </div>
 
                     {/* Chat Window */}
-                    <div className="rounded-2xl border-2 border-border overflow-hidden flex flex-col shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
+                    <div className="rounded-2xl border border-border bg-card overflow-hidden flex flex-col shadow-md">
                         {activeConversation ? (
                             <>
                                 {/* Chat Header */}

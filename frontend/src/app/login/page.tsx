@@ -171,7 +171,8 @@ export default function LoginPage() {
                                             animate={{
                                                 y: focusedInput === 'username' || username ? -24 : 0,
                                                 scale: focusedInput === 'username' || username ? 0.85 : 1,
-                                                color: focusedInput === 'username' ? '#268bd2' : '#93a1a1'
+                                                // framer-motion needs a literal to interpolate — mirrors --primary/--muted
+                                                color: focusedInput === 'username' ? '#1A47E8' : '#6E6E73'
                                             }}
                                             className={`absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors z-10 px-1 ${focusedInput === 'username' || username ? 'bg-card' : ''}`}
                                         >
@@ -192,7 +193,7 @@ export default function LoginPage() {
                                             animate={{
                                                 y: focusedInput === 'password' || password ? -24 : 0,
                                                 scale: focusedInput === 'password' || password ? 0.85 : 1,
-                                                color: focusedInput === 'password' ? '#268bd2' : '#93a1a1'
+                                                color: focusedInput === 'password' ? '#1A47E8' : '#6E6E73'
                                             }}
                                             className={`absolute left-3 top-3 text-muted pointer-events-none origin-left transition-colors z-10 px-1 ${focusedInput === 'password' || password ? 'bg-card' : ''}`}
                                         >

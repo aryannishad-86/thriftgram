@@ -57,8 +57,8 @@ export default function LeaderboardPage() {
                     </motion.p>
                 </div>
 
-                <div className="rounded-3xl border-2 border-border overflow-hidden shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
-                    <div className="p-6 border-b-2 border-border flex justify-between items-center bg-base-2">
+                <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-md">
+                    <div className="p-6 border-b border-border flex justify-between items-center bg-base-2">
                         <div className="font-bold text-base-03">Rank</div>
                         <div className="font-bold text-base-03 flex-1 ml-8">User</div>
                         <div className="font-bold text-base-03">Eco-Points</div>
