@@ -3,9 +3,15 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Package, TrendingUp, ShoppingBag, CheckCircle } from 'lucide-react';
+import { Package, TrendingUp, ShoppingBag } from 'lucide-react';
 import api, { unwrap } from '@/lib/api';
 import { useCart } from '@/context/CartContext';
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageShell } from '@/components/layout/page-shell';
+import { PageHeader } from '@/components/layout/page-header';
+import { cn } from '@/lib/utils';
 
 interface Order {
     id: number;
@@ -28,11 +34,11 @@ interface Order {
 }
 
 const STATUS_COLORS = {
-    PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    PAID: 'bg-blue-100 text-blue-800 border-blue-200',
-    SHIPPED: 'bg-purple-100 text-purple-800 border-purple-200',
-    DELIVERED: 'bg-green-100 text-green-800 border-green-200',
-    CANCELLED: 'bg-red-100 text-red-800 border-red-200',
+    PENDING: 'bg-warning/10 text-warning border-warning/20',
+    PAID: 'bg-primary/10 text-primary border-primary/20',
+    SHIPPED: 'bg-secondary/10 text-secondary border-secondary/20',
+    DELIVERED: 'bg-success/10 text-success border-success/20',
+    CANCELLED: 'bg-error/10 text-error border-error/20',
 };
 
 const STATUS_LABELS = {
@@ -53,8 +59,6 @@ function OrdersContent() {
     const [currentUsername, setCurrentUsername] = useState<string | null>(null);
     const justPaid = searchParams.get('success') === 'true';
 
-    // A successful return from Stripe empties the cart and strips the params so a
-    // refresh doesn't re-show the banner or re-clear anything.
     useEffect(() => {
         if (justPaid) {
             clearCart();
@@ -63,7 +67,6 @@ function OrdersContent() {
     }, [justPaid, clearCart, router]);
 
     useEffect(() => {
-        // Get username from localStorage (client-side only)
         setCurrentUsername(localStorage.getItem('username'));
 
         const fetchOrders = async () => {
@@ -82,173 +85,140 @@ function OrdersContent() {
 
     const purchases = orders.filter(order => order.buyer.username === currentUsername);
     const sales = orders.filter(order => order.item && order.buyer.username !== currentUsername);
-
     const displayOrders = activeTab === 'purchases' ? purchases : sales;
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center pt-20">
-                <div className="text-base-02">Loading orders...</div>
+            <div className="flex min-h-screen items-center justify-center bg-background pt-20">
+                <div className="text-muted-foreground">Loading orders...</div>
             </div>
         );
     }
 
     return (
-        <main className="min-h-screen bg-background pt-24 pb-12 px-4">
-            <div className="container mx-auto max-w-6xl">
-                {/* Payment confirmation */}
-                {justPaid && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-8 flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-6 py-4 text-green-800"
-                    >
-                        <CheckCircle className="w-6 h-6 flex-shrink-0" />
-                        <div>
-                            <p className="font-semibold">Payment successful</p>
-                            <p className="text-sm text-green-700">Your order is confirmed. It may take a moment to appear below.</p>
-                        </div>
-                    </motion.div>
-                )}
+        <PageShell>
+            {justPaid && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+                    <Alert variant="success">
+                        <p className="font-semibold">Payment successful</p>
+                        <p className="text-sm">Your order is confirmed. It may take a moment to appear below.</p>
+                    </Alert>
+                </motion.div>
+            )}
 
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-base-03 mb-2">Orders</h1>
-                    <p className="text-base-02">Track your purchases and sales</p>
-                </div>
+            <PageHeader title="Orders" description="Track your purchases and sales" />
 
-                {/* Tabs */}
-                <div className="flex gap-4 mb-8 border-b border-border">
-                    <button
-                        onClick={() => setActiveTab('purchases')}
-                        className={`px-6 py-3 font-semibold transition-colors relative ${activeTab === 'purchases'
-                            ? 'text-base-03'
-                            : 'text-base-02 hover:text-base-03'
-                            }`}
-                    >
-                        <ShoppingBag className="w-5 h-5 inline mr-2" />
-                        Purchases ({purchases.length})
-                        {activeTab === 'purchases' && (
-                            <motion.div
-                                layoutId="activeTab"
-                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                            />
-                        )}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('sales')}
-                        className={`px-6 py-3 font-semibold transition-colors relative ${activeTab === 'sales'
-                            ? 'text-base-03'
-                            : 'text-base-02 hover:text-base-03'
-                            }`}
-                    >
-                        <TrendingUp className="w-5 h-5 inline mr-2" />
-                        Sales ({sales.length})
-                        {activeTab === 'sales' && (
-                            <motion.div
-                                layoutId="activeTab"
-                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                            />
-                        )}
-                    </button>
-                </div>
+            <div className="mb-8 flex gap-4 border-b border-border">
+                <button
+                    onClick={() => setActiveTab('purchases')}
+                    className={cn(
+                        "relative px-6 py-3 font-semibold transition-colors",
+                        activeTab === 'purchases' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                >
+                    <ShoppingBag className="mr-2 inline h-5 w-5" />
+                    Purchases ({purchases.length})
+                    {activeTab === 'purchases' && (
+                        <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
+                <button
+                    onClick={() => setActiveTab('sales')}
+                    className={cn(
+                        "relative px-6 py-3 font-semibold transition-colors",
+                        activeTab === 'sales' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                >
+                    <TrendingUp className="mr-2 inline h-5 w-5" />
+                    Sales ({sales.length})
+                    {activeTab === 'sales' && (
+                        <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
+            </div>
 
-                {/* Orders List */}
-                {displayOrders.length === 0 ? (
-                    <div className="text-center py-16">
-                        <Package className="w-16 h-16 text-base-01 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold text-base-03 mb-2">
-                            No {activeTab === 'purchases' ? 'purchases' : 'sales'} yet
-                        </h3>
-                        <p className="text-base-02 mb-6">
-                            {activeTab === 'purchases'
-                                ? 'Start shopping to see your orders here'
-                                : 'List items to start selling'}
-                        </p>
-                        <button
-                            onClick={() => router.push(activeTab === 'purchases' ? '/' : '/sell')}
-                            className="px-6 py-3 rounded-full bg-base-03 text-white font-semibold hover:bg-primary/90 transition-colors"
-                        >
+            {displayOrders.length === 0 ? (
+                <EmptyState
+                    icon={Package}
+                    title={`No ${activeTab === 'purchases' ? 'purchases' : 'sales'} yet`}
+                    description={activeTab === 'purchases' ? 'Start shopping to see your orders here' : 'List items to start selling'}
+                    action={
+                        <Button onClick={() => router.push(activeTab === 'purchases' ? '/' : '/sell')}>
                             {activeTab === 'purchases' ? 'Browse Items' : 'List an Item'}
-                        </button>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {displayOrders.map((order) => (
-                            <motion.div
-                                key={order.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-card border border-border rounded-2xl p-6 hover:shadow-md transition-shadow cursor-pointer"
-                                onClick={() => router.push(`/items/${order.item.id}`)}
-                            >
-                                <div className="flex gap-6">
-                                    {/* Item Image */}
-                                    <div className="w-24 h-24 rounded-xl overflow-hidden bg-base-2 flex-shrink-0">
-                                        {order.item.images && order.item.images.length > 0 ? (
-                                            <img
-                                                src={order.item.images[0].image}
-                                                alt={order.item.title}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <Package className="w-8 h-8 text-base-01" />
-                                            </div>
+                        </Button>
+                    }
+                />
+            ) : (
+                <div className="space-y-4">
+                    {displayOrders.map((order) => (
+                        <motion.div
+                            key={order.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="cursor-pointer rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md"
+                            onClick={() => router.push(`/items/${order.item.id}`)}
+                        >
+                            <div className="flex gap-6">
+                                <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-base-2">
+                                    {order.item.images && order.item.images.length > 0 ? (
+                                        <img
+                                            src={order.item.images[0].image}
+                                            alt={order.item.title}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center">
+                                            <Package className="h-8 w-8 text-muted" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex-1">
+                                    <div className="mb-2 flex items-start justify-between">
+                                        <div>
+                                            <h3 className="mb-1 text-lg font-semibold text-foreground">
+                                                {order.item.title}
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                Order #{order.id} • {new Date(order.created_at).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        <div className="text-xl font-bold text-foreground">
+                                            ₹{parseFloat(order.total_amount).toFixed(2)}
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3 flex items-center gap-3">
+                                        <span className={cn(
+                                            "rounded-full border px-3 py-1 text-xs font-semibold",
+                                            STATUS_COLORS[order.status as keyof typeof STATUS_COLORS]
+                                        )}>
+                                            {STATUS_LABELS[order.status as keyof typeof STATUS_LABELS]}
+                                        </span>
+                                        {activeTab === 'purchases' && (
+                                            <span className="text-sm text-muted-foreground">
+                                                Sold by @{order.item.seller?.username || 'Unknown'}
+                                            </span>
+                                        )}
+                                        {activeTab === 'sales' && (
+                                            <span className="text-sm text-muted-foreground">
+                                                Purchased by @{order.buyer.username}
+                                            </span>
                                         )}
                                     </div>
-
-                                    {/* Order Details */}
-                                    <div className="flex-1">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-base-03 mb-1">
-                                                    {order.item.title}
-                                                </h3>
-                                                <p className="text-sm text-base-02">
-                                                    Order #{order.id} • {new Date(order.created_at).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="text-xl font-bold text-base-03">
-                                                    ₹{parseFloat(order.total_amount).toFixed(2)}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Status Badge */}
-                                        <div className="flex items-center gap-3 mt-3">
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-semibold border ${STATUS_COLORS[order.status as keyof typeof STATUS_COLORS]
-                                                    }`}
-                                            >
-                                                {STATUS_LABELS[order.status as keyof typeof STATUS_LABELS]}
-                                            </span>
-                                            {activeTab === 'purchases' && (
-                                                <span className="text-sm text-base-02">
-                                                    Sold by @{order.item.seller?.username || 'Unknown'}
-                                                </span>
-                                            )}
-                                            {activeTab === 'sales' && (
-                                                <span className="text-sm text-base-02">
-                                                    Purchased by @{order.buyer.username}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
                                 </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </main>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+        </PageShell>
     );
 }
 
 export default function OrdersPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center pt-20"><div className="text-base-02">Loading orders...</div></div>}>
+        <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background pt-20"><div className="text-muted-foreground">Loading orders...</div></div>}>
             <OrdersContent />
         </Suspense>
     );

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import ConversationList from '@/components/ConversationList';
 import ChatWindow from '@/components/ChatWindow';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageShell } from '@/components/layout/page-shell';
 import api, { unwrap } from '@/lib/api';
 
 interface Conversation {
@@ -149,80 +151,69 @@ function MessagesContent() {
     );
 
     return (
-        <main className="min-h-screen bg-background pt-20">
-            <div className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold text-base-03 mb-8">Messages</h1>
+        <PageShell>
+            <h1 className="font-display mb-8 text-3xl font-semibold text-foreground">Messages</h1>
 
-                <div className="grid md:grid-cols-[350px_1fr] gap-6 h-[calc(100vh-200px)]">
-                    {/* Conversation List */}
-                    <div className="rounded-2xl border-2 border-border overflow-hidden shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
-                        <div className="p-4 border-b-2 border-border bg-base-2">
-                            <h2 className="font-semibold text-base-03">Conversations</h2>
-                        </div>
-                        <ConversationList
-                            conversations={conversations}
-                            currentUsername={currentUsername}
-                            activeConversationId={activeConversation}
-                            onSelectConversation={handleSelectConversation}
-                            loading={loading}
-                        />
+            <div className="grid h-[calc(100vh-260px)] gap-6 md:grid-cols-[350px_1fr]">
+                <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-md">
+                    <div className="border-b border-border bg-base-2 p-4">
+                        <h2 className="font-semibold text-foreground">Conversations</h2>
                     </div>
+                    <ConversationList
+                        conversations={conversations}
+                        currentUsername={currentUsername}
+                        activeConversationId={activeConversation}
+                        onSelectConversation={handleSelectConversation}
+                        loading={loading}
+                    />
+                </div>
 
-                    {/* Chat Window */}
-                    <div className="rounded-2xl border-2 border-border overflow-hidden flex flex-col shadow-md" style={{ backgroundColor: '#F7F1E3' }}>
-                        {activeConversation ? (
-                            <>
-                                {/* Chat Header */}
-                                <div className="p-4 border-b-2 border-border flex items-center gap-3 bg-base-2">
-                                    <div className="w-10 h-10 rounded-full bg-base-03/10 flex items-center justify-center">
-                                        <MessageCircle className="w-5 h-5 text-base-03" />
-                                    </div>
-                                    <div>
-                                        <h2 className="font-semibold text-base-03">
-                                            @{otherParticipant?.username || 'Unknown'}
-                                        </h2>
-                                        {activeConversationData?.item && (
-                                            <p className="text-xs text-base-02">
-                                                Re: {activeConversationData.item.title}
-                                            </p>
-                                        )}
-                                    </div>
+                <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-md">
+                    {activeConversation ? (
+                        <>
+                            <div className="flex items-center gap-3 border-b border-border bg-base-2 p-4">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink/10">
+                                    <MessageCircle className="h-5 w-5 text-foreground" />
                                 </div>
-
-                                {/* Messages */}
-                                <ChatWindow
-                                    messages={messages}
-                                    currentUsername={currentUsername}
-                                    onSendMessage={handleSendMessage}
-                                    loading={messagesLoading}
-                                />
-                            </>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                                <MessageCircle className="w-16 h-16 text-base-02 mb-4" />
-                                <h3 className="text-lg font-semibold text-base-03 mb-2">
-                                    Select a conversation
-                                </h3>
-                                <p className="text-base-02">
-                                    Choose a conversation from the list to start chatting
-                                </p>
+                                <div>
+                                    <h2 className="font-semibold text-foreground">
+                                        @{otherParticipant?.username || 'Unknown'}
+                                    </h2>
+                                    {activeConversationData?.item && (
+                                        <p className="text-xs text-muted-foreground">
+                                            Re: {activeConversationData.item.title}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                        )}
-                    </div>
+
+                            <ChatWindow
+                                messages={messages}
+                                currentUsername={currentUsername}
+                                onSendMessage={handleSendMessage}
+                                loading={messagesLoading}
+                            />
+                        </>
+                    ) : (
+                        <EmptyState
+                            icon={MessageCircle}
+                            title="Select a conversation"
+                            description="Choose a conversation from the list to start chatting"
+                            className="h-full"
+                        />
+                    )}
                 </div>
             </div>
-        </main>
+        </PageShell>
     );
 }
 
 export default function MessagesPage() {
     return (
         <Suspense fallback={
-            <main className="min-h-screen bg-background pt-20">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="text-base-02">Loading messages...</div>
-                </div>
-            </main>
+            <PageShell>
+                <div className="text-muted-foreground">Loading messages...</div>
+            </PageShell>
         }>
             <MessagesContent />
         </Suspense>

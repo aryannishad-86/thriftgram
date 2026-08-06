@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/Providers";
@@ -17,6 +17,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Display serif — headlines only (see .font-display in globals.css).
+// Loaded with axes for optical variation at large sizes; swap avoids
+// blocking render on the font request.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT", "WONK"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "ThriftGram | Sustainable Style",
   description: "The marketplace for second-hand fashion.",
@@ -30,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
         <Providers>
@@ -38,9 +48,10 @@ export default function RootLayout({
             <SmoothScrolling>
               <Navbar />
               <CartDrawer />
-              <main className="min-h-screen">
-                {children}
-              </main>
+              {/* Every page renders its own single <main> via PageShell —
+                  this used to also wrap in <main>, producing an invalid
+                  nested-landmark document on every page. */}
+              {children}
             </SmoothScrolling>
           </ErrorBoundary>
         </Providers>

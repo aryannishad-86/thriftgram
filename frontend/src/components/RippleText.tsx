@@ -13,7 +13,7 @@ export default function RippleText({ text, className, fontSize = 60, colors }: R
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
     const rippleRef = useRef({ x: 0, y: 0, strength: 0 });
-    const colorRef = useRef<string[]>(['#002b36', '#002b36']); // Default to base-03 (dark)
+    const colorRef = useRef<string[]>(['#0B0B0C', '#0B0B0C']); // Default to --ink, overwritten below once computed
 
     useEffect(() => {
         // Extract color from className if provided
@@ -42,8 +42,8 @@ export default function RippleText({ text, className, fontSize = 60, colors }: R
         if (!ctx) return;
 
         let animationFrameId: number;
-        let width = canvas.offsetWidth;
-        let height = canvas.offsetHeight;
+        const width = canvas.offsetWidth;
+        const height = canvas.offsetHeight;
 
         // Handle high DPI displays
         const dpr = window.devicePixelRatio || 1;
@@ -76,7 +76,9 @@ export default function RippleText({ text, className, fontSize = 60, colors }: R
             rippleRef.current.strength *= 0.95;
 
             ctx.clearRect(0, 0, width, height);
-            ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+            // Canvas re-sets .font every frame via rAF, so it self-corrects once
+            // the Fraunces webfont finishes loading — no explicit fonts.ready wait needed.
+            ctx.font = `bold ${fontSize}px "Fraunces", Georgia, serif`;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
 

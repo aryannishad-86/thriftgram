@@ -26,7 +26,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
     };
 
     return (
-        <div className="border-t-2 border-border p-4" style={{ backgroundColor: '#F7F1E3' }}>
+        <div className="border-t border-border bg-card p-4">
             <div className="flex gap-3 items-end">
                 <textarea
                     value={message}

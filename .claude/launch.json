@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "vectorshift-frontend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/aryannishad/VectorShift/frontend && BROWSER=none npm start"],
+      "port": 3000
+    },
+    {
+      "name": "vectorshift-backend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/aryannishad/VectorShift/backend && .venv/bin/uvicorn main:app --port 8000"],
+      "port": 8000
+    },
+    {
+      "name": "thriftgram-frontend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/aryannishad/ThtiftGram/frontend && NEXT_PUBLIC_API_URL=https://thriftgram-backend-591997315244.asia-south1.run.app npm run dev"],
+      "port": 3000
+    }
+  ]
+}

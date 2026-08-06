@@ -25,43 +25,41 @@ export default function ColdStartLoader({ show }: ColdStartLoaderProps) {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="relative max-w-md mx-4 p-8 rounded-2xl bg-gradient-to-br from-purple-500/10 to-cyan-500/10 backdrop-blur-xl border border-white/20 shadow-2xl">
-                {/* Animated spinner */}
-                <div className="flex justify-center mb-6">
-                    <div className="relative w-16 h-16">
-                        <div className="absolute inset-0 border-4 border-purple-500/30 rounded-full"></div>
-                        <div className="absolute inset-0 border-4 border-transparent border-t-purple-500 rounded-full animate-spin"></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            {/* Flat solid card, not glass — a utility status panel, no photography
+                behind it. Off-palette purple/cyan swapped for the accent token. */}
+            <div className="relative mx-4 max-w-md rounded-2xl border border-border bg-card p-8 shadow-2xl">
+                <div className="mb-6 flex justify-center">
+                    <div className="relative h-16 w-16">
+                        <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+                        <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-primary" />
                     </div>
                 </div>
 
-                {/* Message */}
-                <div className="text-center space-y-4">
-                    <h3 className="text-xl font-semibold text-white">
+                <div className="space-y-4 text-center">
+                    <h3 className="text-xl font-semibold text-foreground">
                         Waking up the server...
                     </h3>
-                    <p className="text-gray-300 text-sm">
+                    <p className="text-sm text-muted-foreground">
                         The backend is starting up from sleep mode.
                         <br />
                         This may take up to 60 seconds (free tier limitation).
                     </p>
 
-                    {/* Progress indicator */}
                     <div className="pt-4">
-                        <div className="flex justify-between text-xs text-gray-400 mb-2">
+                        <div className="mb-2 flex justify-between text-xs text-muted">
                             <span>Elapsed: {elapsed}s</span>
                             <span>Expected: ~30-60s</span>
                         </div>
-                        <div className="w-full h-2 bg-gray-700/50 rounded-full overflow-hidden">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-base-2">
                             <div
-                                className="h-full bg-gradient-to-r from-purple-500 to-cyan-500 transition-all duration-1000 ease-out"
+                                className="h-full bg-primary transition-all duration-1000 ease-out"
                                 style={{ width: `${Math.min((elapsed / 60) * 100, 100)}%` }}
-                            ></div>
+                            />
                         </div>
                     </div>
 
-                    {/* Helpful tip */}
-                    <p className="text-xs text-gray-400 pt-2">
+                    <p className="pt-2 text-xs text-muted">
                         💡 Tip: The server stays awake for 15 minutes after the first request
                     </p>
                 </div>

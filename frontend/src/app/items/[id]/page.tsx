@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Heart, Share2, Sparkles, Shirt, CheckCircle, MessageCircle } from 'lucide-react';
+import { Heart, Share2, Sparkles, Shirt, CheckCircle, MessageCircle, PackageSearch } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageShell } from '@/components/layout/page-shell';
 import BuyButton from '@/components/BuyButton';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewList from '@/components/ReviewList';
@@ -102,12 +106,10 @@ export default function ItemDetailPage() {
         if (!item) return;
         setMessagingLoading(true);
         try {
-            // Create or get existing conversation
             const res = await api.post('/api/conversations/', {
                 other_user: item.seller.id,
                 item: item.id
             });
-            // Redirect to messages with conversation selected
             router.push(`/messages?conversation=${res.data.id}`);
         } catch (error) {
             console.error('Failed to start conversation', error);
@@ -132,7 +134,6 @@ export default function ItemDetailPage() {
                 setIsWishlisted(true);
             }
         } catch (err) {
-            // A 400 on add means it's already wishlisted — reflect that
             const status = (err as { response?: { status?: number } }).response?.status;
             if (!isWishlisted && status === 400) setIsWishlisted(true);
             else console.error('Failed to update wishlist', err);
@@ -152,256 +153,248 @@ export default function ItemDetailPage() {
                 setTimeout(() => setShared(false), 2000);
             }
         } catch {
-            // user cancelled the share sheet — nothing to do
+            // user cancelled the share sheet
         }
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background pt-24 px-4 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <div className="flex min-h-screen items-center justify-center bg-background px-4 pt-24">
+                <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-primary" />
             </div>
         );
     }
 
-    if (!item) return null;
+    if (!item) {
+        return (
+            <PageShell maxWidth="2xl">
+                <EmptyState
+                    icon={PackageSearch}
+                    title="Item not found"
+                    description="This listing may have been removed or sold."
+                    action={<Button onClick={() => router.push('/')}>Browse items</Button>}
+                />
+            </PageShell>
+        );
+    }
 
     return (
-        <main className="min-h-screen bg-background selection:bg-primary/20 pt-24 pb-12 px-4 relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute inset-0 -z-30 bg-base-3" />
-            <div className="absolute inset-0 -z-20 bg-[url('/grid.svg')] bg-center opacity-[0.03]" />
+        <PageShell>
+            <div className="grid gap-12 md:grid-cols-2">
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="relative aspect-[3/4] overflow-hidden rounded-3xl border border-border bg-card shadow-lg"
+                >
+                    <Image
+                        src={item.images[0]?.image || '/placeholder.jpg'}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    {item.ai_analysis?.is_verified && (
+                        <div className="glass-light absolute right-4 top-4 flex items-center gap-2 rounded-full px-4 py-2 font-bold text-success">
+                            <Sparkles className="h-4 w-4" /> AI Verified
+                        </div>
+                    )}
+                </motion.div>
 
-            <div className="container mx-auto max-w-6xl">
-                <div className="grid md:grid-cols-2 gap-12">
-                    {/* Image Section */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-card border border-border shadow-lg"
-                    >
-                        <img
-                            src={item.images[0]?.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                        />
-                        {item.ai_analysis?.is_verified && (
-                            <div className="absolute top-4 right-4 bg-success/20 backdrop-blur-md border border-success/30 text-success px-4 py-2 rounded-full font-bold flex items-center gap-2">
-                                <Sparkles className="w-4 h-4" /> AI Verified
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="space-y-8"
+                >
+                    <div>
+                        <h1 className="font-display mb-2 text-4xl font-semibold text-foreground md:text-5xl">{item.title}</h1>
+                        <p className="font-mono text-2xl text-foreground">₹{item.price}</p>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <div className="rounded-xl border border-border bg-card px-4 py-2 text-muted">
+                            Size: <span className="font-bold text-foreground">{item.size}</span>
+                        </div>
+                        <div className="rounded-xl border border-border bg-card px-4 py-2 text-muted">
+                            Condition: <span className="font-bold text-foreground">{item.condition}</span>
+                        </div>
+                    </div>
+
+                    <p className="text-lg leading-relaxed text-muted-foreground">
+                        {item.description}
+                    </p>
+
+                    <Card padding="lg">
+                        <div className="mb-6 flex items-center justify-between">
+                            <h3 className="flex items-center gap-2 text-xl font-bold text-foreground">
+                                <Sparkles className="h-5 w-5" />
+                                AI Quality Verification
+                            </h3>
+                            {isOwner && (
+                                <Button
+                                    onClick={handleAnalyze}
+                                    disabled={analyzing || !!item.ai_analysis}
+                                    size="sm"
+                                >
+                                    {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
+                                </Button>
+                            )}
+                        </div>
+
+                        {item.ai_analysis ? (
+                            <div className="space-y-4">
+                                {item.ai_analysis.mock && (
+                                    <div className="rounded-xl border border-warning/20 bg-warning/5 px-3 py-2 text-xs text-warning">
+                                        Sample analysis — AI is currently unavailable, so these values are illustrative only.
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="rounded-2xl border border-border bg-base-2 p-4">
+                                        <div className="mb-1 text-xs text-muted">Detected Brand</div>
+                                        <div className="text-lg font-bold text-foreground">{item.ai_analysis.detected_brand}</div>
+                                    </div>
+                                    <div className="rounded-2xl border border-border bg-base-2 p-4">
+                                        <div className="mb-1 text-xs text-muted">Material</div>
+                                        <div className="text-lg font-bold text-foreground">{item.ai_analysis.fabric_type}</div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="mb-2 flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Condition Rating</span>
+                                        <span className="font-bold text-success">{item.ai_analysis.condition_rating}/10</span>
+                                    </div>
+                                    <div className="h-2 overflow-hidden rounded-full bg-base-2">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${item.ai_analysis.condition_rating * 10}%` }}
+                                            className="h-full bg-success"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-border bg-base-2 p-4">
+                                    <div className="mb-2 text-xs text-muted">Defect Analysis</div>
+                                    {item.ai_analysis.detected_defects.length > 0 ? (
+                                        <ul className="list-inside list-disc text-sm text-error">
+                                            {item.ai_analysis.detected_defects.map((defect: string, i: number) => (
+                                                <li key={i}>{defect}</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-sm text-success">
+                                            <CheckCircle className="h-4 w-4" /> No defects detected
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="py-8 text-center text-sm text-muted">
+                                {isOwner
+                                    ? 'Click "Run AI Analysis" to verify authenticity and condition.'
+                                    : 'No AI analysis available for this item yet.'}
                             </div>
                         )}
-                    </motion.div>
+                    </Card>
 
-                    {/* Details Section */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="space-y-8"
-                    >
-                        <div>
-                            <h1 className="text-4xl md:text-5xl font-bold text-base-03 mb-2">{item.title}</h1>
-                            <p className="text-2xl text-base-03 font-mono">₹{item.price}</p>
+                    <Card padding="lg">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="flex items-center gap-2 text-xl font-bold text-foreground">
+                                <Shirt className="h-5 w-5" />
+                                Wardrobe Matcher
+                            </h3>
+                            <Button
+                                onClick={handleMatchOutfit}
+                                disabled={matching}
+                                variant="outline"
+                                size="sm"
+                            >
+                                {matching ? 'Matching...' : 'Match with My Closet'}
+                            </Button>
                         </div>
+
+                        {showMatches && (
+                            <div className="mt-6">
+                                <p className="mb-4 text-muted-foreground">This item pairs well with:</p>
+                                {matches.length > 0 ? (
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {matches.map((match) => (
+                                            <div key={match.id} className="aspect-[3/4] overflow-hidden rounded-xl border border-border bg-base-2">
+                                                <img src={match.image} alt={match.category} className="h-full w-full object-cover" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm italic text-muted">No matches found in your closet yet. Try adding more items!</p>
+                                )}
+                            </div>
+                        )}
+                    </Card>
+
+                    <div className="flex flex-col gap-4 pt-4">
+                        <BuyButton
+                            itemId={item.id}
+                            price={parseFloat(item.price)}
+                            title={item.title}
+                            image={item.images[0]?.image}
+                            size={item.size}
+                        />
+
+                        <Button
+                            onClick={handleMessageSeller}
+                            disabled={messagingLoading}
+                            variant="outline"
+                            size="lg"
+                            loading={messagingLoading}
+                        >
+                            <MessageCircle className="h-5 w-5" />
+                            {messagingLoading ? 'Starting chat...' : 'Message Seller'}
+                        </Button>
 
                         <div className="flex gap-4">
-                            <div className="bg-card border border-border px-4 py-2 rounded-xl text-base-02">
-                                Size: <span className="text-base-03 font-bold">{item.size}</span>
-                            </div>
-                            <div className="bg-card border border-border px-4 py-2 rounded-xl text-base-02">
-                                Condition: <span className="text-base-03 font-bold">{item.condition}</span>
-                            </div>
-                        </div>
-
-                        <p className="text-lg text-base-02 leading-relaxed">
-                            {item.description}
-                        </p>
-
-                        {/* AI Analysis Section */}
-                        <div className="bg-card border border-border rounded-3xl p-6 shadow-lg">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold text-base-03 flex items-center gap-2">
-                                    <Sparkles className="w-5 h-5 text-base-03" />
-                                    AI Quality Verification
-                                </h3>
-                                {isOwner && (
-                                    <Button
-                                        onClick={handleAnalyze}
-                                        disabled={analyzing || !!item.ai_analysis}
-                                        className="bg-base-03 hover:bg-base-03/90 text-white rounded-full"
-                                    >
-                                        {analyzing ? 'Analyzing...' : item.ai_analysis ? 'Analysis Complete' : 'Run AI Analysis'}
-                                    </Button>
-                                )}
-                            </div>
-
-                            {item.ai_analysis ? (
-                                <div className="space-y-4">
-                                    {item.ai_analysis.mock && (
-                                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                                            Sample analysis — AI is currently unavailable, so these values are illustrative only.
-                                        </div>
-                                    )}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-base-2 p-4 rounded-2xl border border-border">
-                                            <div className="text-xs text-base-01 mb-1">Detected Brand</div>
-                                            <div className="text-lg font-bold text-base-03">{item.ai_analysis.detected_brand}</div>
-                                        </div>
-                                        <div className="bg-base-2 p-4 rounded-2xl border border-border">
-                                            <div className="text-xs text-base-01 mb-1">Material</div>
-                                            <div className="text-lg font-bold text-base-03">{item.ai_analysis.fabric_type}</div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-2">
-                                            <span className="text-base-02">Condition Rating</span>
-                                            <span className="text-success font-bold">{item.ai_analysis.condition_rating}/10</span>
-                                        </div>
-                                        <div className="h-2 bg-base-2 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${item.ai_analysis.condition_rating * 10}%` }}
-                                                className="h-full bg-gradient-to-r from-success to-emerald-400"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-base-2 p-4 rounded-2xl border border-border">
-                                        <div className="text-xs text-base-01 mb-2">Defect Analysis</div>
-                                        {item.ai_analysis.detected_defects.length > 0 ? (
-                                            <ul className="list-disc list-inside text-error text-sm">
-                                                {item.ai_analysis.detected_defects.map((defect: string, i: number) => (
-                                                    <li key={i}>{defect}</li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            <div className="flex items-center gap-2 text-success text-sm">
-                                                <CheckCircle className="w-4 h-4" /> No defects detected
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-base-01 text-sm">
-                                    {isOwner
-                                        ? 'Click "Run AI Analysis" to verify authenticity and condition.'
-                                        : 'No AI analysis available for this item yet.'}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Wardrobe Matcher Section */}
-                        <div className="bg-card border border-border rounded-3xl p-6 shadow-lg">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xl font-bold text-base-03 flex items-center gap-2">
-                                    <Shirt className="w-5 h-5 text-base-03" />
-                                    Wardrobe Matcher
-                                </h3>
-                                <Button
-                                    onClick={handleMatchOutfit}
-                                    disabled={matching}
-                                    variant="outline"
-                                    className="border-primary/30 text-base-03 hover:bg-primary/10 rounded-full"
-                                >
-                                    {matching ? 'Matching...' : 'Match with My Closet'}
-                                </Button>
-                            </div>
-
-                            {showMatches && (
-                                <div className="mt-6">
-                                    <p className="text-base-02 mb-4">This item pairs well with:</p>
-                                    {matches.length > 0 ? (
-                                        <div className="grid grid-cols-3 gap-4">
-                                            {matches.map((match) => (
-                                                <div key={match.id} className="aspect-[3/4] rounded-xl overflow-hidden bg-base-2 border border-border">
-                                                    <img src={match.image} alt={match.category} className="w-full h-full object-cover" />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-base-01 text-sm italic">No matches found in your closet yet. Try adding more items!</p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex flex-col gap-4 pt-4">
-                            <BuyButton
-                                itemId={item.id}
-                                price={parseFloat(item.price)}
-                                title={item.title}
-                                image={item.images[0]?.image}
-                                size={item.size}
-                            />
-
-                            {/* Message Seller Button */}
                             <Button
-                                onClick={handleMessageSeller}
-                                disabled={messagingLoading}
+                                onClick={handleToggleWishlist}
+                                disabled={wishlistLoading}
                                 variant="outline"
-                                className="w-full py-6 text-lg font-bold border-2 border-base-03/30 text-base-03 hover:bg-base-03/10 rounded-xl transition-all"
+                                size="lg"
+                                className="flex-1"
                             >
-                                {messagingLoading ? (
-                                    <span className="flex items-center gap-2">
-                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-base-03 border-t-transparent" />
-                                        Starting chat...
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-2">
-                                        <MessageCircle className="w-5 h-5" />
-                                        Message Seller
-                                    </span>
-                                )}
+                                <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-current text-error' : ''}`} />
+                                {isWishlisted ? 'Saved' : 'Save'}
                             </Button>
-
-                            <div className="flex gap-4">
-                                <Button
-                                    onClick={handleToggleWishlist}
-                                    disabled={wishlistLoading}
-                                    variant="outline"
-                                    className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10"
-                                >
-                                    <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? 'fill-current text-error' : ''}`} />
-                                    {isWishlisted ? 'Saved' : 'Save'}
-                                </Button>
-                                <Button
-                                    onClick={handleShare}
-                                    variant="outline"
-                                    className="flex-1 h-14 rounded-xl border-base-03/30 text-base-03 hover:bg-base-03/10"
-                                >
-                                    <Share2 className="w-5 h-5 mr-2" />
-                                    {shared ? 'Copied!' : 'Share'}
-                                </Button>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-
-                {/* Reviews Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="mt-16"
-                >
-                    <h2 className="text-3xl font-bold text-white mb-8">Reviews</h2>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {/* Review Form */}
-                        <div>
-                            <ReviewForm
-                                itemId={item.id}
-                                onReviewSubmitted={() => setRefreshReviews(prev => prev + 1)}
-                            />
-                        </div>
-
-                        {/* Review List */}
-                        <div>
-                            <ReviewList itemId={item.id} refreshTrigger={refreshReviews} />
+                            <Button
+                                onClick={handleShare}
+                                variant="outline"
+                                size="lg"
+                                className="flex-1"
+                            >
+                                <Share2 className="h-5 w-5" />
+                                {shared ? 'Copied!' : 'Share'}
+                            </Button>
                         </div>
                     </div>
                 </motion.div>
             </div>
-        </main>
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-16"
+            >
+                <h2 className="font-display mb-8 text-3xl font-semibold text-foreground">Reviews</h2>
+
+                <div className="grid gap-8 md:grid-cols-2">
+                    <div>
+                        <ReviewForm
+                            itemId={item.id}
+                            onReviewSubmitted={() => setRefreshReviews(prev => prev + 1)}
+                        />
+                    </div>
+                    <div>
+                        <ReviewList itemId={item.id} refreshTrigger={refreshReviews} />
+                    </div>
+                </div>
+            </motion.div>
+        </PageShell>
     );
 }

@@ -1,83 +1,90 @@
 @import "tailwindcss";
 
+/*
+ * Paper Editorial — design token layer.
+ *
+ * Migration note: these variable NAMES are the pre-existing Solarized scale
+ * (base-03 … base-3, 390+ usages across the app). Rather than a big-bang
+ * rename, we REMAP the values to the new cool-paper palette so every existing
+ * usage lands correctly immediately. New semantic aliases (--ink, --paper,
+ * --surface, --line, --muted, --accent) are layered on top for new code.
+ * Old names get retired once every call site has migrated to the aliases.
+ *
+ * Every text/background pairing below is WCAG-checked (computed, not
+ * eyeballed) — see the ratio noted next to each. AA normal text needs 4.5:1.
+ */
 :root {
-  /* Solarized Light - Base Colors */
-  --base03: #002b36;
-  --base02: #073642;
-  --base01: #586e75;
-  /* Emphasized content - darker for better contrast */
-  --base00: #657b83;
-  /* Body text - optimal readability */
-  --base0: #839496;
-  /* Comments / secondary content */
-  --base1: #93a1a1;
-  /* De-emphasized content */
-  --base2: #eee8d5;
-  /* Background highlights */
-  --base3: #fdf6e3;
-  /* Main background - warm cream */
+  /* Neutral ramp, darkest -> lightest. True neutral gray — no warmth. */
+  --base03: #0b0b0c;
+  /* ink — primary text/headings. 18.99:1 on paper */
+  --base02: #2b2b2e;
+  /* near-ink — secondary/body text. 13.62:1 on paper */
+  --base01: #55555a;
+  /* tertiary — de-emphasized text. 7.15:1 on paper */
+  --base00: #6e6e73;
+  /* = --muted. 4.89:1 on paper */
+  --base0: #9a9a9f;
+  /* decorative/disabled ONLY — 2.70:1, fails AA for text */
+  --base1: #c4c4c1;
+  /* divider / hover border */
+  --base2: #f1f1ef;
+  /* surface fill (skeletons, hover bg) */
+  --base3: #fbfbf9;
+  /* paper — page canvas */
 
-  /* Solarized Light - Accent Colors */
-  --sol-yellow: #b58900;
-  --sol-orange: #cb4b16;
-  --sol-red: #dc322f;
-  --sol-magenta: #d33682;
-  --sol-violet: #6c71c4;
-  --sol-blue: #268bd2;
-  --sol-cyan: #2aa198;
-  --sol-green: #859900;
+  /* Semantic aliases — prefer these in new code */
+  --ink: var(--base03);
+  --paper: var(--base3);
+  --surface: #ffffff;
+  --line: #e4e4e1;
+  --line-strong: var(--base1);
+  --muted: var(--base00);
 
-  /* Theme Variables - Enhanced for Better Contrast */
-  --background: #fdf6e3;
-  /* Warm cream background */
-  --foreground: #586e75;
-  /* Darker text for better contrast (base01) */
-  --primary: #268bd2;
-  /* Blue for primary actions */
-  --primary-hover: #2075b5;
-  /* Darker blue for hover (10% darker) */
+  /* Theme variables */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --primary: #1a47e8;
+  /* electric blue — 6.52:1 on paper */
+  --primary-hover: #1438b8;
   --primary-foreground: #ffffff;
-  --secondary: #2aa198;
-  /* Cyan for eco-friendly */
-  --secondary-hover: #238b83;
-  /* Darker cyan for hover */
+  --secondary: #0f766e;
+  /* teal — alt accent, sparingly used */
+  --secondary-hover: #0b5c56;
   --secondary-foreground: #ffffff;
-  --muted: #93a1a1;
-  /* Light gray for muted text */
-  --muted-foreground: #657b83;
-  /* Medium gray for readable muted text */
-  --accent: #cb4b16;
-  /* Orange for CTAs */
-  --accent-hover: #a83a12;
-  /* Darker orange for hover */
+  --muted-foreground: var(--base01);
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
   --accent-foreground: #ffffff;
-  --card: #ffffff;
-  /* White for cards */
-  --card-foreground: #586e75;
-  /* Darker text on cards */
-  --border: #d3cbb8;
-  /* Slightly darker beige for better visibility */
-  --border-hover: #93a1a1;
-  /* Gray border on hover */
-  --success: #859900;
-  /* Green for success */
-  --warning: #b58900;
-  /* Yellow for warnings */
-  --error: #dc322f;
-  /* Red for errors */
-  --info: #268bd2;
-  /* Blue for info */
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --border: var(--line);
+  --border-hover: var(--line-strong);
+  --input: var(--line);
+  --success: #15803d;
+  /* 4.84:1 on paper */
+  --warning: #b45309;
+  /* 4.85:1 on paper */
+  --error: #b91c1c;
+  /* 6.24:1 on paper — chosen over #dc2626 (4.66:1) for margin */
+  --info: var(--primary);
 
-  /* Shadow Colors - Complementary to Solarized palette */
-  --shadow-sm: 0 1px 2px 0 rgba(101, 123, 131, 0.05);
-  --shadow: 0 1px 3px 0 rgba(101, 123, 131, 0.1), 0 1px 2px -1px rgba(101, 123, 131, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(101, 123, 131, 0.1), 0 2px 4px -2px rgba(101, 123, 131, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(101, 123, 131, 0.1), 0 4px 6px -4px rgba(101, 123, 131, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(101, 123, 131, 0.1), 0 8px 10px -6px rgba(101, 123, 131, 0.1);
+  /* Shadows — neutral black-based, cool (no warm tint). Low-elevation,
+     editorial: shadows read as "lifted paper," not glow. */
+  --shadow-sm: 0 1px 2px 0 rgba(11, 11, 12, 0.04);
+  --shadow: 0 1px 3px 0 rgba(11, 11, 12, 0.06), 0 1px 2px -1px rgba(11, 11, 12, 0.06);
+  --shadow-md: 0 4px 8px -2px rgba(11, 11, 12, 0.08), 0 2px 4px -2px rgba(11, 11, 12, 0.06);
+  --shadow-lg: 0 12px 20px -4px rgba(11, 11, 12, 0.10), 0 4px 8px -4px rgba(11, 11, 12, 0.06);
+  --shadow-xl: 0 24px 32px -8px rgba(11, 11, 12, 0.14), 0 8px 12px -6px rgba(11, 11, 12, 0.08);
 
-  /* Focus Ring - Blue with opacity */
-  --ring: rgba(38, 139, 210, 0.3);
-  --ring-offset: #fdf6e3;
+  --ring: rgba(26, 71, 232, 0.35);
+  --ring-offset: var(--paper);
+
+  /* Dark glass — ONLY for use over photography/scrims, never over --paper.
+     blur 12px, bg 8-12%, border ~15% per the surgical-glass rule. */
+  --glass-bg: rgba(11, 11, 12, 0.55);
+  --glass-bg-light: rgba(11, 11, 12, 0.10);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-blur: 12px;
 }
 
 @layer utilities {
@@ -97,25 +104,61 @@
     }
   }
 
-  /* Custom shadow utilities */
-  .shadow-warm-sm {
-    box-shadow: var(--shadow-sm);
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+
+    to {
+      background-position: -200% 0;
+    }
   }
 
-  .shadow-warm {
-    box-shadow: var(--shadow);
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
   }
 
-  .shadow-warm-md {
-    box-shadow: var(--shadow-md);
+  @keyframes dropIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
 
-  .shadow-warm-lg {
-    box-shadow: var(--shadow-lg);
+  .animate-drop-in {
+    animation: dropIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .shadow-warm-xl {
-    box-shadow: var(--shadow-xl);
+  /* Surgical glass: dark-tinted glass over imagery only. Never apply to a
+     bare --paper background — on light it must sit over a photo or scrim. */
+  .glass-dark {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+  }
+
+  .glass-light {
+    background: var(--glass-bg-light);
+    border: 1px solid rgba(11, 11, 12, 0.08);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-dark {
+      background: rgba(11, 11, 12, 0.85);
+    }
+
+    .glass-light {
+      background: rgba(255, 255, 255, 0.92);
+    }
   }
 }
 
@@ -130,15 +173,12 @@
   --color-base-2: var(--base2);
   --color-base-3: var(--base3);
 
-  /* Solarized accent colors */
-  --color-sol-yellow: var(--sol-yellow);
-  --color-sol-orange: var(--sol-orange);
-  --color-sol-red: var(--sol-red);
-  --color-sol-magenta: var(--sol-magenta);
-  --color-sol-violet: var(--sol-violet);
-  --color-sol-blue: var(--sol-blue);
-  --color-sol-cyan: var(--sol-cyan);
-  --color-sol-green: var(--sol-green);
+  /* Semantic aliases */
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
 
   /* Theme colors */
   --color-background: var(--background);
@@ -158,28 +198,57 @@
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
   --color-border-hover: var(--border-hover);
+  --color-input: var(--input);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
   --color-info: var(--info);
 
-  /* Shadow colors */
-  --color-shadow-sm: var(--shadow-sm);
-  --color-shadow: var(--shadow);
-  --color-shadow-md: var(--shadow-md);
-  --color-shadow-lg: var(--shadow-lg);
-  --color-shadow-xl: var(--shadow-xl);
-
-  /* Focus ring colors */
   --color-ring: var(--ring);
   --color-ring-offset: var(--ring-offset);
 
+  /* Shadows — real box-shadow namespace this time (was misfiled under
+     --color-shadow-*, which made shadow-md/lg silently fall back to
+     Tailwind's stock gray). */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* --font-display intentionally omitted here: @theme inline only bakes this
+     into an auto-generated .font-display utility (font-family only). The
+     hand-rolled .font-display class below is the canonical one — it also
+     needs letter-spacing/optical-sizing, so it supersedes the auto utility. */
 }
 
+/*
+ * NOTE: @theme inline only inlines --font-sans/--font-display into the
+ * Tailwind utility classes it generates (.font-sans, .font-display) — it
+ * does NOT emit them as standalone, queryable CSS custom properties. A
+ * plain `var(--font-sans)` reference outside a Tailwind-generated utility
+ * is invalid and silently falls through to Preflight's default stack
+ * (verified: this is exactly how the original Arial bug's replacement
+ * would have failed silently). So below we reference the raw next/font
+ * variables (--font-geist-sans, --font-fraunces) directly — confirmed
+ * present on <body> via getComputedStyle, unlike the @theme aliases.
+ */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Display headings default to the editorial serif. Apply .font-display
+   explicitly on the elements that should use it (large headlines only —
+   Fraunces is loaded for display sizes, not body copy). */
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  letter-spacing: -0.03em;
+  font-optical-sizing: auto;
+}
+
+.font-mono-nums {
+  font-variant-numeric: tabular-nums;
 }

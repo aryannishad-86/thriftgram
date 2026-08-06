@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingBag, Trash2, ArrowRight, Loader2 } from 'lucide-react';
+import { X, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 import api from '@/lib/api';
 
 export default function CartDrawer() {
@@ -41,41 +42,44 @@ export default function CartDrawer() {
         <AnimatePresence>
             {isCartOpen && (
                 <>
-                    {/* Backdrop */}
+                    {/* Backdrop scrim — a genuine modal-dimming layer, one of the
+                        permitted glass surfaces. */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={closeCart}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                        className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
                     />
 
-                    {/* Drawer */}
+                    {/* The drawer itself is a flat solid surface, not glass — a
+                        utilitarian form/list overlay has no photography behind it
+                        to blur, and it needs to stay legible over every page in
+                        the app (including plain, content-light ones), not just
+                        image-heavy ones. */}
                     <motion.div
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-black/90 border-l border-white/10 shadow-2xl z-[101] flex flex-col"
+                        className="fixed right-0 top-0 z-[101] flex h-full w-full max-w-md flex-col border-l border-border bg-surface shadow-2xl"
                     >
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-white/10">
+                        <div className="flex items-center justify-between border-b border-border p-6">
                             <div className="flex items-center gap-3">
-                                <ShoppingBag className="h-5 w-5 text-base-03" />
-                                <h2 className="text-xl font-bold">Your Cart ({items.length})</h2>
+                                <ShoppingBag className="h-5 w-5 text-foreground" />
+                                <h2 className="text-xl font-bold text-foreground">Your Cart ({items.length})</h2>
                             </div>
                             <button
                                 onClick={closeCart}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                                className="rounded-full p-2 text-foreground transition-colors hover:bg-base-2"
                             >
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
 
-                        {/* Cart Items */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        <div className="flex-1 space-y-6 overflow-y-auto p-6">
                             {items.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-muted-foreground">
+                                <div className="flex h-full flex-col items-center justify-center space-y-4 text-center text-muted-foreground">
                                     <ShoppingBag className="h-16 w-16 opacity-20" />
                                     <p className="text-lg">Your cart is empty</p>
                                     <Button variant="outline" onClick={closeCart}>
@@ -90,9 +94,9 @@ export default function CartDrawer() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.9 }}
-                                        className="flex gap-4 bg-white/5 p-4 rounded-xl border border-white/5"
+                                        className="flex gap-4 rounded-xl border border-border bg-base-2 p-4"
                                     >
-                                        <div className="h-20 w-20 bg-white/10 rounded-lg overflow-hidden flex-shrink-0">
+                                        <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-base-1">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
                                                 src={item.image}
@@ -100,16 +104,16 @@ export default function CartDrawer() {
                                                 className="h-full w-full object-cover"
                                             />
                                         </div>
-                                        <div className="flex-1 flex flex-col justify-between">
+                                        <div className="flex flex-1 flex-col justify-between">
                                             <div>
-                                                <h3 className="font-medium line-clamp-1">{item.title}</h3>
+                                                <h3 className="line-clamp-1 font-medium text-foreground">{item.title}</h3>
                                                 <p className="text-sm text-muted-foreground">Size: {item.size || 'N/A'}</p>
                                             </div>
-                                            <div className="flex items-center justify-between mt-2">
-                                                <span className="font-bold text-base-03">₹{item.price}</span>
+                                            <div className="mt-2 flex items-center justify-between">
+                                                <span className="font-bold text-foreground">₹{item.price}</span>
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
-                                                    className="text-muted-foreground hover:text-red-400 transition-colors"
+                                                    className="text-muted-foreground transition-colors hover:text-error"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </button>
@@ -120,29 +124,18 @@ export default function CartDrawer() {
                             )}
                         </div>
 
-                        {/* Footer */}
                         {items.length > 0 && (
-                            <div className="p-6 border-t border-white/10 bg-black/50 backdrop-blur-xl">
-                                <div className="flex items-center justify-between mb-4 text-lg font-bold">
+                            <div className="border-t border-border bg-card p-6">
+                                <div className="mb-4 flex items-center justify-between text-lg font-bold text-foreground">
                                     <span>Subtotal</span>
                                     <span>₹{cartTotal.toFixed(2)}</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground mb-2 text-center">
+                                <p className="mb-2 text-center text-xs text-muted-foreground">
                                     Shipping and taxes calculated at checkout.
                                 </p>
-                                {error && (
-                                    <p className="text-sm text-red-400 mb-4 text-center">{error}</p>
-                                )}
-                                <Button
-                                    onClick={handleCheckout}
-                                    disabled={loading}
-                                    className="w-full py-6 text-lg font-bold bg-base-03 hover:bg-base-03/90 disabled:opacity-50"
-                                >
-                                    {loading ? (
-                                        <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
-                                    ) : (
-                                        <>Checkout <ArrowRight className="ml-2 h-5 w-5" /></>
-                                    )}
+                                {error && <Alert variant="error" className="mb-4">{error}</Alert>}
+                                <Button onClick={handleCheckout} disabled={loading} loading={loading} size="lg" className="w-full">
+                                    {loading ? 'Processing...' : <>Checkout <ArrowRight className="ml-2 h-5 w-5" /></>}
                                 </Button>
                             </div>
                         )}

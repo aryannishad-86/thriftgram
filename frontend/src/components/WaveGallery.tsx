@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import api from '@/lib/api';
+import Image from 'next/image';
+import api, { unwrap } from '@/lib/api';
 import styles from './WaveGallery.module.css';
 
 interface FeaturedItem {
@@ -21,8 +22,7 @@ export default function WaveGallery() {
         const fetchFeatured = async () => {
             try {
                 const response = await api.get('/api/items/featured/');
-                const data = response.data.results || response.data;
-                setItems(data);
+                setItems(unwrap<FeaturedItem>(response));
             } catch (err) {
                 console.error('Failed to load featured items:', err);
             } finally {
@@ -32,7 +32,6 @@ export default function WaveGallery() {
         fetchFeatured();
     }, []);
 
-    // Don't render the section if there are no items and not loading
     if (!loading && items.length === 0) {
         return null;
     }
@@ -40,7 +39,7 @@ export default function WaveGallery() {
     return (
         <section className={styles.wrapper}>
             <div>
-                <h2 className={styles.sectionTitle}>Featured Collection</h2>
+                <h2 className={`${styles.sectionTitle} font-display`}>Featured Collection</h2>
                 <div className={styles.gallery}>
                     {loading
                         ? Array.from({ length: 8 }).map((_, i) => (
@@ -57,10 +56,12 @@ export default function WaveGallery() {
                                     href={`/items/${item.id}`}
                                     className={styles.item}
                                 >
-                                    <img
+                                    <Image
                                         src={image}
                                         alt={item.title}
-                                        loading="lazy"
+                                        fill
+                                        sizes="(max-width: 768px) 40vw, 20vw"
+                                        className="object-cover"
                                     />
                                     <div className={styles.overlay}>
                                         <span className={styles.price}>

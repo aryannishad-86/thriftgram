@@ -62,12 +62,16 @@ export default function CountdownTimer({ targetDate, onComplete }: CountdownTime
         const value = timeLeft[interval];
         if (value === undefined) return;
 
+        // Solid ink "flip clock" chips — a deliberate dark accent, not a
+        // glass-on-light leftover: these are opaque fills, not translucent.
         timerComponents.push(
-            <div key={interval} className="flex flex-col items-center mx-2 md:mx-4">
-                <span className="text-3xl md:text-6xl font-bold text-white font-mono">
-                    {value.toString().padStart(2, '0')}
-                </span>
-                <span className="text-xs md:text-sm text-white/50 uppercase tracking-widest mt-2">
+            <div key={interval} className="mx-2 flex flex-col items-center md:mx-3">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-ink md:h-24 md:w-24">
+                    <span className="font-mono text-2xl font-bold text-white md:text-4xl">
+                        {value.toString().padStart(2, '0')}
+                    </span>
+                </div>
+                <span className="mt-3 text-xs uppercase tracking-widest text-muted md:text-sm">
                     {interval}
                 </span>
             </div>
@@ -75,8 +79,8 @@ export default function CountdownTimer({ targetDate, onComplete }: CountdownTime
     });
 
     return (
-        <div className="flex justify-center items-center bg-black/30 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-10">
-            {timerComponents.length ? timerComponents : <span className="text-2xl font-bold text-white">Event Started!</span>}
+        <div className="flex items-center justify-center rounded-3xl border border-border bg-card p-6 md:p-10">
+            {timerComponents.length ? timerComponents : <span className="text-2xl font-bold text-foreground">Event Started!</span>}
         </div>
     );
 }

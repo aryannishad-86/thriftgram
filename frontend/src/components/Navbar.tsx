@@ -24,30 +24,29 @@ export default function Navbar() {
     if (isAuthPage) {
         return (
             <nav className="absolute top-0 z-50 w-full p-8 lg:p-16">
-                <Link href="/" className="text-3xl lg:text-4xl font-bold tracking-tighter text-base-03 hover:text-base-02 transition-colors">
+                <Link href="/" className="font-display text-3xl font-semibold text-ink transition-colors hover:text-ink/70 lg:text-4xl">
                     ThriftGram
                 </Link>
             </nav>
         );
     }
 
+    // Flat solid surface, not glass — nothing in this app scrolls behind a
+    // transparent sticky nav, so per the surgical-glass rule this stays flat.
     return (
-        <nav className="sticky top-0 z-50 w-full bg-base-2/95 backdrop-blur-md border-b border-border transition-all duration-300 shadow-sm">
-            <div className="container mx-auto grid grid-cols-[1fr_auto_1fr] h-[72px] items-center px-4 relative">
-                {/* Logo */}
+        <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95">
+            <div className="container relative mx-auto grid h-[72px] grid-cols-[1fr_auto_1fr] items-center px-4">
                 <div className="flex justify-start">
-                    <Link href="/" className="text-2xl font-bold tracking-tighter text-base-03 hover:text-base-03 transition-colors">
+                    <Link href="/" className="font-display text-2xl font-semibold text-ink transition-colors hover:text-ink/70">
                         ThriftGram
                     </Link>
                 </div>
 
-                {/* Centered Nav Links */}
-                <div className="flex justify-center items-center gap-8">
+                <div className="flex items-center justify-center gap-8">
                     <NavLinks />
                 </div>
 
-                {/* Right Side: Search + Actions */}
-                <div className="flex justify-end items-center gap-4 z-10">
+                <div className="z-10 flex items-center justify-end gap-3">
                     <SearchBar />
                     <NavActions username={username} />
                 </div>
