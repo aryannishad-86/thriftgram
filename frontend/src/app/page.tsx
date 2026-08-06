@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Feed from "@/components/Feed";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 import WaveGallery from "@/components/WaveGallery";
+import { PageShell } from "@/components/layout/page-shell";
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -33,35 +34,26 @@ function HomeContent() {
   }), [search, drop, filters]);
 
   return (
-    <main className="min-h-screen bg-background selection:bg-primary/20">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden py-24 sm:py-32 isolate">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/hero-bg.jpeg"
-            alt="Background"
-            className="h-full w-full object-cover object-[center_70%] opacity-20"
-          />
-        </div>
-
-        {/* Subtle Overlay */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-base-3/80 via-base-3/60 to-base-3" />
-
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-5xl font-bold tracking-tight text-base-03 sm:text-7xl">
+    <PageShell maxWidth="full" noPadding className="selection:bg-primary/20">
+      {/* Hero — typographic, no photo. The old hero used a Studio Ghibli
+          still as a decorative wash (off-brand and copyrighted on a public
+          site); with no reliable product photography to replace it with,
+          the type itself carries the section instead. */}
+      <div className="relative overflow-hidden py-32 sm:py-40">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="font-display text-6xl font-semibold tracking-tight text-foreground sm:text-8xl lg:text-9xl">
             Future of Thrifting.
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-base-02">
-            Discover curated vintage and pre-loved fashion in a premium, immersive marketplace.
-            Sustainable style meets digital art.
+          <p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">
+            Discover curated vintage and pre-loved fashion in a premium marketplace
+            built for sustainable style.
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <a href="#feed" className="rounded-full bg-base-03 px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-base-03/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-base-03 transition-all hover:scale-105">
+            <a href="#feed" className="rounded-full bg-ink px-8 py-3 text-sm font-semibold text-white shadow-md transition-all hover:scale-105 hover:bg-ink/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
               Explore Feed
             </a>
-            <a href="/sell" className="text-sm font-semibold leading-6 text-base-03 hover:text-base-03 transition-colors">
+            <a href="/sell" className="text-sm font-semibold leading-6 text-foreground transition-colors hover:text-muted-foreground">
               Start Selling <span aria-hidden="true">→</span>
             </a>
           </div>
@@ -74,23 +66,22 @@ function HomeContent() {
       {/* Feed Section */}
       <div id="feed" className="container mx-auto px-4 py-16">
         <div className="mb-10">
-          <h2 className="text-2xl font-bold tracking-tight text-base-03 mb-6">
+          <h2 className="font-display mb-6 text-2xl font-semibold tracking-tight text-foreground">
             {searchParams.get('search') ? `Results for "${searchParams.get('search')}"` : 'Trending Now'}
           </h2>
 
-          {/* Advanced Filters */}
           <AdvancedFilters filters={filters} onFiltersChange={setFilters} />
         </div>
 
         <Feed filters={feedFilters} />
       </div>
-    </main>
+    </PageShell>
   );
 }
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="text-base-02">Loading...</div></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background"><div className="text-muted-foreground">Loading...</div></div>}>
       <HomeContent />
     </Suspense>
   );
