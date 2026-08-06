@@ -31,7 +31,9 @@ export interface ItemCardData {
     price: string;
     size?: string;
     condition?: string;
-    images: { id: number; image: string }[];
+    // Only .image is ever read — id isn't required, so callers with a
+    // narrower shape (e.g. wishlist's API response) don't need to fake one.
+    images: { image: string }[];
     likes_count?: number;
     is_liked?: boolean;
 }

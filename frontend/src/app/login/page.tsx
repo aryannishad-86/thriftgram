@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import api, { coldStartEvents } from '@/lib/api';
 import { Input } from '@/components/ui/input';
@@ -34,7 +33,6 @@ const FEATURES = [
 ];
 
 export default function LoginPage() {
-    const router = useRouter();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);

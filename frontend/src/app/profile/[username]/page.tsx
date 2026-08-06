@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { User, Edit, Instagram, Twitter, Globe, Users } from 'lucide-react';
+import { User, Edit, Instagram, Twitter, Globe } from 'lucide-react';
 import Image from 'next/image';
 import api from '@/lib/api';
 import Feed from '@/components/Feed';
 import FollowButton from '@/components/FollowButton';
+import { Card } from '@/components/ui/card';
+import { PageShell } from '@/components/layout/page-shell';
 
 interface UserProfile {
     id: number;
@@ -69,60 +71,48 @@ export default function ProfilePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center pt-20">
-                <div className="text-base-02">Loading profile...</div>
+            <div className="flex min-h-screen items-center justify-center bg-background pt-20">
+                <div className="text-muted-foreground">Loading profile...</div>
             </div>
         );
     }
 
     if (!user) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center pt-20">
-                <div className="text-base-02">User not found</div>
+            <div className="flex min-h-screen items-center justify-center bg-background pt-20">
+                <div className="text-muted-foreground">User not found</div>
             </div>
         );
     }
 
     return (
-        <main className="min-h-screen bg-background pt-24 pb-12 px-4">
-            <div className="container mx-auto max-w-4xl">
-                {/* Profile Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-card border border-border rounded-3xl p-8 mb-8 shadow-sm"
-                >
-                    <div className="flex flex-col md:flex-row gap-6 items-start">
-                        {/* Profile Picture */}
-                        <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-border bg-base-2 flex-shrink-0">
+        <PageShell maxWidth="4xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+                <Card padding="lg" className="shadow-sm">
+                    <div className="flex flex-col items-start gap-6 md:flex-row">
+                        <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-full border-4 border-border bg-base-2">
                             {user.profile_picture ? (
-                                <Image
-                                    src={user.profile_picture}
-                                    alt={user.username}
-                                    fill
-                                    className="object-cover"
-                                />
+                                <Image src={user.profile_picture} alt={user.username} fill className="object-cover" />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center">
-                                    <User className="h-16 w-16 text-base-01" />
+                                    <User className="h-16 w-16 text-muted" />
                                 </div>
                             )}
                         </div>
 
-                        {/* Profile Info */}
                         <div className="flex-1">
-                            <div className="flex items-start justify-between mb-4">
+                            <div className="mb-4 flex items-start justify-between">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-base-03">@{user.username}</h1>
-                                    {user.bio && <p className="mt-2 text-base-02">{user.bio}</p>}
+                                    <h1 className="font-display text-3xl font-semibold text-foreground">@{user.username}</h1>
+                                    {user.bio && <p className="mt-2 text-muted-foreground">{user.bio}</p>}
                                 </div>
 
                                 {isOwnProfile ? (
                                     <button
                                         onClick={() => router.push('/profile/edit')}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-base-2 text-base-03 border border-border hover:bg-base-1 transition-colors"
+                                        className="flex items-center gap-2 rounded-full border border-border bg-base-2 px-4 py-2 text-foreground transition-colors hover:bg-base-1"
                                     >
-                                        <Edit className="w-4 h-4" />
+                                        <Edit className="h-4 w-4" />
                                         Edit Profile
                                     </button>
                                 ) : (
@@ -134,23 +124,21 @@ export default function ProfilePage() {
                                 )}
                             </div>
 
-                            {/* Stats */}
-                            <div className="flex gap-6 mb-4">
+                            <div className="mb-4 flex gap-6">
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-base-03">{user.followers_count}</div>
-                                    <div className="text-sm text-base-02">Followers</div>
+                                    <div className="text-2xl font-bold text-foreground">{user.followers_count}</div>
+                                    <div className="text-sm text-muted-foreground">Followers</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-base-03">{user.following_count}</div>
-                                    <div className="text-sm text-base-02">Following</div>
+                                    <div className="text-2xl font-bold text-foreground">{user.following_count}</div>
+                                    <div className="text-sm text-muted-foreground">Following</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-base-03">{user.eco_points}</div>
-                                    <div className="text-sm text-base-02">Eco Points</div>
+                                    <div className="text-2xl font-bold text-foreground">{user.eco_points}</div>
+                                    <div className="text-sm text-muted-foreground">Eco Points</div>
                                 </div>
                             </div>
 
-                            {/* Social Links */}
                             {user.social_links && Object.keys(user.social_links).length > 0 && (
                                 <div className="flex gap-3">
                                     {user.social_links.instagram && (
@@ -158,9 +146,9 @@ export default function ProfilePage() {
                                             href={`https://instagram.com/${user.social_links.instagram.replace('@', '')}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-2 rounded-full bg-base-2 text-base-03 hover:bg-primary hover:text-white transition-colors"
+                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-white"
                                         >
-                                            <Instagram className="w-5 h-5" />
+                                            <Instagram className="h-5 w-5" />
                                         </a>
                                     )}
                                     {user.social_links.twitter && (
@@ -168,9 +156,9 @@ export default function ProfilePage() {
                                             href={`https://twitter.com/${user.social_links.twitter.replace('@', '')}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-2 rounded-full bg-base-2 text-base-03 hover:bg-primary hover:text-white transition-colors"
+                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-white"
                                         >
-                                            <Twitter className="w-5 h-5" />
+                                            <Twitter className="h-5 w-5" />
                                         </a>
                                     )}
                                     {user.social_links.website && (
@@ -178,35 +166,33 @@ export default function ProfilePage() {
                                             href={user.social_links.website}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-2 rounded-full bg-base-2 text-base-03 hover:bg-primary hover:text-white transition-colors"
+                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-white"
                                         >
-                                            <Globe className="w-5 h-5" />
+                                            <Globe className="h-5 w-5" />
                                         </a>
                                     )}
                                 </div>
                             )}
 
-                            {/* Eco Impact */}
                             <div className="mt-4 flex gap-4 text-sm">
-                                <div className="flex items-center gap-2 text-base-02">
+                                <div className="flex items-center gap-2 text-muted-foreground">
                                     <span className="font-semibold text-success">{user.co2_saved.toFixed(1)}kg</span>
                                     CO₂ saved
                                 </div>
-                                <div className="flex items-center gap-2 text-base-02">
-                                    <span className="font-semibold text-base-03">{user.water_saved.toFixed(0)}L</span>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <span className="font-semibold text-foreground">{user.water_saved.toFixed(0)}L</span>
                                     Water saved
                                 </div>
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </Card>
+            </motion.div>
 
-                {/* User's Listings */}
-                <div>
-                    <h2 className="text-2xl font-bold text-base-03 mb-6">Listings</h2>
-                    <Feed filters={{ seller_username: username }} />
-                </div>
+            <div>
+                <h2 className="mb-6 text-2xl font-bold text-foreground">Listings</h2>
+                <Feed filters={{ seller_username: username }} />
             </div>
-        </main>
+        </PageShell>
     );
 }
