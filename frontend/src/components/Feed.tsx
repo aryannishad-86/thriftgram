@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, ShoppingBag } from 'lucide-react';
 import api from '@/lib/api';
 import ItemCard, { Item } from './ItemCard';
 import SkeletonCard from './SkeletonCard';
+import { EmptyState } from './ui/empty-state';
+import { Button } from './ui/button';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 export default function Feed({ filters }: { filters?: Record<string, unknown> }) {
@@ -103,36 +105,23 @@ export default function Feed({ filters }: { filters?: Record<string, unknown> })
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="p-4 rounded-full bg-red-500/10 mb-4">
-                    <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <p className="text-red-400 font-medium">{error}</p>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="mt-4 text-sm text-white/60 hover:text-white underline underline-offset-4 transition-colors"
-                >
-                    Try refreshing
-                </button>
-            </div>
+            <EmptyState
+                icon={AlertTriangle}
+                title="Something went wrong"
+                description={error}
+                action={<Button variant="outline" onClick={() => window.location.reload()}>Try refreshing</Button>}
+            />
         );
     }
 
     if (items.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-32 text-center">
-                <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
-                    <svg className="w-10 h-10 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-base-03 mb-2">No items yet</h3>
-                <p className="text-base-02 max-w-sm mx-auto">
-                    Be the first to list a unique find and start the collection.
-                </p>
-            </div>
+            <EmptyState
+                icon={ShoppingBag}
+                title="No items yet"
+                description="Be the first to list a unique find and start the collection."
+                className="py-32"
+            />
         );
     }
 

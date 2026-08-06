@@ -42,8 +42,8 @@ export default function RippleText({ text, className, fontSize = 60, colors }: R
         if (!ctx) return;
 
         let animationFrameId: number;
-        let width = canvas.offsetWidth;
-        let height = canvas.offsetHeight;
+        const width = canvas.offsetWidth;
+        const height = canvas.offsetHeight;
 
         // Handle high DPI displays
         const dpr = window.devicePixelRatio || 1;

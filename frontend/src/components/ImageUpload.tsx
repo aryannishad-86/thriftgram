@@ -74,7 +74,7 @@ export default function ImageUpload({ onChange }: ImageUploadProps) {
                                     e.stopPropagation();
                                     handleRemove(index);
                                 }}
-                                className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white backdrop-blur-sm transition-colors hover:bg-red-500"
+                                className="glass-dark absolute right-1 top-1 rounded-full p-1 text-white transition-colors hover:bg-error hover:border-error"
                             >
                                 <X className="h-3 w-3" />
                             </button>
