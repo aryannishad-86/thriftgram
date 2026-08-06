@@ -48,9 +48,10 @@ export default function RootLayout({
             <SmoothScrolling>
               <Navbar />
               <CartDrawer />
-              <main className="min-h-screen">
-                {children}
-              </main>
+              {/* Every page renders its own single <main> via PageShell —
+                  this used to also wrap in <main>, producing an invalid
+                  nested-landmark document on every page. */}
+              {children}
             </SmoothScrolling>
           </ErrorBoundary>
         </Providers>

@@ -1,9 +1,12 @@
+'use client';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart } from 'lucide-react';
+import { Heart, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 export interface Item {
     id: number;
@@ -22,10 +25,43 @@ export interface Item {
     };
 }
 
-export default function ItemCard({ item: initialItem }: { item: Item }) {
+export interface ItemCardData {
+    id: number;
+    title: string;
+    price: string;
+    size?: string;
+    condition?: string;
+    images: { id: number; image: string }[];
+    likes_count?: number;
+    is_liked?: boolean;
+}
+
+export interface ItemCardProps {
+    item: ItemCardData;
+    href?: string;
+    /** Wishlist "remove" action — when given, replaces the like button with
+     * a remove button (a card only ever gets one corner action). */
+    onRemove?: () => void;
+    /** Extra line under the price — e.g. "by @seller" or "Added Jan 3". */
+    meta?: React.ReactNode;
+    className?: string;
+}
+
+/**
+ * The one marketplace item card — replaces 3 previous independent
+ * implementations (feed 4:5 dark-glass, wishlist 1:1 light, closet 3:4
+ * light) with a single component at one canonical aspect ratio.
+ *
+ * This is the reference implementation of the surgical-glass rule: the
+ * bottom price/title scrim is a plain gradient (real photography behind
+ * it, no blur needed), and the corner action button is the one genuine
+ * "glass over photo" surface — `.glass-dark` from globals.css.
+ */
+export default function ItemCard({ item: initialItem, href, onRemove, meta, className }: ItemCardProps) {
     const [item, setItem] = useState(initialItem);
     const [isLiking, setIsLiking] = useState(false);
     const mainImage = item.images.length > 0 ? item.images[0].image : '/placeholder.jpg';
+    const canLike = !onRemove && item.is_liked !== undefined && item.likes_count !== undefined;
 
     const handleLike = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -33,12 +69,11 @@ export default function ItemCard({ item: initialItem }: { item: Item }) {
         if (isLiking) return;
 
         setIsLiking(true);
-        // Optimistic update
         const previousState = { ...item };
         setItem(prev => ({
             ...prev,
             is_liked: !prev.is_liked,
-            likes_count: prev.is_liked ? prev.likes_count - 1 : prev.likes_count + 1
+            likes_count: (prev.likes_count ?? 0) + (prev.is_liked ? -1 : 1),
         }));
 
         try {
@@ -48,7 +83,6 @@ export default function ItemCard({ item: initialItem }: { item: Item }) {
                 await api.post(`/api/items/${item.id}/like/`);
             }
         } catch (error) {
-            // Revert on failure
             console.error('Failed to toggle like:', error);
             setItem(previousState);
         } finally {
@@ -56,50 +90,71 @@ export default function ItemCard({ item: initialItem }: { item: Item }) {
         }
     };
 
+    const handleRemove = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onRemove?.();
+    };
+
     return (
         <motion.div
-            whileHover={{ y: -8 }}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-500 hover:border-primary/80 hover:shadow-[0_0_40px_-5px_rgba(109,40,217,0.6)]"
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+            className={cn(
+                "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow duration-300 hover:shadow-lg",
+                className
+            )}
         >
-            {/* Image Container */}
-            <div className="aspect-[4/5] relative overflow-hidden bg-secondary/50">
+            <div className="relative aspect-[4/5] overflow-hidden bg-base-2">
                 <Image
                     src={mainImage}
                     alt={item.title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
 
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleLike}
-                    className="absolute right-3 top-3 rounded-full bg-black/40 p-2.5 text-white backdrop-blur-md border border-white/10 transition-all hover:bg-white hover:text-red-500 z-10 hover:border-transparent"
-                >
-                    <Heart className={`h-4 w-4 ${item.is_liked ? 'fill-red-500 text-red-500' : ''} ${isLiking ? 'animate-pulse' : ''}`} />
-                </motion.button>
-
-                {/* Overlay Content */}
-                <div className="absolute bottom-0 left-0 w-full p-4 translate-y-2 opacity-90 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                    <div className="flex justify-between items-end mb-1">
-                        <div className="flex-1 min-w-0 mr-2">
-                            <p className="font-bold text-white text-xl tracking-tight">₹{item.price}</p>
-                            <h3 className="font-medium text-white/90 line-clamp-1 text-sm truncate">{item.title}</h3>
+                {/* Bottom scrim + info — always visible, not hover-gated (hiding
+                    price behind hover doesn't work on touch devices). Plain
+                    gradient, not glass — there's real photography behind it,
+                    no translucent surface needed. */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                    <p className="text-lg font-semibold tracking-tight text-white">₹{item.price}</p>
+                    <h3 className="truncate text-sm text-white/85">{item.title}</h3>
+                    {meta && <p className="mt-0.5 truncate text-xs text-white/60">{meta}</p>}
+                    {(item.size || item.condition) && (
+                        <div className="mt-2 flex items-center gap-2 text-xs font-medium text-white/60">
+                            {item.size && <span className="rounded bg-white/10 px-2 py-0.5 text-white/80">{item.size}</span>}
+                            {item.condition && <span className="uppercase tracking-wider">{item.condition.replace('_', ' ')}</span>}
                         </div>
-                        <div className="text-xs text-white/70 flex items-center gap-1 bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm border border-white/5">
-                            <Heart className="h-3 w-3 fill-white/70" /> {item.likes_count}
-                        </div>
-                    </div>
-                    <div className="mt-2 flex items-center gap-2 text-xs text-white/60 font-medium">
-                        <span className="bg-white/10 px-2 py-0.5 rounded text-white/80">{item.size}</span>
-                        <span>•</span>
-                        <span className="uppercase tracking-wider">{item.condition.replace('_', ' ')}</span>
-                    </div>
+                    )}
                 </div>
+
+                {/* The one genuine glass-over-photo surface on this card. */}
+                {canLike && (
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleLike}
+                        aria-label={item.is_liked ? 'Unlike' : 'Like'}
+                        className="glass-dark absolute right-3 top-3 z-10 rounded-full p-2.5 text-white transition-colors hover:bg-error hover:border-error"
+                    >
+                        <Heart className={cn('h-4 w-4', item.is_liked && 'fill-current', isLiking && 'animate-pulse')} />
+                    </motion.button>
+                )}
+                {onRemove && (
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleRemove}
+                        aria-label="Remove"
+                        className="glass-dark absolute right-3 top-3 z-10 rounded-full p-2.5 text-white transition-colors hover:bg-error hover:border-error"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </motion.button>
+                )}
             </div>
 
-            <Link href={`/items/${item.id}`} className="absolute inset-0">
-                <span className="sr-only">View Item</span>
+            <Link href={href ?? `/items/${item.id}`} className="absolute inset-0">
+                <span className="sr-only">View {item.title}</span>
             </Link>
         </motion.div>
     );

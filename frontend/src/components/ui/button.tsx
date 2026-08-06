@@ -1,62 +1,88 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { motion } from "framer-motion"
+import { cva, type VariantProps } from "class-variance-authority"
+import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// One button radius everywhere (rounded-full) — the previous base rounded-xl
+// vs. per-caller rounded-full override was exactly the "two systems on one
+// page" problem this redesign exists to fix. Settle on one shape.
+const buttonVariants = cva(
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+    {
+        variants: {
+            variant: {
+                primary: "bg-ink text-white hover:bg-ink/90",
+                secondary: "bg-primary text-primary-foreground hover:bg-primary-hover",
+                outline: "border border-ink/30 text-ink bg-transparent hover:border-ink hover:bg-ink hover:text-white",
+                ghost: "text-ink hover:bg-base-2",
+                link: "text-ink underline-offset-4 hover:underline rounded-none p-0 h-auto font-medium",
+                danger: "bg-error text-white hover:bg-error/90",
+            },
+            size: {
+                sm: "h-9 px-4 text-sm",
+                md: "h-11 px-6 text-sm",
+                lg: "h-14 px-8 text-base",
+                icon: "h-10 w-10",
+            },
+        },
+        defaultVariants: { variant: "primary", size: "md" },
+    }
+)
+
+// Both the plain <button> and the asChild <Slot> get the SAME hover/tap
+// spring — motion.create(Component) makes any ref-forwarding, single-child
+// component motion-capable. This replaces the old motion.div wrapper, which
+// silently dropped the animation whenever asChild was set (every <Link>
+// button in the app).
+const MotionButton = motion.create("button")
+const MotionSlot = motion.create(Slot)
+
+const tapMotion = {
+    whileHover: { scale: 1.03, y: -1 },
+    whileTap: { scale: 0.97 },
+    transition: { type: "spring" as const, stiffness: 400, damping: 20 },
+}
+
+// framer-motion's motion.create() props (onDrag, onAnimationStart, etc.) clash
+// with the native HTML event handlers of the same name but different
+// signatures — omit the native ones so the motion versions win.
+type NativeConflicts = "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration"
+
 export interface ButtonProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, NativeConflicts>,
+    VariantProps<typeof buttonVariants> {
     asChild?: boolean
-    variant?: 'default' | 'outline' | 'ghost' | 'link'
-    size?: 'default' | 'sm' | 'lg' | 'icon'
+    loading?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant = 'default', size = 'default', asChild = false, ...props }, ref) => {
-        const Comp = asChild ? Slot : "button"
-
-        const variants = {
-            default: "bg-base-03 text-white hover:bg-base-03/90 shadow-md hover:shadow-lg",
-            outline: "border-2 border-base-03 bg-transparent text-base-03 hover:bg-base-03 hover:text-white",
-            ghost: "hover:bg-base-03/10 hover:text-base-03",
-            link: "text-base-03 underline-offset-4 hover:underline",
-        }
-
-        const sizes = {
-            default: "h-10 px-4 py-2",
-            sm: "h-9 rounded-md px-3",
-            lg: "h-11 rounded-md px-8",
-            icon: "h-10 w-10",
-        }
-
-        const buttonContent = (
-            <Comp
-                className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-bold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-03 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                    variants[variant],
-                    sizes[size],
-                    className
-                )}
-                ref={ref}
-                {...props}
-            />
-        )
+    ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
+        const classes = cn(buttonVariants({ variant, size }), className)
 
         if (asChild) {
-            return buttonContent
+            return (
+                <MotionSlot ref={ref} className={classes} {...tapMotion} {...props}>
+                    {children}
+                </MotionSlot>
+            )
         }
 
         return (
-            <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="inline-block"
+            <MotionButton
+                ref={ref}
+                className={classes}
+                disabled={disabled || loading}
+                {...tapMotion}
+                {...props}
             >
-                {buttonContent}
-            </motion.div>
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {children}
+            </MotionButton>
         )
     }
 )
 Button.displayName = "Button"
 
-export { Button }
+export { Button, buttonVariants }
