@@ -7,12 +7,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from .models import Item, Like, ClosetItem, DropEvent, Follow, Order, Review, Wishlist
 from .serializers import (
     ItemSerializer, UserSerializer, UserProfileSerializer, ClosetItemSerializer,
-    DropEventSerializer, FollowSerializer, OrderSerializer, ReviewSerializer, WishlistSerializer
+    DropEventSerializer, FollowSerializer, OrderSerializer, ReviewSerializer, WishlistSerializer,
+    LeaderboardEntrySerializer
 )
 from .ai_service import AIService
+from .caching import LEADERBOARD_KEY, FEATURED_ITEMS_ANON_KEY, DEFAULT_TTL_SECONDS
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -106,14 +109,48 @@ class LogoutView(APIView):
 
 class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('-eco_points')
-    serializer_class = UserSerializer
+    # LeaderboardEntrySerializer, not the full UserSerializer: leaderboard
+    # entries have no follow button (verified against the frontend), so
+    # followers_count/following_count/is_following were pure waste (3
+    # queries/entry — the P0 audit's "31 queries" for this endpoint). More
+    # importantly, is_following is personalized per viewer, which would have
+    # made caching this response (below) actively incorrect — one viewer's
+    # follow state leaking into what every other viewer receives.
+    serializer_class = LeaderboardEntrySerializer
     permission_classes = [permissions.AllowAny]
 
     def list(self, request, *args, **kwargs):
-        # Return top 10 users
+        # Top 10 is the actual product intent here (a leaderboard, not a
+        # browsable ranked list of every user) — deliberately NOT switching
+        # to DRF's real pagination (which would page through the full user
+        # table). What was wrong was the envelope: a bare array instead of
+        # the {count,next,previous,results} shape every other collection
+        # endpoint returns. next/previous are always null since this is a
+        # fixed top-10, not a real page. frontend/src/lib/api.ts's unwrap()
+        # already tolerates both shapes (checked before making this change),
+        # so no frontend change was needed.
+        #
+        # H5: cached — this response is now identical for every caller
+        # (LeaderboardEntrySerializer carries nothing personalized), so one
+        # shared cache entry is correct for all viewers, not just anonymous
+        # ones. Invalidated explicitly by invalidate_leaderboard_cache in
+        # core/signals.py on every CustomUser save (the only way eco_points
+        # changes — see core/signals.py's three award_* receivers, all of
+        # which go through user.save()); DEFAULT_TTL_SECONDS is the backstop.
+        cached = cache.get(LEADERBOARD_KEY)
+        if cached is not None:
+            return Response(cached)
+
         queryset = self.get_queryset()[:10]
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        payload = {
+            'count': len(serializer.data),
+            'next': None,
+            'previous': None,
+            'results': serializer.data,
+        }
+        cache.set(LEADERBOARD_KEY, payload, DEFAULT_TTL_SECONDS)
+        return Response(payload)
 
 class ClosetItemViewSet(viewsets.ModelViewSet):
     serializer_class = ClosetItemSerializer
@@ -291,7 +328,8 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
-        # Eco points awarded by post_save signal in core/signals.py
+        # Eco points awarded + featured() cache invalidated by post_save
+        # signals in core/signals.py
 
     @action(detail=True, methods=['post'])
     def analyze(self, request, pk=None):
@@ -325,13 +363,37 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
     def featured(self, request):
-        """Return featured items for the homepage gallery"""
+        """Return featured items for the homepage gallery.
+
+        H5: cached, but ONLY for anonymous requests. ItemSerializer.is_liked
+        is per-viewer personalized data — caching a response computed for
+        one logged-in user and serving it to the next caller would
+        misreport their like state (or leak another user's). Anonymous
+        callers always get is_liked=False deterministically (see
+        _annotate_is_liked), so a single shared cache entry is correct for
+        all of them — and a public homepage gallery is disproportionately
+        anonymous traffic anyway. Invalidated on every Item save (see
+        invalidate_featured_cache in core/signals.py — covers create AND
+        field edits, any creation path) and explicitly on the is_sold flip
+        in handle_checkout_completion below (a bulk .update(), which doesn't
+        fire that signal); DEFAULT_TTL_SECONDS is the backstop if either is
+        ever missed."""
+        if not request.user.is_authenticated:
+            cached = cache.get(FEATURED_ITEMS_ANON_KEY)
+            if cached is not None:
+                return Response(cached)
+
         items = Item.objects.filter(is_sold=False).select_related('seller').prefetch_related(
             'images', 'likes', 'reviews'
         ).order_by('-created_at')
         items = _annotate_is_liked(items, request.user)[:12]  # annotate before slicing — a sliced queryset can't be chained further
         serializer = self.get_serializer(items, many=True, context={'request': request})
-        return Response(serializer.data)
+        data = serializer.data
+
+        if not request.user.is_authenticated:
+            cache.set(FEATURED_ITEMS_ANON_KEY, data, DEFAULT_TTL_SECONDS)
+
+        return Response(data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
@@ -479,21 +541,25 @@ class WishlistViewSet(viewsets.ModelViewSet):
         item_id = request.data.get('item')
         if not item_id:
             return Response({'error': 'item ID is required'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             item = Item.objects.get(id=item_id)
         except Item.DoesNotExist:
             return Response({'error': 'Item not found'}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        # Was two different response shapes for the same endpoint (a full
+        # serialized object on 201 vs a bare {'status': ...} string on 200) —
+        # get_or_create's second branch isn't an error, the caller's actual
+        # goal (item is in their wishlist) is satisfied either way, so both
+        # paths now return the same WishlistSerializer shape and let the
+        # status code (201 vs 200) carry the created-vs-already-existed
+        # distinction, same as every other endpoint in the API.
         wishlist, created = Wishlist.objects.get_or_create(
             user=request.user,
             item=item
         )
-        
-        if created:
-            serializer = self.get_serializer(wishlist)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({'status': 'already in wishlist'})
+        serializer = self.get_serializer(wishlist)
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
     
     @action(detail=False, methods=['delete'], permission_classes=[permissions.IsAuthenticated])
     def remove(self, request):
@@ -690,3 +756,8 @@ def handle_checkout_completion(session):
             order.stripe_payment_intent_id = payment_intent_id
             order.save()  # PENDING→PAID triggers award_points_for_purchase + order emails
             Item.objects.filter(id=order.item_id).update(is_sold=True)
+            # A sold item must drop out of featured()'s top-12 immediately, not
+            # after up to DEFAULT_TTL_SECONDS — .update() is a bulk queryset
+            # write and doesn't fire Item's post_save signal, so this can't be
+            # caught by a signal handler the way leaderboard's invalidation is.
+            cache.delete(FEATURED_ITEMS_ANON_KEY)
