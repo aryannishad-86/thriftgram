@@ -1,5 +1,7 @@
+from django.core.cache import cache
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from .caching import LEADERBOARD_KEY, FEATURED_ITEMS_ANON_KEY
 from .models import Item, Order, EcoPointsHistory, CustomUser
 
 
@@ -92,5 +94,38 @@ def award_profile_completion_bonus(sender, instance, created, **kwargs):
                 points=points,
                 description='Completed profile with bio and picture'
             )
-            
+
             instance.update_tier()
+
+
+@receiver(post_save, sender=Item)
+def invalidate_featured_cache(sender, instance, **kwargs):
+    """H5: ItemViewSet.featured() caches its response for anonymous callers
+    (see core/views.py) — invalidated here on every Item save, create OR
+    update, rather than only from ItemViewSet.perform_create. A view-level
+    hook only fires for items created through POST /api/items/ — it misses
+    the Django admin, a management command, or (concretely, caught by a
+    test) any direct Item.objects.create(...) call. A signal fires
+    regardless of how the save happened. Also covers title/price/image
+    edits now, not just creation, which the original view-level hook didn't
+    (those were left to DEFAULT_TTL_SECONDS as a backstop). The one write
+    this can't catch is the is_sold flip in handle_checkout_completion,
+    which uses a bulk .update() — that keeps its own explicit cache.delete()
+    at the call site (see core/views.py) for exactly that reason."""
+    cache.delete(FEATURED_ITEMS_ANON_KEY)
+
+
+@receiver(post_save, sender=CustomUser)
+def invalidate_leaderboard_cache(sender, instance, **kwargs):
+    """H5: LeaderboardViewSet caches its response (see core/views.py) —
+    invalidated here on every CustomUser save rather than trying to hook
+    each of the three eco_points-award call sites above individually. All
+    three go through user.save()/instance.save(...), a real Model.save()
+    (not a bulk .update(), which wouldn't fire this), so this one receiver
+    reliably catches every current and future eco_points-changing path.
+    Deliberately unconditional/eager rather than checking whether
+    eco_points specifically changed — invalidating a cheap-to-recompute
+    top-10 query slightly more often than strictly necessary costs nothing
+    meaningful, and is simpler and harder to accidentally miss a case with
+    than tracking per-field diffs would be."""
+    cache.delete(LEADERBOARD_KEY)

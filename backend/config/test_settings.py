@@ -38,3 +38,16 @@ STORAGES = {
 
 STRIPE_SECRET_KEY = 'sk_test_dummy'
 STRIPE_WEBHOOK_SECRET = 'whsec_dummy'
+
+# DatabaseCache needs its table created via `manage.py createcachetable`,
+# which is a plain management command, not a tracked migration — the test
+# runner's automatic migrate-then-run-tests flow has no hook for it. Rather
+# than add cache-table setup to the test bootstrap, swap in LocMemCache here:
+# same cache API, same behavior for what the tests actually check
+# (cache hit/miss, key presence, invalidation), zero extra test
+# infrastructure.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}

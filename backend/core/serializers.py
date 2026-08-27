@@ -29,6 +29,21 @@ class UserSummarySerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'profile_picture']
 
 
+class LeaderboardEntrySerializer(serializers.ModelSerializer):
+    """Leaderboard-specific shape: exactly the fields the leaderboard page
+    reads (verified against its TypeScript interface) and nothing
+    per-viewer-personalized. The full UserSerializer's followers_count/
+    following_count/is_following are both wasted work here (not rendered —
+    a leaderboard entry has no follow button) and, worse, is_following
+    specifically made this endpoint's response depend on WHO was asking,
+    which would have made caching it (see LeaderboardViewSet) actively
+    incorrect — one viewer's follow relationships leaking into the cached
+    response every other viewer receives."""
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'profile_picture', 'eco_points', 'co2_saved', 'water_saved']
+
+
 class UserSerializer(serializers.ModelSerializer):
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()

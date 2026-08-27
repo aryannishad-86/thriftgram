@@ -172,7 +172,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
-    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
     # Rate Limiting
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -184,6 +184,23 @@ REST_FRAMEWORK = {
         'login': '5/minute',
         'register': '3/hour',
     },
+}
+
+# H5: previously absent entirely, which meant DRF's throttling used Django's
+# implicit LocMemCache default — in-process, per-instance memory. On Cloud
+# Run's maxScale=3, that's up to 3 independent counters for the same client:
+# the register (3/hr) and login (5/min) throttles were meaningfully
+# bypassable just by getting unlucky/lucky across instances, and every
+# counter resets on a cold start regardless. DatabaseCache is shared across
+# instances at $0 (no new service — Redis is out of scope here), which is
+# what makes throttling actually correct, and is also what backs the
+# response caching added below (leaderboard/featured). createcachetable runs
+# on every container boot (see Dockerfile) — idempotent, verified.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache_table',
+    }
 }
 
 SITE_ID = 1
