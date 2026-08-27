@@ -140,7 +140,16 @@ class Order(models.Model):
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='purchases')
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='orders')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    stripe_payment_intent = models.CharField(max_length=255, blank=True)
+    # Renamed from stripe_payment_intent (which never actually held a
+    # PaymentIntent id — it held the Checkout Session id, cs_..., because that's
+    # the only id available at order-creation time). NOT unique: a multi-item
+    # cart creates one Order per item, all sharing the same session id.
+    stripe_checkout_session_id = models.CharField(max_length=255, blank=True, db_index=True)
+    # The real PaymentIntent id (pi_...), captured from the webhook payload once
+    # the session completes. This is what refunds/disputes actually key off of
+    # in the Stripe dashboard — the session id alone can't be reconciled against
+    # a charge. Null until the order is fulfilled.
+    stripe_payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -154,6 +163,21 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} - {self.item.title}"
+
+
+class ProcessedStripeEvent(models.Model):
+    """One row per successfully-processed Stripe webhook event id. Stripe
+    retries deliveries (e.g. if our response is slow), and this table is the
+    hard guard against double-fulfillment on a retry: an insert with a
+    duplicate event_id fails on the unique constraint, which is enforced by
+    the database itself rather than a read-then-write check in application
+    code (which a concurrent retry could still race)."""
+    event_id = models.CharField(max_length=255, unique=True)
+    event_type = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.event_type} ({self.event_id})"
 
 
 class Review(models.Model):

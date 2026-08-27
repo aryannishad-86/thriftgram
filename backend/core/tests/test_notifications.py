@@ -25,13 +25,21 @@ def test_no_email_on_pending_order(item_factory, user_factory, spy_emails):
     assert spy_emails['seller'] == 0
 
 
-def test_emails_sent_on_paid(item_factory, user_factory, spy_emails):
+def test_emails_sent_on_paid(item_factory, user_factory, spy_emails, django_capture_on_commit_callbacks):
+    """order_paid's send_* calls are wrapped in transaction.on_commit (see
+    notifications/signals.py — deferred so they never fire if the enclosing
+    transaction rolls back, and so they run after select_for_update() locks
+    release). pytest-django wraps each test in a transaction that's rolled
+    back at the end, so on_commit callbacks never fire on their own here —
+    django_capture_on_commit_callbacks(execute=True) is pytest-django's
+    fixture for exercising them without a real commit."""
     item = item_factory()
     buyer = user_factory(username='buyer')
     order = Order.objects.create(buyer=buyer, item=item, status='PENDING', total_amount=item.price)
 
-    order.status = 'PAID'
-    order.save()
+    with django_capture_on_commit_callbacks(execute=True):
+        order.status = 'PAID'
+        order.save()
 
     assert spy_emails['confirmation'] == 1
     assert spy_emails['seller'] == 1

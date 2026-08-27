@@ -118,6 +118,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'ThriftGram <noreply@thriftgram.com>')
+# smtplib has no timeout by default (blocks indefinitely on a hung server).
+# Emails now fire via transaction.on_commit (see notifications/signals.py), so
+# this mostly guards against a slow mail server pinning a gunicorn thread.
+EMAIL_TIMEOUT = 10
 
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = False
