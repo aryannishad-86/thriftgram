@@ -65,10 +65,26 @@ api.interceptors.request.use((config: RequestConfig) => {
 });
 
 function logoutLocally() {
-    if (typeof window !== 'undefined') {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('username');
+    if (typeof window === 'undefined') return;
+
+    // Only bounce someone to /login if they actually HAD a session that just
+    // became invalid. Without this guard, any 401 from a background request
+    // made on behalf of a never-logged-in visitor redirected them to /login —
+    // which is exactly what happened on the public homepage: NotificationBell
+    // polls /api/notifications/ every 30s regardless of auth, that 401s for
+    // an anonymous visitor, and this handler bounced them off the public
+    // marketplace ~30s after they arrived. Verified by reproducing it in a
+    // browser against the real dev server, and confirmed pre-existing (the
+    // same unconditional redirect is in commit 5fd6422, before any of this
+    // hardening work). An anonymous visitor isn't "logged out" — they were
+    // never logged in, and there's nothing for them to re-authenticate.
+    const hadSession = !!localStorage.getItem('access_token') || !!localStorage.getItem('refresh_token');
+
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('username');
+
+    if (hadSession) {
         window.location.href = '/login';
     }
 }

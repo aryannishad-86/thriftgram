@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { Bell } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import api, { unwrap } from '@/lib/api';
+import { usePolling } from '@/hooks/usePolling';
 import { cn } from '@/lib/utils';
 
 interface Notification {
@@ -16,37 +17,55 @@ interface Notification {
 
 const POLL_MS = 30000;
 
+/** localStorage only fires 'storage' in OTHER tabs, so this picks up a
+ *  sign-in/sign-out made elsewhere. Sign-in in THIS tab does a full page
+ *  navigation (see login/page.tsx), which remounts everything anyway. */
+function subscribeToAuthChanges(onChange: () => void) {
+    window.addEventListener('storage', onChange);
+    return () => window.removeEventListener('storage', onChange);
+}
+
 export default function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Poll every 30s (WebSockets aren't available on the WSGI backend). Pause
-    // while the tab is hidden so a backgrounded tab makes no requests.
-    useEffect(() => {
-        let cancelled = false;
-
-        const fetchNotifications = async () => {
-            if (document.hidden) return;
-            try {
-                const response = await api.get('/api/notifications/');
-                if (cancelled) return;
-                const data = unwrap<Notification>(response);
-                setNotifications(data);
-                setUnreadCount(data.filter((n) => !n.is_read).length);
-            } catch {
-                // Not authenticated / offline — leave state as-is
-            }
-        };
-
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, POLL_MS);
-        return () => {
-            cancelled = true;
-            clearInterval(interval);
-        };
+    // Poll every 30s (WebSockets aren't available on the WSGI backend).
+    // usePolling handles the hidden-tab pause, unmount cleanup, and — the
+    // part this didn't have before — exponential backoff while requests keep
+    // failing, so an unauthenticated visitor or a backend outage doesn't mean
+    // every open tab polls a failing endpoint every 30s forever.
+    //
+    // Deliberately does NOT swallow the error (the old inline version caught
+    // and ignored it): usePolling needs the rejection to know the request
+    // failed. State is simply left as-is on failure, same user-visible
+    // behavior as before.
+    const fetchNotifications = useCallback(async () => {
+        const response = await api.get('/api/notifications/');
+        const data = unwrap<Notification>(response);
+        setNotifications(data);
+        setUnreadCount(data.filter((n) => !n.is_read).length);
     }, []);
+
+    // Only poll for a signed-in visitor. An anonymous visitor has no
+    // notifications, so this was a guaranteed-401 request every 30s — which,
+    // besides being pointless load, is what used to bounce anonymous visitors
+    // off the public homepage to /login (see logoutLocally in lib/api.ts).
+    // Both halves are fixed; this one keeps the request from being made at all.
+    //
+    // useSyncExternalStore rather than a setState-in-effect: localStorage
+    // doesn't exist during SSR, so the value has to come from a
+    // client-only snapshot with an explicit server snapshot (false) — this
+    // is exactly the hook's purpose, and it avoids the extra render pass a
+    // setState-in-effect costs.
+    const isSignedIn = useSyncExternalStore(
+        subscribeToAuthChanges,
+        () => !!localStorage.getItem('access_token'),
+        () => false // server snapshot: never signed in during SSR
+    );
+
+    usePolling(fetchNotifications, { intervalMs: POLL_MS, enabled: isSignedIn });
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {

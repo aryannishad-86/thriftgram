@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Package, TrendingUp, ShoppingBag } from 'lucide-react';
@@ -9,6 +9,7 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { PageShell } from '@/components/layout/page-shell';
 import { PageHeader } from '@/components/layout/page-header';
 import { cn } from '@/lib/utils';
@@ -55,6 +56,7 @@ function OrdersContent() {
     const { clearCart } = useCart();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [activeTab, setActiveTab] = useState<'purchases' | 'sales'>('purchases');
     const [currentUsername, setCurrentUsername] = useState<string | null>(null);
     const justPaid = searchParams.get('success') === 'true';
@@ -66,22 +68,24 @@ function OrdersContent() {
         }
     }, [justPaid, clearCart, router]);
 
+    const fetchOrders = useCallback(async () => {
+        setLoading(true);
+        setLoadFailed(false);
+        try {
+            const response = await api.get('/api/orders/');
+            setOrders(unwrap<Order>(response));
+        } catch (err) {
+            console.error('Failed to fetch orders', err);
+            setLoadFailed(true);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         setCurrentUsername(localStorage.getItem('username'));
-
-        const fetchOrders = async () => {
-            try {
-                const response = await api.get('/api/orders/');
-                setOrders(unwrap<Order>(response));
-            } catch (err) {
-                console.error('Failed to fetch orders', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchOrders();
-    }, []);
+    }, [fetchOrders]);
 
     const purchases = orders.filter(order => order.buyer.username === currentUsername);
     const sales = orders.filter(order => order.item && order.buyer.username !== currentUsername);
@@ -137,7 +141,9 @@ function OrdersContent() {
                 </button>
             </div>
 
-            {displayOrders.length === 0 ? (
+            {loadFailed ? (
+                <ErrorState subject="your orders" onRetry={fetchOrders} />
+            ) : displayOrders.length === 0 ? (
                 <EmptyState
                     icon={Package}
                     title={`No ${activeTab === 'purchases' ? 'purchases' : 'sales'} yet`}

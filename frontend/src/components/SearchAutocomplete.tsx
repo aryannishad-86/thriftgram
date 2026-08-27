@@ -119,7 +119,7 @@ export default function SearchAutocomplete() {
                     }}
                     onFocus={() => setIsOpen(true)}
                     placeholder="Search ThriftGram..."
-                    className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-border bg-background text-base-03 focus:outline-none focus:border-primary transition-all"
+                    className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-border bg-background text-base-03 focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background transition-all"
                 />
                 {query && (
                     <button

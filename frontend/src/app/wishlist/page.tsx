@@ -8,6 +8,7 @@ import api, { unwrap } from '@/lib/api';
 import ItemCard from '@/components/ItemCard';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { PageShell } from '@/components/layout/page-shell';
 
 interface WishlistItem {
@@ -28,17 +29,21 @@ export default function WishlistPage() {
     const router = useRouter();
     const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
 
     useEffect(() => {
         fetchWishlist();
     }, []);
 
     const fetchWishlist = async () => {
+        setLoading(true);
+        setLoadFailed(false);
         try {
             const response = await api.get('/api/wishlist/');
             setWishlist(unwrap<WishlistItem>(response));
         } catch (err) {
             console.error('Failed to fetch wishlist', err);
+            setLoadFailed(true);
         } finally {
             setLoading(false);
         }
@@ -71,7 +76,9 @@ export default function WishlistPage() {
                 <p className="text-muted-foreground">Items you&apos;ve saved for later</p>
             </div>
 
-            {wishlist.length === 0 ? (
+            {loadFailed ? (
+                <ErrorState subject="your wishlist" onRetry={fetchWishlist} />
+            ) : wishlist.length === 0 ? (
                 <EmptyState
                     icon={Heart}
                     title="Your wishlist is empty"

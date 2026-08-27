@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Leaf, Droplets, User as UserIcon } from 'lucide-react';
 import api, { unwrap } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { PageShell } from '@/components/layout/page-shell';
 import { PageHeader } from '@/components/layout/page-header';
 
@@ -20,20 +22,25 @@ interface User {
 export default function LeaderboardPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
+
+    const fetchLeaderboard = useCallback(async () => {
+        setLoading(true);
+        setLoadFailed(false);
+        try {
+            const res = await api.get('/api/leaderboard/');
+            setUsers(unwrap<User>(res));
+        } catch (error) {
+            console.error('Failed to fetch leaderboard', error);
+            setLoadFailed(true);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchLeaderboard = async () => {
-            try {
-                const res = await api.get('/api/leaderboard/');
-                setUsers(unwrap<User>(res));
-            } catch (error) {
-                console.error('Failed to fetch leaderboard', error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchLeaderboard();
-    }, []);
+    }, [fetchLeaderboard]);
 
     return (
         <PageShell maxWidth="4xl" className="selection:bg-primary/20">
@@ -57,6 +64,14 @@ export default function LeaderboardPage() {
                             <Skeleton key={i} className="h-16 w-full rounded-xl" />
                         ))}
                     </div>
+                ) : loadFailed ? (
+                    <ErrorState subject="the leaderboard" onRetry={fetchLeaderboard} />
+                ) : users.length === 0 ? (
+                    <EmptyState
+                        icon={Leaf}
+                        title="No champions yet"
+                        description="Eco-points are earned by listing and buying pre-loved items. Be the first on the board."
+                    />
                 ) : (
                     <div className="divide-y divide-border">
                         {users.map((user, index) => (

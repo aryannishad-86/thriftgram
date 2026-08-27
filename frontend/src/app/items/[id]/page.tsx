@@ -316,7 +316,7 @@ export default function ItemDetailPage() {
                             <div className="mt-6">
                                 <p className="mb-4 text-muted-foreground">This item pairs well with:</p>
                                 {matches.length > 0 ? (
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                                         {matches.map((match) => (
                                             <div key={match.id} className="aspect-[3/4] overflow-hidden rounded-xl border border-border bg-base-2">
                                                 <img src={match.image} alt={match.category} className="h-full w-full object-cover" />
