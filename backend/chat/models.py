@@ -9,6 +9,11 @@ class Conversation(models.Model):
 
     class Meta:
         ordering = ['-updated_at']
+        indexes = [
+            # ConversationViewSet.get_queryset: filter(participants=user) (via
+            # the M2M through table, already indexed) ordered by Meta.ordering.
+            models.Index(fields=['-updated_at'], name='chat_conversation_updated_idx'),
+        ]
 
     def __str__(self):
         return f"Conversation {self.id}"
@@ -23,6 +28,16 @@ class Message(models.Model):
 
     class Meta:
         ordering = ['created_at']
+        indexes = [
+            # conversation.messages.all() (ConversationViewSet.messages action)
+            # and the last-message Subquery, both ordered within a conversation.
+            models.Index(fields=['conversation', 'created_at'], name='chat_message_conv_created_idx'),
+            # get_unread_count's Count(filter=Q(is_read=False) & ~Q(sender=...))
+            # is always scoped to one conversation via the outer join — a
+            # composite serves that better than a bare is_read index would
+            # (low-cardinality boolean columns index poorly on their own).
+            models.Index(fields=['conversation', 'is_read'], name='chat_message_conv_is_read_idx'),
+        ]
 
     def __str__(self):
         return f"Message from {self.sender.username} at {self.created_at}"

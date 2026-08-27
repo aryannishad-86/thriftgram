@@ -213,3 +213,37 @@ class TestStripeWebhookEndpoint:
         assert res.status_code == 200
         order = Order.objects.get(item=item)
         assert order.status == 'PENDING'
+
+
+def test_order_list_query_count_is_bounded(django_assert_max_num_queries, auth_client, user_factory, item_factory):
+    """H1 regression guard: OrderViewSet was a bare .filter() against the
+    deepest nested serializer in the codebase, measured at ~282 queries/page
+    in the P0 audit. select_related('buyer','item','item__seller') +
+    prefetch_related('item__images','item__likes','item__reviews') brings 10
+    orders (distinct sellers/items) down to 15 (count + select + 3
+    prefetches + 1 get_is_liked fallback query per row — item.is_liked isn't
+    annotated when Item is nested inside Order, only when ItemViewSet's own
+    queryset is used directly; left as a known, documented remainder since
+    the frontend doesn't render is_liked on the orders page). Bound set at
+    16 for headroom."""
+    buyer = auth_client.user
+    for i in range(10):
+        item = item_factory()
+        Order.objects.create(buyer=buyer, item=item, status='PAID', total_amount=item.price)
+
+    with django_assert_max_num_queries(16):
+        res = auth_client.get('/api/orders/')
+        assert res.status_code == 200
+        assert len(res.data['results']) == 10
+
+
+def test_nested_buyer_and_item_seller_are_lean_summary_shape(auth_client, item_factory):
+    """OrderSerializer.buyer and item.seller are UserSummarySerializer now."""
+    buyer = auth_client.user
+    item = item_factory()
+    Order.objects.create(buyer=buyer, item=item, status='PAID', total_amount=item.price)
+
+    res = auth_client.get('/api/orders/')
+    order = res.data['results'][0]
+    assert set(order['buyer'].keys()) == {'id', 'username', 'profile_picture'}
+    assert set(order['item']['seller'].keys()) == {'id', 'username', 'profile_picture'}
