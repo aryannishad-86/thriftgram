@@ -52,6 +52,56 @@ def test_search_filters_by_title(api_client, item_factory):
     assert 'Red Sneakers' not in titles
 
 
+def test_is_liked_reflects_current_user_via_annotation(auth_client, item_factory, user_factory):
+    """get_is_liked reads ItemViewSet's Exists() annotation now, not a
+    per-row .filter().exists() query — correctness check that the annotation
+    actually reflects reality for both the liking user and an uninvolved one."""
+    item = item_factory()
+    other = user_factory(username='otherliker')
+    from core.models import Like
+    Like.objects.create(user=other, item=item)  # someone else likes it — should not count as "liked" for auth_client.user
+
+    res = auth_client.get(f'/api/items/{item.id}/')
+    assert res.status_code == 200
+    assert res.data['is_liked'] is False
+
+    auth_client.post(f'/api/items/{item.id}/like/')
+    res2 = auth_client.get(f'/api/items/{item.id}/')
+    assert res2.data['is_liked'] is True
+
+
+def test_is_liked_false_for_anonymous(api_client, item_factory):
+    """AnonymousUser can't be used in a User FK filter — _annotate_is_liked
+    must fall back to a constant False rather than erroring."""
+    item = item_factory()
+    res = api_client.get(f'/api/items/{item.id}/')
+    assert res.status_code == 200
+    assert res.data['is_liked'] is False
+
+
+def test_nested_seller_is_lean_summary_shape(api_client, item_factory):
+    """ItemSerializer.seller is UserSummarySerializer now — confirm the
+    nested object doesn't carry followers_count/email/is_following, which
+    each cost their own query under the old full UserSerializer."""
+    item_factory()
+    res = api_client.get('/api/items/')
+    seller = res.data['results'][0]['seller']
+    assert set(seller.keys()) == {'id', 'username', 'profile_picture'}
+
+
+def test_item_feed_query_count_is_bounded(django_assert_max_num_queries, api_client, item_factory):
+    """Regression guard for the N+1 fixes on ItemViewSet: listing 10 items
+    (with distinct sellers) measures at 5 queries (count + main select +
+    3 prefetches: images/likes/reviews) — page-size-independent, not one
+    that scales with item count. Bound set at 6 for a little headroom."""
+    for _ in range(10):
+        item_factory()
+    with django_assert_max_num_queries(6):
+        res = api_client.get('/api/items/')
+        assert res.status_code == 200
+        assert len(res.data['results']) == 10
+
+
 def test_drop_filter(api_client, item_factory):
     from core.models import DropEvent
     from django.utils import timezone

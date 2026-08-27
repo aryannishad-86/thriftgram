@@ -13,6 +13,22 @@ def _owner_only_email(serializer, obj):
     return None
 
 
+class UserSummarySerializer(serializers.ModelSerializer):
+    """Lean nested-user representation: id/username/avatar only. Every place a
+    user is nested inside another object's serializer (item.seller,
+    order.buyer, review.reviewer, message.sender, conversation.participants,
+    follow.follower/.following) previously used the full UserSerializer,
+    which computes followers_count/following_count/is_following via three
+    separate SerializerMethodField queries EACH TIME — a feed page nesting 20
+    items' sellers paid 60 queries just for that, none of which the frontend
+    even reads off a nested user (verified: every nested-user TypeScript
+    interface in the frontend already only expects id/username/
+    profile_picture)."""
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'profile_picture']
+
+
 class UserSerializer(serializers.ModelSerializer):
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
@@ -101,7 +117,7 @@ class DropEventSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at']
 
 class ItemSerializer(serializers.ModelSerializer):
-    seller = UserSerializer(read_only=True)
+    seller = UserSummarySerializer(read_only=True)
     images = ItemImageSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(max_length=1000000, allow_empty_file=False, use_url=False),
@@ -129,6 +145,15 @@ class ItemSerializer(serializers.ModelSerializer):
             return 0
 
     def get_is_liked(self, obj):
+        # ItemViewSet's queryset annotates is_liked_annotated via Exists() —
+        # zero extra queries, and (unlike the .filter() this replaces) it
+        # doesn't defeat prefetch_related('likes') for get_likes_count below.
+        # Fallback query path kept for any context that serializes an Item
+        # without going through that annotated queryset (e.g. nested inside
+        # OrderSerializer/WishlistSerializer).
+        annotated = getattr(obj, 'is_liked_annotated', None)
+        if annotated is not None:
+            return annotated
         try:
             request = self.context.get('request')
             if request and request.user.is_authenticated:
@@ -162,8 +187,8 @@ class ItemSerializer(serializers.ModelSerializer):
 # New Phase 1 Serializers
 
 class FollowSerializer(serializers.ModelSerializer):
-    follower = UserSerializer(read_only=True)
-    following = UserSerializer(read_only=True)
+    follower = UserSummarySerializer(read_only=True)
+    following = UserSummarySerializer(read_only=True)
     
     class Meta:
         model = Follow
@@ -172,7 +197,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    buyer = UserSerializer(read_only=True)
+    buyer = UserSummarySerializer(read_only=True)
     item = ItemSerializer(read_only=True)
     
     class Meta:
@@ -185,7 +210,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    reviewer = UserSerializer(read_only=True)
+    reviewer = UserSummarySerializer(read_only=True)
     
     class Meta:
         model = Review

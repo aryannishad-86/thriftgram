@@ -1,7 +1,7 @@
 import logging
 import os
 from django.shortcuts import render, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef, Value, BooleanField
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -203,19 +203,26 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['get'])
     def followers(self, request, username=None):
-        """Get user's followers"""
+        """Get user's followers. Was unbounded with an unindexed doubly-nested
+        UserSerializer per row (8 queries/row) — a popular account's follower
+        list was a genuine DoS-adjacent cost even though the frontend doesn't
+        currently call this endpoint at all (verified via grep). Paginated +
+        select_related now that FollowSerializer nests the lean
+        UserSummarySerializer instead (0 extra queries per row)."""
         user = self.get_object()
-        followers = Follow.objects.filter(following=user)
-        serializer = FollowSerializer(followers, many=True, context={'request': request})
-        return Response(serializer.data)
+        followers = Follow.objects.filter(following=user).select_related('follower', 'following')
+        page = self.paginate_queryset(followers)
+        serializer = FollowSerializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['get'])
     def following(self, request, username=None):
-        """Get users that this user follows"""
+        """Get users that this user follows. See followers() above."""
         user = self.get_object()
-        following = Follow.objects.filter(follower=user)
-        serializer = FollowSerializer(following, many=True, context={'request': request})
-        return Response(serializer.data)
+        following = Follow.objects.filter(follower=user).select_related('follower', 'following')
+        page = self.paginate_queryset(following)
+        serializer = FollowSerializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def dashboard_stats(self, request):
@@ -248,10 +255,23 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             'MEDIA_URL': django_settings.MEDIA_URL,
         })
 
+def _annotate_is_liked(queryset, user):
+    """Exists() annotation for ItemSerializer.get_is_liked, replacing a
+    .filter().exists() call in the serializer that ran once per item and, on
+    top of that, cloned the queryset and silently defeated
+    prefetch_related('likes') for that item — paying the prefetch's memory
+    cost while still firing a query per row. Exists() runs as a subquery in
+    the single main SELECT instead. AnonymousUser can't be used in a User FK
+    filter (not a real model instance), so anonymous callers get a constant
+    False instead of attempting the Exists()."""
+    if user and user.is_authenticated:
+        return queryset.annotate(
+            is_liked_annotated=Exists(Like.objects.filter(item=OuterRef('pk'), user=user))
+        )
+    return queryset.annotate(is_liked_annotated=Value(False, output_field=BooleanField()))
+
+
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all().select_related('seller').prefetch_related(
-        'images', 'likes', 'reviews'
-    ).order_by('-created_at')
     serializer_class = ItemSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter]
@@ -267,7 +287,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         drop = self.request.query_params.get('drop', None)
         if drop is not None:
             queryset = queryset.filter(drops__id=drop)
-        return queryset
+        return _annotate_is_liked(queryset, self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
@@ -308,7 +328,8 @@ class ItemViewSet(viewsets.ModelViewSet):
         """Return featured items for the homepage gallery"""
         items = Item.objects.filter(is_sold=False).select_related('seller').prefetch_related(
             'images', 'likes', 'reviews'
-        ).order_by('-created_at')[:12]
+        ).order_by('-created_at')
+        items = _annotate_is_liked(items, request.user)[:12]  # annotate before slicing — a sliced queryset can't be chained further
         serializer = self.get_serializer(items, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -400,9 +421,15 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        """Return orders where user is buyer or seller"""
+        """Return orders where user is buyer or seller. Was a bare .filter()
+        with zero select_related/prefetch_related against the deepest nested
+        serializer in the codebase (buyer, item, item.seller all
+        UserSummarySerializer now; item.images, item.likes, item.reviews) —
+        measured at ~282 queries/page before this."""
         return Order.objects.filter(
             Q(buyer=self.request.user) | Q(item__seller=self.request.user)
+        ).select_related('buyer', 'item', 'item__seller').prefetch_related(
+            'item__images', 'item__likes', 'item__reviews'
         )
     
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])

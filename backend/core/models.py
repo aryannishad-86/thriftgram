@@ -20,6 +20,13 @@ class CustomUser(AbstractUser):
     items_sold_count = models.IntegerField(default=0)
     items_bought_count = models.IntegerField(default=0)
 
+    class Meta:
+        indexes = [
+            # LeaderboardViewSet orders the entire table by -eco_points with
+            # no filter — a full unindexed sort on every request.
+            models.Index(fields=['-eco_points'], name='core_customuser_eco_points_idx'),
+        ]
+
     def update_tier(self):
         """Update user tier based on eco points"""
         if self.eco_points >= 2500:
@@ -54,6 +61,16 @@ class Item(models.Model):
     is_sold = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            # ItemViewSet's default feed: no filter, ordered by -created_at.
+            models.Index(fields=['-created_at'], name='core_item_created_at_idx'),
+            # featured(): filter(is_sold=False).order_by('-created_at') — a
+            # composite covers this exact pattern better than either field
+            # alone (is_sold's low cardinality on its own is a weak index).
+            models.Index(fields=['is_sold', '-created_at'], name='core_item_sold_created_idx'),
+        ]
 
     def __str__(self):
         return self.title
