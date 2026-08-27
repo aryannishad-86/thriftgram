@@ -178,10 +178,10 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id', 'buyer', 'item', 'status', 'stripe_payment_intent',
+            'id', 'buyer', 'item', 'status', 'stripe_checkout_session_id',
             'total_amount', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['buyer', 'item', 'stripe_payment_intent', 'created_at', 'updated_at']
+        read_only_fields = ['buyer', 'item', 'stripe_checkout_session_id', 'created_at', 'updated_at']
 
 
 class ReviewSerializer(serializers.ModelSerializer):

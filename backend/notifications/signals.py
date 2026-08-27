@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from core.models import Like, Order, Follow
@@ -9,6 +10,17 @@ from core.emails import (
     send_new_message_notification,
     send_new_follower_notification,
 )
+
+# Every send_* call below is deferred with transaction.on_commit rather than
+# called directly. Two reasons: (1) if the enclosing transaction rolls back,
+# an email about a change that never happened should never go out; (2) the
+# order-paid path now runs inside select_for_update() row locks (see
+# core/views.py handle_checkout_completion) — sending synchronous SMTP while
+# holding those locks would extend lock time by however long Stripe's retry
+# window lets a slow mail server drag on. on_commit runs after the
+# transaction (and its locks) are released. If there's no active transaction,
+# Django runs the callback immediately, so this is a no-op change outside a
+# transaction.
 
 @receiver(post_save, sender=Like)
 def create_like_notification(sender, instance, created, **kwargs):
@@ -32,7 +44,7 @@ def create_message_notification(sender, instance, created, **kwargs):
                 notification_type='message',
                 message=f"New message from {instance.sender.username}"
             )
-            send_new_message_notification(instance)
+            transaction.on_commit(lambda: send_new_message_notification(instance))
 
 @receiver(post_save, sender=Order)
 def order_paid(sender, instance, created, **kwargs):
@@ -41,11 +53,11 @@ def order_paid(sender, instance, created, **kwargs):
     hook in core.signals.capture_old_order_status."""
     old_status = getattr(instance, '_old_status', None)
     if instance.status == 'PAID' and old_status != 'PAID':
-        send_order_confirmation(instance)     # to buyer
-        send_new_order_notification(instance)  # to seller
+        transaction.on_commit(lambda: send_order_confirmation(instance))      # to buyer
+        transaction.on_commit(lambda: send_new_order_notification(instance))  # to seller
 
 @receiver(post_save, sender=Follow)
 def follow_created(sender, instance, created, **kwargs):
     """Send email when someone follows"""
     if created:
-        send_new_follower_notification(instance)
+        transaction.on_commit(lambda: send_new_follower_notification(instance))

@@ -455,9 +455,12 @@ def eco_points_history(request):
     return Response(serializer.data)
 
 
+from rest_framework.decorators import throttle_classes
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.db import transaction, IntegrityError
 from .stripe_service import StripeService
+from .models import ProcessedStripeEvent
 import stripe
 
 @api_view(['POST'])
@@ -498,31 +501,43 @@ def create_checkout_session(request):
     try:
         session = StripeService.create_checkout_session(items, success_url, cancel_url)
 
-        # One Order per item, all keyed to session.id (payment_intent is None at creation time)
+        # One Order per item, all keyed to the Checkout Session id (the real
+        # PaymentIntent id doesn't exist yet at creation time — it's captured
+        # in handle_checkout_completion once the session actually completes).
         Order.objects.bulk_create([
             Order(buyer=request.user, item=item, status='PENDING',
-                  stripe_payment_intent=session.id, total_amount=item.price)
+                  stripe_checkout_session_id=session.id, total_amount=item.price)
             for item in items
         ])
 
         return Response({'sessionId': session.id, 'url': session.url})
-    except Exception as e:
+    except Exception:
+        # Never echo str(e) to the client — a Stripe error message can carry
+        # internal detail (request ids, API-key-related hints). Log the real
+        # exception server-side, return a generic message externally.
         logger.exception('Stripe checkout session creation failed')
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': 'Could not start checkout. Please try again.'},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([])
 @csrf_exempt
 def stripe_webhook(request):
     """Handle Stripe webhooks. Called by Stripe unauthenticated — signature is
-    the auth. Must stay AllowAny now that the global default requires auth for writes."""
+    the auth. Must stay AllowAny now that the global default requires auth for
+    writes. @throttle_classes([]) is required too, separately: AllowAny only
+    overrides permissions, not DRF's DEFAULT_THROTTLE_CLASSES — without this,
+    the view still lands in the anon bucket (100/hour) and a busy day or a
+    Stripe retry storm gets throttled with a 429, which Stripe logs as a
+    delivery failure and keeps retrying, without the order ever fulfilling."""
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    
+
     if not sig_header:
         return Response({'error': 'Missing signature'}, status=400)
-    
+
     try:
         webhook_secret = settings.STRIPE_WEBHOOK_SECRET
         event = StripeService.construct_webhook_event(
@@ -532,31 +547,74 @@ def stripe_webhook(request):
         return Response({'error': 'Invalid payload'}, status=400)
     except stripe.error.SignatureVerificationError:
         return Response({'error': 'Invalid signature'}, status=400)
-    
+
+    # Claim this event id before doing anything else. Stripe redelivers on a
+    # slow/failed response, and two deliveries of the same event.id can arrive
+    # concurrently. A unique constraint at the DB level closes that race in a
+    # way an in-Python "have we seen this id" check cannot — two concurrent
+    # requests both doing a SELECT-then-INSERT can both pass the SELECT. Here,
+    # only one INSERT can win; the loser gets IntegrityError and exits cleanly.
+    event_id = event.get('id', '')
+    try:
+        with transaction.atomic():
+            ProcessedStripeEvent.objects.create(event_id=event_id, event_type=event.get('type', ''))
+    except IntegrityError:
+        logger.info('Stripe webhook: event %s already processed, skipping', event_id)
+        return Response({'status': 'already processed'})
+
     # Handle the event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         handle_checkout_completion(session)
     elif event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object']
-        # Handle successful payment intent if needed
+        # Not handled separately — checkout.session.completed already carries
+        # the payment_intent id and is sufficient for the current mode='payment'
+        # Checkout integration. Left as an explicit no-op rather than silently
+        # ignored so a future PaymentIntents-only integration doesn't miss it.
         pass
-    
+
     return Response({'status': 'success'})
 
 
 def handle_checkout_completion(session):
-    """Mark every order for this checkout session PAID. Idempotent: a replayed
-    webhook skips orders already PAID, so no double eco points or emails."""
+    """Mark every PENDING order for this checkout session PAID.
+
+    Concurrency-safe: select_for_update() row-locks the matching orders for
+    the duration of the transaction, so a second, concurrent delivery of the
+    same event (the ProcessedStripeEvent guard in stripe_webhook covers exact
+    retries, but this covers the belt-and-suspenders case of two different
+    events touching the same session) blocks until the first commits, then
+    re-reads status='PAID' via the query filter and finds nothing to do.
+    Previously this was a bare read-then-write with no lock and no
+    transaction at all — two concurrent deliveries could both read PENDING
+    and both fulfill, doubling eco points, CO2/water stats, and emails.
+    """
     session_id = session.get('id')
-    orders = Order.objects.filter(stripe_payment_intent=session_id)
-    if not orders:
-        logger.warning('Stripe webhook: no orders found for session %s', session_id)
+
+    # checkout.session.completed also fires for sessions that didn't actually
+    # collect payment (delayed-notification methods, no_payment_required).
+    # Only 'card' is offered (see stripe_service.py), so this is currently a
+    # defensive check rather than a live path — but fulfilling on session
+    # completion alone, without checking payment_status, is the wrong
+    # invariant to build on as payment methods change.
+    if session.get('payment_status') != 'paid':
+        logger.warning('Stripe webhook: session %s completed with payment_status=%s, not fulfilling',
+                       session_id, session.get('payment_status'))
         return
 
-    for order in orders:
-        if order.status == 'PAID':
-            continue
-        order.status = 'PAID'
-        order.save()  # PENDING→PAID triggers award_points_for_purchase + order emails
-        Item.objects.filter(id=order.item_id).update(is_sold=True)
+    payment_intent_id = session.get('payment_intent')
+
+    with transaction.atomic():
+        orders = list(
+            Order.objects.select_for_update()
+            .filter(stripe_checkout_session_id=session_id, status='PENDING')
+        )
+        if not orders:
+            logger.warning('Stripe webhook: no pending orders found for session %s', session_id)
+            return
+
+        for order in orders:
+            order.status = 'PAID'
+            order.stripe_payment_intent_id = payment_intent_id
+            order.save()  # PENDING→PAID triggers award_points_for_purchase + order emails
+            Item.objects.filter(id=order.item_id).update(is_sold=True)
