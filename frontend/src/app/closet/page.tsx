@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { PageShell } from '@/components/layout/page-shell';
 import { PageHeader } from '@/components/layout/page-header';
 
@@ -21,6 +22,7 @@ interface ClosetItem {
 export default function ClosetPage() {
     const [items, setItems] = useState<ClosetItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
@@ -28,12 +30,15 @@ export default function ClosetPage() {
     }, []);
 
     const fetchCloset = async () => {
+        setLoading(true);
+        setLoadFailed(false);
         try {
             const res = await api.get('/api/closet/');
             const itemsData = res.data.results ?? res.data;
             setItems(Array.isArray(itemsData) ? itemsData : []);
         } catch (error) {
             console.error('Failed to fetch closet', error);
+            setLoadFailed(true);
         } finally {
             setLoading(false);
         }
@@ -87,6 +92,8 @@ export default function ClosetPage() {
                         <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
                     ))}
                 </div>
+            ) : loadFailed ? (
+                <ErrorState subject="your closet" onRetry={fetchCloset} />
             ) : items.length === 0 ? (
                 <EmptyState
                     icon={Shirt}

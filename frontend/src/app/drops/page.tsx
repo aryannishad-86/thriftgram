@@ -7,6 +7,7 @@ import api, { unwrap } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/ui/error-state';
 import { PageShell } from '@/components/layout/page-shell';
 import Link from 'next/link';
 
@@ -23,6 +24,7 @@ interface DropEvent {
 export default function DropsPage() {
     const [drops, setDrops] = useState<DropEvent[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [activeDrop, setActiveDrop] = useState<DropEvent | null>(null);
 
     useEffect(() => {
@@ -30,6 +32,7 @@ export default function DropsPage() {
     }, []);
 
     const fetchDrops = async () => {
+        setLoadFailed(false);
         try {
             const res = await api.get('/api/drops/');
             const dropList = unwrap<DropEvent>(res);
@@ -44,6 +47,7 @@ export default function DropsPage() {
             setActiveDrop(active || null);
         } catch (error) {
             console.error('Failed to fetch drops', error);
+            setLoadFailed(true);
         } finally {
             setLoading(false);
         }
@@ -73,6 +77,8 @@ export default function DropsPage() {
 
                 {loading ? (
                     <Skeleton className="mx-auto h-40 w-full max-w-3xl rounded-3xl" />
+                ) : loadFailed ? (
+                    <ErrorState subject="upcoming drops" onRetry={fetchDrops} />
                 ) : nextDrop ? (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                         <CountdownTimer targetDate={nextDrop.start_time} onComplete={fetchDrops} />

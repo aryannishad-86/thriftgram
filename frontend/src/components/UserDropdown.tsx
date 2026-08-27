@@ -47,10 +47,14 @@ export default function UserDropdown({ username }: UserDropdownProps) {
 
     return (
         <div className="relative" ref={dropdownRef}>
+            {/* focus:outline-none used to strip the browser's default focus ring
+                here with nothing replacing it, leaving this button invisible to
+                keyboard navigation. The outline is now only suppressed together
+                with an explicit replacement ring. */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Account menu"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-base-2 focus:outline-none"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-base-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background"
             >
                 <User className="h-5 w-5" />
             </button>

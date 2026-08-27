@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import ConversationList from '@/components/ConversationList';
 import ChatWindow from '@/components/ChatWindow';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { PageShell } from '@/components/layout/page-shell';
 import api, { unwrap } from '@/lib/api';
+import { usePolling } from '@/hooks/usePolling';
 
 interface Conversation {
     id: number;
@@ -45,6 +47,7 @@ function MessagesContent() {
     const [activeConversation, setActiveConversation] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [messagesLoading, setMessagesLoading] = useState(false);
     const [currentUsername, setCurrentUsername] = useState<string>('');
 
@@ -79,26 +82,38 @@ function MessagesContent() {
         }
     }, [searchParams, conversations]);
 
-    // Poll the open conversation and the conversation list every 5s. Skip while
-    // the tab is hidden so a backgrounded tab makes no requests.
-    useEffect(() => {
+    // Poll the open conversation and the conversation list every 5s.
+    // usePolling handles the hidden-tab pause, cleanup, and exponential
+    // backoff on repeated failure — at a 5s interval this is by far the
+    // chattiest loop in the app, so it's the one that most needs to stop
+    // hammering a backend that's returning errors.
+    //
+    // Uses the non-throwing fetch variants directly so a failure actually
+    // rejects (fetchMessages/fetchConversations swallow their own errors for
+    // the user-initiated paths, which would make every poll look successful).
+    const pollActiveConversation = useCallback(async () => {
         if (!activeConversation) return;
-
-        const interval = setInterval(() => {
-            if (document.hidden) return;
-            fetchMessages(activeConversation, false);
-            fetchConversations();
-        }, 5000);
-
-        return () => clearInterval(interval);
+        const [messagesRes, conversationsRes] = await Promise.all([
+            api.get(`/api/conversations/${activeConversation}/messages/`),
+            api.get('/api/conversations/'),
+        ]);
+        setMessages(unwrap<Message>(messagesRes));
+        setConversations(unwrap<Conversation>(conversationsRes));
     }, [activeConversation]);
 
+    usePolling(pollActiveConversation, {
+        intervalMs: 5000,
+        enabled: activeConversation !== null,
+    });
+
     const fetchConversations = async () => {
+        setLoadFailed(false);
         try {
             const response = await api.get('/api/conversations/');
             setConversations(unwrap<Conversation>(response));
         } catch (error) {
             console.error('Failed to fetch conversations', error);
+            setLoadFailed(true);
         } finally {
             setLoading(false);
         }
@@ -159,13 +174,21 @@ function MessagesContent() {
                     <div className="border-b border-border bg-base-2 p-4">
                         <h2 className="font-semibold text-foreground">Conversations</h2>
                     </div>
-                    <ConversationList
-                        conversations={conversations}
-                        currentUsername={currentUsername}
-                        activeConversationId={activeConversation}
-                        onSelectConversation={handleSelectConversation}
-                        loading={loading}
-                    />
+                    {loadFailed && !loading ? (
+                        <ErrorState
+                            subject="your conversations"
+                            onRetry={fetchConversations}
+                            className="py-12"
+                        />
+                    ) : (
+                        <ConversationList
+                            conversations={conversations}
+                            currentUsername={currentUsername}
+                            activeConversationId={activeConversation}
+                            onSelectConversation={handleSelectConversation}
+                            loading={loading}
+                        />
+                    )}
                 </div>
 
                 <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-md">

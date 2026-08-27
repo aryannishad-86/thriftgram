@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { User, Edit, Instagram, Twitter, Globe } from 'lucide-react';
+import { User, UserX, Edit, Instagram, Twitter, Globe } from 'lucide-react';
 import Image from 'next/image';
 import api from '@/lib/api';
 import Feed from '@/components/Feed';
 import FollowButton from '@/components/FollowButton';
 import { Card } from '@/components/ui/card';
 import { PageShell } from '@/components/layout/page-shell';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 
 interface UserProfile {
     id: number;
@@ -34,30 +36,40 @@ export default function ProfilePage() {
     const params = useParams();
     const router = useRouter();
     const username = params.username as string;
+    const [loadFailed, setLoadFailed] = useState(false);
     const [user, setUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [isOwnProfile, setIsOwnProfile] = useState(false);
 
+    const fetchUser = useCallback(async () => {
+        setLoading(true);
+        setLoadFailed(false);
+        try {
+            const response = await api.get(`/api/users/${username}/`);
+            setUser(response.data);
+
+            // Check if this is the current user's profile
+            const currentUsername = localStorage.getItem('username');
+            setIsOwnProfile(currentUsername === username);
+        } catch (err) {
+            console.error(err);
+            // Only a real 404 means "this user doesn't exist". Any other
+            // failure (500, network down, timeout) is a load error — the old
+            // code rendered "User not found" for all of them, which tells a
+            // visitor a real person's profile is gone whenever the backend
+            // hiccups.
+            const status = (err as { response?: { status?: number } }).response?.status;
+            setLoadFailed(status !== 404);
+        } finally {
+            setLoading(false);
+        }
+    }, [username]);
+
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await api.get(`/api/users/${username}/`);
-                setUser(response.data);
-
-                // Check if this is the current user's profile
-                const currentUsername = localStorage.getItem('username');
-                setIsOwnProfile(currentUsername === username);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (username) {
             fetchUser();
         }
-    }, [username]);
+    }, [username, fetchUser]);
 
     const handleFollowChange = (isFollowing: boolean) => {
         if (user) {
@@ -77,11 +89,23 @@ export default function ProfilePage() {
         );
     }
 
+    if (loadFailed) {
+        return (
+            <PageShell maxWidth="4xl">
+                <ErrorState subject="this profile" onRetry={fetchUser} />
+            </PageShell>
+        );
+    }
+
     if (!user) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-background pt-20">
-                <div className="text-muted-foreground">User not found</div>
-            </div>
+            <PageShell maxWidth="4xl">
+                <EmptyState
+                    icon={UserX}
+                    title="User not found"
+                    description={`No account exists with the username @${username}.`}
+                />
+            </PageShell>
         );
     }
 
