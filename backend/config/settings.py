@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'core',
     'chat',
@@ -143,11 +144,19 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "https://*.run.app",       # GCP Cloud Run deployment
+    # Exact Cloud Run service host — NOT the wildcard "https://*.run.app" this
+    # replaced, which trusted every tenant on Cloud Run's shared *.run.app
+    # domain (anyone else's Cloud Run service), not just this one. Needed
+    # because /admin/ is reachable directly on this host.
+    "https://thriftgram-backend-fjgp4mzklq-el.a.run.app",
 ] + CORS_ALLOWED_ORIGINS
+
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS += [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
 
 # DRF Configuration
 REST_FRAMEWORK = {
@@ -199,6 +208,25 @@ SOCIALACCOUNT_PROVIDERS = {
 REST_USE_JWT = True
 # JWT_AUTH_COOKIE = 'my-app-auth'
 # JWT_AUTH_REFRESH_COOKIE = 'my-app-refresh-auth'
+
+from datetime import timedelta
+
+# Previously absent entirely, which meant SimpleJWT's own defaults were live:
+# a 5-minute access token with no refresh call anywhere in the frontend (the
+# axios client only ever reads the stored access token — see
+# frontend/src/lib/api.ts), so every session was silently dying every 5
+# minutes; and a 1-day refresh token with no revocation path at all — no
+# blacklist app installed, no logout endpoint that touched it. Explicit now:
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    # A refresh issues a new refresh token and invalidates the old one
+    # (blacklisted), rather than the same refresh token being reusable for its
+    # full 7-day life — narrows the window a leaked refresh token is useful.
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+}
 
 
 # Database

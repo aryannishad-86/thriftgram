@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { User, LogOut, UserCircle, ShoppingBag, Heart } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import api from '@/lib/api';
 
 interface UserDropdownProps {
     username: string;
@@ -23,7 +24,21 @@ export default function UserDropdown({ username }: UserDropdownProps) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        // Best-effort: tell the backend to blacklist this refresh token so a
+        // copied/leaked one can't outlive the user's own logout. Previously
+        // this was 100% client-side (localStorage.removeItem only) — the
+        // token stayed valid server-side regardless. Clearing local state and
+        // redirecting happens either way; a slow/offline backend shouldn't
+        // block the user from leaving.
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+            try {
+                await api.post('/api/logout/', { refresh: refreshToken });
+            } catch (e) {
+                console.error('Server-side logout failed (proceeding with local logout)', e);
+            }
+        }
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('username');

@@ -19,13 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
 from core.views import (
     ItemViewSet, UserViewSet, LeaderboardViewSet, ClosetItemViewSet,
-    DropEventViewSet, RegisterView, GoogleLogin, OrderViewSet,
+    DropEventViewSet, RegisterView, LogoutView, ThrottledTokenObtainPairView,
+    GoogleLogin, OrderViewSet,
     ReviewViewSet, WishlistViewSet, eco_points_history,
     create_checkout_session, stripe_webhook, health_check
 )
@@ -49,7 +47,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/register/', RegisterView.as_view(), name='register'),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
+    path('api/token/', ThrottledTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),

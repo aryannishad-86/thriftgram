@@ -31,7 +31,16 @@ def health_check(request):
 
 
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .security import LoginRateThrottle, RegisterRateThrottle, IsOwnerOrReadOnly
+
+
+class ThrottledTokenObtainPairView(TokenObtainPairView):
+    """Password-login was reachable through /api/token/ with no throttle
+    beyond the generic 100/hr anon bucket — LoginRateThrottle (5/min) was
+    defined and already wired to GoogleLogin, but never to the actual
+    password-login path, which is the one brute-force actually targets."""
+    throttle_classes = [LoginRateThrottle]
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -48,16 +57,52 @@ class RegisterView(APIView):
         if User.objects.filter(username=username).exists():
             return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # AUTH_PASSWORD_VALIDATORS was configured in settings but never actually
+        # invoked here — create_user() doesn't call it on its own. A 1-character
+        # password was previously accepted despite MinimumLengthValidator etc.
+        # being "on". Built against an unsaved User (not just the bare string) so
+        # UserAttributeSimilarityValidator can actually compare against the
+        # username/email being registered, not just the CommonPassword/Numeric/
+        # MinimumLength checks. Error shape matches every other branch in this
+        # view ({'error': str}) — no frontend change needed to surface it.
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        try:
+            validate_password(password, user=User(username=username, email=email))
+        except DjangoValidationError as e:
+            return Response({'error': ' '.join(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+
         user = User.objects.create_user(username=username, password=password, email=email)
-        
+
         from rest_framework_simplejwt.tokens import RefreshToken
         refresh = RefreshToken.for_user(user)
-        
+
         return Response({
             'message': 'User created successfully',
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }, status=status.HTTP_201_CREATED)
+
+
+class LogoutView(APIView):
+    """Revoke a refresh token server-side. Without this, "logout" was purely
+    client-side localStorage.removeItem — a copied/leaked refresh token stayed
+    valid for its full lifetime regardless of what the original owner did.
+    Requires the token_blacklist app (see INSTALLED_APPS)."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'error': 'refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            RefreshToken(refresh_token).blacklist()
+        except TokenError:
+            # Already invalid/expired/blacklisted — logout is idempotent
+            # either way, the caller's intent (end up logged out) is satisfied.
+            pass
+        return Response({'message': 'Logged out successfully'})
 
 class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('-eco_points')
