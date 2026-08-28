@@ -45,7 +45,7 @@ function ErrorState({
             role="alert"
             className={cn("flex flex-col items-center justify-center py-20 text-center", className)}
         >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-none border border-error/25 bg-error/10">
                 <WifiOff className="h-7 w-7 text-error" strokeWidth={1.5} />
             </div>
             <h3 className="text-lg font-semibold text-foreground">{title}</h3>

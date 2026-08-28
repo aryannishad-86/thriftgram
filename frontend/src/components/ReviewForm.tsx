@@ -56,7 +56,7 @@ export default function ReviewForm({ itemId, onReviewSubmitted }: ReviewFormProp
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             onSubmit={handleSubmit}
-            className="bg-card border border-border rounded-2xl p-6"
+            className="bg-card border border-border rounded-none p-6"
         >
             <h3 className="text-xl font-bold text-base-03 mb-4">Write a Review</h3>
 
@@ -77,14 +77,14 @@ export default function ReviewForm({ itemId, onReviewSubmitted }: ReviewFormProp
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-none border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none"
                     placeholder="Share your experience with this item..."
                 />
             </div>
 
             {/* Error */}
             {error && (
-                <div className="mb-4 p-3 rounded-xl bg-error/10 border border-error/20 text-error text-sm">
+                <div className="mb-4 p-3 rounded-none bg-error/10 border border-error/20 text-error text-sm">
                     {error}
                 </div>
             )}
@@ -93,7 +93,7 @@ export default function ReviewForm({ itemId, onReviewSubmitted }: ReviewFormProp
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 rounded-none bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
                 <Send className="w-5 h-5" />
                 {loading ? 'Submitting...' : 'Submit Review'}

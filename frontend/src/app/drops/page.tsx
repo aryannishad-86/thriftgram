@@ -61,7 +61,7 @@ export default function DropsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 inline-flex items-center gap-2 rounded-full border border-error/20 bg-error/10 px-4 py-2 text-error"
+                    className="mb-6 inline-flex items-center gap-2 rounded-none border border-error/20 bg-error/10 px-4 py-2 text-error"
                 >
                     <Flame className="h-4 w-4 animate-pulse" />
                     <span className="text-sm font-bold tracking-wider">LIVE DROPS</span>
@@ -76,7 +76,7 @@ export default function DropsPage() {
                 </motion.h1>
 
                 {loading ? (
-                    <Skeleton className="mx-auto h-40 w-full max-w-3xl rounded-3xl" />
+                    <Skeleton className="mx-auto h-40 w-full max-w-3xl rounded-none" />
                 ) : loadFailed ? (
                     <ErrorState subject="upcoming drops" onRetry={fetchDrops} />
                 ) : nextDrop ? (
@@ -104,7 +104,7 @@ export default function DropsPage() {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="relative mb-20 overflow-hidden rounded-3xl bg-ink p-8 md:p-12"
+                    className="relative mb-20 overflow-hidden rounded-none bg-ink p-8 md:p-12"
                 >
                     <div className="absolute right-0 top-0 rounded-bl-3xl bg-error px-6 py-2 font-bold text-paper">
                         LIVE NOW
@@ -120,7 +120,7 @@ export default function DropsPage() {
                                 </Link>
                             </Button>
                         </div>
-                        <div className="relative aspect-video overflow-hidden rounded-2xl border border-paper/10">
+                        <div className="relative aspect-video overflow-hidden rounded-none border border-paper/10">
                             {activeDrop.image ? (
                                 <img src={activeDrop.image} alt={activeDrop.title} className="h-full w-full object-cover" />
                             ) : (
@@ -140,14 +140,14 @@ export default function DropsPage() {
                     </h3>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {drops.filter(d => d.id !== activeDrop?.id && d.id !== nextDrop?.id).map((drop) => (
-                            <div key={drop.id} className="group overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary">
+                            <div key={drop.id} className="group overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary">
                                 <div className="relative aspect-video bg-base-2">
                                     {drop.image && (
                                         <img src={drop.image} alt={drop.title} className="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-100" />
                                     )}
                                     {/* Genuine glass-over-photo: a date chip floating on the cover image */}
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="glass-dark rounded-full px-4 py-2 font-mono text-sm text-white">
+                                        <div className="glass-dark rounded-none px-4 py-2 font-mono text-sm text-white">
                                             {new Date(drop.start_time).toLocaleDateString()} • {new Date(drop.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </div>

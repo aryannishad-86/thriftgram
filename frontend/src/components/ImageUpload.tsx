@@ -37,7 +37,7 @@ export default function ImageUpload({ onChange }: ImageUploadProps) {
         <div className="space-y-4">
             <div
                 onClick={() => fileInputRef.current?.click()}
-                className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-base-03/30 bg-base-2 p-10 transition-all hover:border-base-03 hover:bg-base-2/80 cursor-pointer"
+                className="relative flex flex-col items-center justify-center rounded-none border-2 border-dashed border-base-03/30 bg-base-2 p-10 transition-all hover:border-base-03 hover:bg-base-2/80 cursor-pointer"
             >
                 <input
                     type="file"
@@ -61,7 +61,7 @@ export default function ImageUpload({ onChange }: ImageUploadProps) {
             {previews.length > 0 && (
                 <div className="grid grid-cols-3 gap-4 sm:grid-cols-4">
                     {previews.map((preview, index) => (
-                        <div key={index} className="group relative aspect-square overflow-hidden rounded-lg border-2 border-border bg-base-2">
+                        <div key={index} className="group relative aspect-square overflow-hidden rounded-none border-2 border-border bg-base-2">
                             <Image
                                 src={preview}
                                 alt={`Preview ${index}`}

@@ -184,7 +184,7 @@ export default function ItemDetailPage() {
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="relative aspect-[3/4] overflow-hidden rounded-3xl border border-border bg-card shadow-lg"
+                    className="relative aspect-[3/4] overflow-hidden rounded-none border border-border bg-card shadow-lg"
                 >
                     <Image
                         src={item.images[0]?.image || '/placeholder.jpg'}
@@ -194,7 +194,7 @@ export default function ItemDetailPage() {
                         priority
                     />
                     {item.ai_analysis?.is_verified && (
-                        <div className="glass-light absolute right-4 top-4 flex items-center gap-2 rounded-full px-4 py-2 font-bold text-success">
+                        <div className="glass-light absolute right-4 top-4 flex items-center gap-2 rounded-none px-4 py-2 font-bold text-success">
                             <Sparkles className="h-4 w-4" /> AI Verified
                         </div>
                     )}
@@ -211,10 +211,10 @@ export default function ItemDetailPage() {
                     </div>
 
                     <div className="flex gap-4">
-                        <div className="rounded-xl border border-border bg-card px-4 py-2 text-muted">
+                        <div className="rounded-none border border-border bg-card px-4 py-2 text-muted">
                             Size: <span className="font-bold text-foreground">{item.size}</span>
                         </div>
-                        <div className="rounded-xl border border-border bg-card px-4 py-2 text-muted">
+                        <div className="rounded-none border border-border bg-card px-4 py-2 text-muted">
                             Condition: <span className="font-bold text-foreground">{item.condition}</span>
                         </div>
                     </div>
@@ -243,16 +243,16 @@ export default function ItemDetailPage() {
                         {item.ai_analysis ? (
                             <div className="space-y-4">
                                 {item.ai_analysis.mock && (
-                                    <div className="rounded-xl border border-warning/20 bg-warning/5 px-3 py-2 text-xs text-warning">
+                                    <div className="rounded-none border border-warning/20 bg-warning/5 px-3 py-2 text-xs text-warning">
                                         Sample analysis — AI is currently unavailable, so these values are illustrative only.
                                     </div>
                                 )}
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="rounded-2xl border border-border bg-base-2 p-4">
+                                    <div className="rounded-none border border-border bg-base-2 p-4">
                                         <div className="mb-1 text-xs text-muted">Detected Brand</div>
                                         <div className="text-lg font-bold text-foreground">{item.ai_analysis.detected_brand}</div>
                                     </div>
-                                    <div className="rounded-2xl border border-border bg-base-2 p-4">
+                                    <div className="rounded-none border border-border bg-base-2 p-4">
                                         <div className="mb-1 text-xs text-muted">Material</div>
                                         <div className="text-lg font-bold text-foreground">{item.ai_analysis.fabric_type}</div>
                                     </div>
@@ -263,7 +263,7 @@ export default function ItemDetailPage() {
                                         <span className="text-muted-foreground">Condition Rating</span>
                                         <span className="font-bold text-success">{item.ai_analysis.condition_rating}/10</span>
                                     </div>
-                                    <div className="h-2 overflow-hidden rounded-full bg-base-2">
+                                    <div className="h-2 overflow-hidden rounded-none bg-base-2">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${item.ai_analysis.condition_rating * 10}%` }}
@@ -272,7 +272,7 @@ export default function ItemDetailPage() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-2xl border border-border bg-base-2 p-4">
+                                <div className="rounded-none border border-border bg-base-2 p-4">
                                     <div className="mb-2 text-xs text-muted">Defect Analysis</div>
                                     {item.ai_analysis.detected_defects.length > 0 ? (
                                         <ul className="list-inside list-disc text-sm text-error">
@@ -318,7 +318,7 @@ export default function ItemDetailPage() {
                                 {matches.length > 0 ? (
                                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                                         {matches.map((match) => (
-                                            <div key={match.id} className="aspect-[3/4] overflow-hidden rounded-xl border border-border bg-base-2">
+                                            <div key={match.id} className="aspect-[3/4] overflow-hidden rounded-none border border-border bg-base-2">
                                                 <img src={match.image} alt={match.category} className="h-full w-full object-cover" />
                                             </div>
                                         ))}

@@ -66,7 +66,7 @@ export default function CountdownTimer({ targetDate, onComplete }: CountdownTime
         // glass-on-light leftover: these are opaque fills, not translucent.
         timerComponents.push(
             <div key={interval} className="mx-2 flex flex-col items-center md:mx-3">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-ink md:h-24 md:w-24">
+                <div className="flex h-16 w-16 items-center justify-center rounded-none bg-ink md:h-24 md:w-24">
                     <span className="font-mono text-2xl font-bold text-paper md:text-4xl">
                         {value.toString().padStart(2, '0')}
                     </span>
@@ -79,7 +79,7 @@ export default function CountdownTimer({ targetDate, onComplete }: CountdownTime
     });
 
     return (
-        <div className="flex items-center justify-center rounded-3xl border border-border bg-card p-6 md:p-10">
+        <div className="flex items-center justify-center rounded-none border border-border bg-card p-6 md:p-10">
             {timerComponents.length ? timerComponents : <span className="text-2xl font-bold text-foreground">Event Started!</span>}
         </div>
     );

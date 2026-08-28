@@ -66,7 +66,7 @@ export default function UserDropdown({ username }: UserDropdownProps) {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.98 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl border border-border bg-surface py-1 shadow-lg"
+                        className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-none border border-border bg-surface py-1 shadow-lg"
                     >
                         <div className="border-b border-border px-4 py-2">
                             <p className="truncate text-sm font-medium text-foreground">@{username}</p>

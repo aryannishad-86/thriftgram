@@ -52,7 +52,7 @@ export default function MessageBubble({ message, isOwnMessage }: MessageBubblePr
             {/* Message Content */}
             <div className={`flex flex-col max-w-[70%] ${isOwnMessage ? 'items-end' : 'items-start'}`}>
                 <div
-                    className={`px-4 py-2 rounded-2xl ${isOwnMessage
+                    className={`px-4 py-2 rounded-none ${isOwnMessage
                         ? 'bg-base-03 text-paper rounded-br-sm'
                         : 'bg-base-2 text-base-03 rounded-bl-sm'
                         }`}

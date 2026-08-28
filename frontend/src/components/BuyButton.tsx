@@ -69,7 +69,7 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
                     onClick={handleAddToCart}
                     disabled={isSold}
                     variant="outline"
-                    className="flex-1 border-base-03/50 text-base-03 hover:bg-base-03/10 font-bold py-6 text-lg rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 border-base-03/50 text-base-03 hover:bg-base-03/10 font-bold py-6 text-lg rounded-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <ShoppingCart className="h-5 w-5 mr-2" />
                     {isSold ? 'Sold' : 'Add to Cart'}
@@ -83,7 +83,7 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
                     <Button
                         onClick={handleBuy}
                         disabled={loading || isSold}
-                        className="w-full bg-base-03 hover:bg-base-03/90 text-paper font-bold py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-base-03 hover:bg-base-03/90 text-paper font-bold py-6 text-lg rounded-none shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <span className="flex items-center gap-2">

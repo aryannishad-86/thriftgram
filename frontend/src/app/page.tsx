@@ -2,6 +2,7 @@
 
 import { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import Feed from "@/components/Feed";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 import WaveGallery from "@/components/WaveGallery";
@@ -49,13 +50,19 @@ function HomeContent() {
             built for sustainable style.
           </p>
 
+          {/* Was two hand-rolled <a> elements duplicating button styling — so
+              the hero CTA and the navbar's Sell Item button, visible together
+              on first paint, were two different button systems. Both now go
+              through the primitive. */}
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <a href="#feed" className="rounded-full bg-ink px-8 py-3 text-sm font-semibold text-paper shadow-md transition-all hover:scale-105 hover:bg-ink/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
-              Explore Feed
-            </a>
-            <a href="/sell" className="text-sm font-semibold leading-6 text-foreground transition-colors hover:text-muted-foreground">
-              Start Selling <span aria-hidden="true">→</span>
-            </a>
+            <Button asChild size="lg">
+              <a href="#feed">Explore Feed</a>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <a href="/sell">
+                Start Selling <span aria-hidden="true">→</span>
+              </a>
+            </Button>
           </div>
         </div>
       </div>

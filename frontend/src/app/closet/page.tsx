@@ -89,7 +89,7 @@ export default function ClosetPage() {
             {loading ? (
                 <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-5">
                     {[...Array(10)].map((_, i) => (
-                        <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+                        <Skeleton key={i} className="aspect-[3/4] rounded-none" />
                     ))}
                 </div>
             ) : loadFailed ? (
@@ -108,7 +108,7 @@ export default function ClosetPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.05 }}
-                            className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary"
+                            className="group relative aspect-[3/4] overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary"
                         >
                             <img
                                 src={item.image}

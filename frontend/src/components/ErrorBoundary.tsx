@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
         if (this.state.hasError) {
             return this.props.fallback || (
                 <div className="min-h-screen bg-background flex items-center justify-center p-4">
-                    <div className="max-w-md w-full bg-card border border-border rounded-2xl p-8 text-center">
+                    <div className="max-w-md w-full bg-card border border-border rounded-none p-8 text-center">
                         <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
                             <AlertTriangle className="w-8 h-8 text-error" />
                         </div>
@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
                                 <summary className="text-sm text-base-01 cursor-pointer hover:text-base-03">
                                     Error details
                                 </summary>
-                                <pre className="mt-2 p-3 bg-base-2 rounded-lg text-xs text-base-02 overflow-auto">
+                                <pre className="mt-2 p-3 bg-base-2 rounded-none text-xs text-base-02 overflow-auto">
                                     {this.state.error.message}
                                 </pre>
                             </details>
@@ -55,13 +55,13 @@ export class ErrorBoundary extends Component<Props, State> {
                         <div className="flex gap-3 justify-center">
                             <button
                                 onClick={() => window.location.reload()}
-                                className="px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+                                className="px-6 py-3 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
                             >
                                 Refresh Page
                             </button>
                             <button
                                 onClick={() => window.location.href = '/'}
-                                className="px-6 py-3 rounded-full border border-border text-base-03 hover:bg-base-2 transition-colors font-semibold"
+                                className="px-6 py-3 rounded-none border border-border text-base-03 hover:bg-base-2 transition-colors font-semibold"
                             >
                                 Go Home
                             </button>

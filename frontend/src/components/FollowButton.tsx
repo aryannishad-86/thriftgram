@@ -38,7 +38,7 @@ export default function FollowButton({ username, initialIsFollowing, onFollowCha
             onClick={handleFollow}
             disabled={loading}
             className={`
-                px-6 py-2 rounded-full font-semibold transition-all flex items-center gap-2
+                px-6 py-2 rounded-none font-semibold transition-all flex items-center gap-2
                 ${isFollowing
                     ? 'bg-base-2 text-base-03 border border-border hover:bg-error/10 hover:text-error hover:border-error'
                     : 'bg-primary text-primary-foreground hover:bg-primary/90'

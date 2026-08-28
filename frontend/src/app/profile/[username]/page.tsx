@@ -134,7 +134,7 @@ export default function ProfilePage() {
                                 {isOwnProfile ? (
                                     <button
                                         onClick={() => router.push('/profile/edit')}
-                                        className="flex items-center gap-2 rounded-full border border-border bg-base-2 px-4 py-2 text-foreground transition-colors hover:bg-base-1"
+                                        className="flex items-center gap-2 rounded-none border border-border bg-base-2 px-4 py-2 text-foreground transition-colors hover:bg-base-1"
                                     >
                                         <Edit className="h-4 w-4" />
                                         Edit Profile

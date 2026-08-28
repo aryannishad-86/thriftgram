@@ -170,7 +170,7 @@ function MessagesContent() {
             <h1 className="font-display mb-8 text-3xl font-semibold text-foreground">Messages</h1>
 
             <div className="grid h-[calc(100vh-260px)] gap-6 md:grid-cols-[350px_1fr]">
-                <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-md">
+                <div className="overflow-hidden rounded-none border border-border bg-card shadow-md">
                     <div className="border-b border-border bg-base-2 p-4">
                         <h2 className="font-semibold text-foreground">Conversations</h2>
                     </div>
@@ -191,7 +191,7 @@ function MessagesContent() {
                     )}
                 </div>
 
-                <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-md">
+                <div className="flex flex-col overflow-hidden rounded-none border border-border bg-card shadow-md">
                     {activeConversation ? (
                         <>
                             <div className="flex items-center gap-3 border-b border-border bg-base-2 p-4">

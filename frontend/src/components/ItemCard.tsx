@@ -108,7 +108,7 @@ export default function ItemCard({ item: initialItem, href, onRemove, meta, clas
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
             className={cn(
-                "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow duration-300 hover:shadow-lg",
+                "group relative flex flex-col overflow-hidden rounded-none border border-border bg-card transition-shadow duration-300 hover:shadow-lg",
                 className
             )}
         >

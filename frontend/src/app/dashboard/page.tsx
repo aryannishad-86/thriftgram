@@ -69,7 +69,7 @@ export default function DashboardPage() {
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
                     {loading ? (
                         Array.from({ length: 5 }).map((_, i) => (
-                            <Skeleton key={i} className="h-32 rounded-2xl" />
+                            <Skeleton key={i} className="h-32 rounded-none" />
                         ))
                     ) : (
                         <>
@@ -110,7 +110,7 @@ export default function DashboardPage() {
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-foreground">Your Listings</h2>
                     {loading ? (
-                        <Skeleton className="h-64 rounded-2xl" />
+                        <Skeleton className="h-64 rounded-none" />
                     ) : (
                         <ListingsTable
                             items={items}

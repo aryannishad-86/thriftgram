@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Search } from 'lucide-react';
+import { Dialog } from '@/components/ui/dialog';
 import SearchAutocomplete from './SearchAutocomplete';
 
 export default function SearchBar() {
@@ -10,51 +10,28 @@ export default function SearchBar() {
 
     return (
         <>
-            {/* Search Icon Button */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="p-2 rounded-full hover:bg-base-2 transition-colors"
+                className="rounded-full p-2 text-foreground transition-colors hover:bg-base-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 aria-label="Search"
             >
-                <Search className="w-5 h-5 text-base-03" />
+                <Search className="h-5 w-5" />
             </button>
 
-            {/* Search Modal */}
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        {/* Backdrop */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsOpen(false)}
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-                        />
-
-                        {/* Search Modal Content */}
-                        <motion.div
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-50"
-                        >
-                            <div className="bg-card rounded-3xl p-6 shadow-2xl border border-border">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold text-base-03">Search ThriftGram</h3>
-                                    <button
-                                        onClick={() => setIsOpen(false)}
-                                        className="p-2 rounded-full hover:bg-base-2 transition-colors"
-                                    >
-                                        <X className="w-5 h-5 text-base-02" />
-                                    </button>
-                                </div>
-                                <SearchAutocomplete />
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            {/* Was a hand-rolled backdrop + panel with no escape handling, no
+                scroll lock, no focus management and no dialog semantics — you
+                could tab straight out of the open modal into the page behind
+                it, and closing dumped focus back at the top of the document.
+                The Dialog primitive supplies all of that. */}
+            <Dialog
+                open={isOpen}
+                onClose={() => setIsOpen(false)}
+                title="Search ThriftGram"
+                variant="sheet"
+                className="p-6"
+            >
+                <SearchAutocomplete />
+            </Dialog>
         </>
     );
 }

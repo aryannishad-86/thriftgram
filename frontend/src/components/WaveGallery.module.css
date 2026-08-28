@@ -26,7 +26,7 @@
     width: calc(var(--index) * 10);
     height: calc(var(--index) * 14);
     position: relative;
-    border-radius: calc(var(--index) * 0.6);
+    border-radius: 0;
     overflow: hidden;
     cursor: pointer;
     display: block;

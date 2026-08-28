@@ -119,7 +119,7 @@ export default function SearchAutocomplete() {
                     }}
                     onFocus={() => setIsOpen(true)}
                     placeholder="Search ThriftGram..."
-                    className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-border bg-background text-base-03 focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background transition-all"
+                    className="w-full pl-12 pr-4 py-3 rounded-none border-2 border-border bg-background text-base-03 focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background transition-all"
                 />
                 {query && (
                     <button
@@ -142,7 +142,7 @@ export default function SearchAutocomplete() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full mt-2 w-full bg-card border border-border rounded-2xl shadow-lg overflow-hidden z-50"
+                        className="absolute top-full mt-2 w-full bg-card border border-border rounded-none shadow-lg overflow-hidden z-50"
                     >
                         {/* Recent Searches */}
                         {query.length < 2 && history.length > 0 && (
@@ -164,7 +164,7 @@ export default function SearchAutocomplete() {
                                         <button
                                             key={index}
                                             onClick={() => handleHistoryClick(item)}
-                                            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-base-2 transition-colors text-left group"
+                                            className="w-full flex items-center justify-between px-3 py-2 rounded-none hover:bg-base-2 transition-colors text-left group"
                                         >
                                             <span className="text-sm text-base-03">{item}</span>
                                             <button
@@ -197,9 +197,9 @@ export default function SearchAutocomplete() {
                                                 <button
                                                     key={item.id}
                                                     onClick={() => handleSuggestionClick(item)}
-                                                    className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-2 transition-colors"
+                                                    className="w-full flex items-center gap-3 p-2 rounded-none hover:bg-base-2 transition-colors"
                                                 >
-                                                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-base-2 flex-shrink-0">
+                                                    <div className="w-12 h-12 rounded-none overflow-hidden bg-base-2 flex-shrink-0">
                                                         {item.images && item.images.length > 0 ? (
                                                             <img
                                                                 src={item.images[0].image}

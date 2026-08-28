@@ -35,7 +35,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
                     placeholder="Type a message..."
                     disabled={disabled}
                     rows={1}
-                    className="flex-1 px-4 py-3 rounded-2xl border-2 border-border bg-surface text-base-03 resize-none focus:outline-none focus:ring-2 focus:ring-base-03/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-3 rounded-none border-2 border-border bg-surface text-base-03 resize-none focus:outline-none focus:ring-2 focus:ring-base-03/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                         minHeight: '48px',
                         maxHeight: '120px',

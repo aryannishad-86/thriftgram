@@ -158,7 +158,7 @@ export default function LoginPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, delay: 0.1 }}
-                            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-lg"
+                            className="relative w-full max-w-md overflow-hidden rounded-none border border-border bg-card p-8 shadow-lg"
                         >
                             <div className="absolute left-0 top-0 h-1 w-full bg-primary" />
 
@@ -227,7 +227,7 @@ export default function LoginPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="submit"
                                     disabled={loading}
-                                    className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 font-bold text-primary-foreground shadow-md transition-all duration-300 hover:bg-primary-hover"
+                                    className="group flex w-full items-center justify-center gap-2 rounded-none bg-primary py-3.5 font-bold text-primary-foreground shadow-md transition-all duration-300 hover:bg-primary-hover"
                                 >
                                     {loading ? (
                                         <div className="h-5 w-5 animate-spin rounded-full border-2 border-paper border-t-transparent" />
@@ -253,7 +253,7 @@ export default function LoginPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="button"
                                     onClick={() => handleGoogleLogin()}
-                                    className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background py-3.5 font-medium text-foreground transition-all duration-300 hover:border-primary"
+                                    className="flex w-full items-center justify-center gap-3 rounded-none border border-border bg-background py-3.5 font-medium text-foreground transition-all duration-300 hover:border-primary"
                                 >
                                     <svg className="h-5 w-5" viewBox="0 0 24 24">
                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -288,7 +288,7 @@ export default function LoginPage() {
                                 transition={{ duration: 0.8, delay: index * 0.2 }}
                                 className="group flex items-start gap-6"
                             >
-                                <div className="rounded-2xl border border-border bg-base-2 p-4 transition-transform duration-500 group-hover:scale-110">
+                                <div className="rounded-none border border-border bg-base-2 p-4 transition-transform duration-500 group-hover:scale-110">
                                     <feature.icon className={`h-8 w-8 ${feature.color}`} />
                                 </div>
                                 <div>
