@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import api, { unwrap } from '@/lib/api';
 import styles from './WaveGallery.module.css';
 
@@ -46,10 +47,14 @@ export default function WaveGallery() {
                             <div key={i} className={`${styles.item} ${styles.skeleton}`} />
                         ))
                         : items.map((item) => {
-                            const image =
+                            const rawImage =
                                 item.images.length > 0
                                     ? item.images[0].image
                                     : '/placeholder.jpg';
+                            // One shared 3:4 frame with subject-aware cropping —
+                            // this is what makes a row of arbitrary phone photos
+                            // read as a gallery rather than a pile.
+                            const image = cloudinaryUrl(rawImage, { width: 600, aspect: '3:4' });
                             return (
                                 <Link
                                     key={item.id}
@@ -61,6 +66,7 @@ export default function WaveGallery() {
                                         alt={item.title}
                                         fill
                                         sizes="(max-width: 768px) 40vw, 20vw"
+                                        unoptimized={isCloudinary(rawImage)}
                                         className="object-cover"
                                     />
                                     <div className={styles.overlay}>

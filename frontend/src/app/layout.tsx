@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { Archivo, Geist_Mono, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/Providers";
@@ -7,9 +7,14 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import CartDrawer from "@/components/CartDrawer";
 import SmoothScrolling from "@/components/SmoothScrolling";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// UI + body grotesk. Variable weight axis so the whole UI ships one file.
+// Chosen over a hairline serif specifically because light-on-dark type gains
+// optical weight and thin strokes break up — a sturdy grotesk survives that.
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
+  axes: ["wdth"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -17,13 +22,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Display serif — headlines only (see .font-display in globals.css).
-// Loaded with axes for optical variation at large sizes; swap avoids
-// blocking render on the font request.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+// Display Didone — headlines only (see .font-display in globals.css, which
+// enforces the display-only rule). The optical-size axis matters here: at
+// display sizes Bodoni's hairlines thin out, and opsz compensates.
+const bodoni = Bodoni_Moda({
+  variable: "--font-bodoni",
   subsets: ["latin"],
-  axes: ["opsz", "SOFT", "WONK"],
+  axes: ["opsz"],
   display: "swap",
 });
 
@@ -40,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased bg-background text-foreground`}
+        className={`${archivo.variable} ${geistMono.variable} ${bodoni.variable} antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
         <Providers>

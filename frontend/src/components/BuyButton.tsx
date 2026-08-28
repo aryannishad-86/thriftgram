@@ -83,11 +83,11 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
                     <Button
                         onClick={handleBuy}
                         disabled={loading || isSold}
-                        className="w-full bg-base-03 hover:bg-base-03/90 text-white font-bold py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-base-03 hover:bg-base-03/90 text-paper font-bold py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <span className="flex items-center gap-2">
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-paper border-t-transparent" />
                                 Processing...
                             </span>
                         ) : isSold ? (

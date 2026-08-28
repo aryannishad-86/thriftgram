@@ -95,33 +95,36 @@ export default function DropsPage() {
                 )}
             </div>
 
-            {/* Deliberate solid-ink promotional panel — high-contrast emphasis
-                for a "live now" callout, not a glass-on-light mistake. */}
+            {/* Inverted promo panel — a solid BONE block on the black canvas.
+                This was a solid-ink block on the old light theme; the inversion
+                flips it to light, which is if anything a stronger editorial
+                move (one bright slab interrupting the dark page). Its contents
+                therefore take canvas-dark text, not white. */}
             {activeDrop && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="relative mb-20 overflow-hidden rounded-3xl bg-ink p-8 md:p-12"
                 >
-                    <div className="absolute right-0 top-0 rounded-bl-3xl bg-error px-6 py-2 font-bold text-white">
+                    <div className="absolute right-0 top-0 rounded-bl-3xl bg-error px-6 py-2 font-bold text-paper">
                         LIVE NOW
                     </div>
 
                     <div className="grid items-center gap-12 md:grid-cols-2">
                         <div>
-                            <h2 className="mb-4 text-4xl font-bold text-white">{activeDrop.title}</h2>
-                            <p className="mb-8 text-lg text-white/70">{activeDrop.description}</p>
+                            <h2 className="font-display mb-4 text-4xl font-semibold text-paper">{activeDrop.title}</h2>
+                            <p className="mb-8 text-lg text-paper/70">{activeDrop.description}</p>
                             <Button asChild variant="danger" size="lg">
                                 <Link href={`/?drop=${activeDrop.id}#feed`}>
                                     Shop Collection <ArrowRight className="ml-2 h-5 w-5" />
                                 </Link>
                             </Button>
                         </div>
-                        <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10">
+                        <div className="relative aspect-video overflow-hidden rounded-2xl border border-paper/10">
                             {activeDrop.image ? (
                                 <img src={activeDrop.image} alt={activeDrop.title} className="h-full w-full object-cover" />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-white/5 text-white/30">
+                                <div className="flex h-full w-full items-center justify-center bg-paper/5 text-paper/40">
                                     No Cover Image
                                 </div>
                             )}

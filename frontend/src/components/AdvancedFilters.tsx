@@ -65,7 +65,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                     <SlidersHorizontal className="w-5 h-5 text-base-03" />
                     <span className="font-semibold text-base-03">Filters</span>
                     {activeFilterCount > 0 && (
-                        <span className="px-2 py-0.5 rounded-full bg-primary text-white text-xs font-semibold">
+                        <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                             {activeFilterCount}
                         </span>
                     )}
@@ -145,7 +145,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                                             key={size}
                                             onClick={() => toggleSize(size)}
                                             className={`px-4 py-2 rounded-lg border transition-all ${filters.sizes.includes(size)
-                                                    ? 'bg-primary text-white border-primary'
+                                                    ? 'bg-primary text-primary-foreground border-primary'
                                                     : 'bg-background text-base-03 border-border hover:border-primary'
                                                 }`}
                                         >
@@ -169,7 +169,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                                                 })
                                             }
                                             className={`px-4 py-2 rounded-lg border transition-all ${filters.condition === cond
-                                                    ? 'bg-primary text-white border-primary'
+                                                    ? 'bg-primary text-primary-foreground border-primary'
                                                     : 'bg-background text-base-03 border-border hover:border-primary'
                                                 }`}
                                         >

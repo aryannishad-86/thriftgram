@@ -134,7 +134,7 @@ export default function ConversationList({
 
                             {/* Unread badge */}
                             {conversation.unread_count && conversation.unread_count > 0 && (
-                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-error text-white text-xs font-semibold">
+                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-error text-paper text-xs font-semibold">
                                     {conversation.unread_count}
                                 </span>
                             )}

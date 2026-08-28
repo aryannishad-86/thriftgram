@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Heart, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 
 export interface Item {
@@ -62,7 +63,11 @@ export interface ItemCardProps {
 export default function ItemCard({ item: initialItem, href, onRemove, meta, className }: ItemCardProps) {
     const [item, setItem] = useState(initialItem);
     const [isLiking, setIsLiking] = useState(false);
-    const mainImage = item.images.length > 0 ? item.images[0].image : '/placeholder.jpg';
+    // Routed through Cloudinary: crops every upload to one 4:5 frame with
+    // subject-aware gravity, and drops a ~1 MB original to ~40 KB. The shared
+    // frame is what lets a grid of arbitrary phone photos read as a gallery.
+    const rawImage = item.images.length > 0 ? item.images[0].image : '/placeholder.jpg';
+    const mainImage = cloudinaryUrl(rawImage, { width: 640, aspect: '4:5' });
     const canLike = !onRemove && item.is_liked !== undefined && item.likes_count !== undefined;
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -112,6 +117,11 @@ export default function ItemCard({ item: initialItem, href, onRemove, meta, clas
                     src={mainImage}
                     alt={item.title}
                     fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    // Cloudinary already sized, cropped and re-encoded this.
+                    // Letting /_next/image process it again is a second lossy
+                    // pass and a billed Vercel optimization for no gain.
+                    unoptimized={isCloudinary(rawImage)}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
 

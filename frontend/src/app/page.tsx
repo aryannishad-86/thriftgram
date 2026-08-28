@@ -50,7 +50,7 @@ function HomeContent() {
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <a href="#feed" className="rounded-full bg-ink px-8 py-3 text-sm font-semibold text-white shadow-md transition-all hover:scale-105 hover:bg-ink/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
+            <a href="#feed" className="rounded-full bg-ink px-8 py-3 text-sm font-semibold text-paper shadow-md transition-all hover:scale-105 hover:bg-ink/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
               Explore Feed
             </a>
             <a href="/sell" className="text-sm font-semibold leading-6 text-foreground transition-colors hover:text-muted-foreground">

@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, ArrowRight, Sparkles, Leaf, Recycle, Heart } from 'lucide-react';
-import RippleText from '@/components/RippleText';
 import ColdStartLoader from '@/components/ColdStartLoader';
 
 const FEATURES = [
@@ -112,11 +111,21 @@ export default function LoginPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, type: "spring" }}
                         >
-                            <h1 className="text-6xl font-black leading-none tracking-tight lg:text-8xl">
-                                <RippleText text="Sustainable style," className="text-ink" />
+                            {/* Was two <RippleText> canvases. They rendered NOTHING:
+                                the component sizes its backing store from
+                                canvas.offsetWidth, which measures 0 for a w-full
+                                canvas at effect time, so both headlines on this
+                                page have been silently blank (verified in the
+                                browser: backing width 0, CSS width 505). It also
+                                ran an rAF loop that never idled, with no
+                                prefers-reduced-motion guard, on the first page
+                                many visitors see. Replaced with real display
+                                type — which is the identity anyway. */}
+                            <h1 className="font-display text-[clamp(3rem,7vw,6.5rem)] font-semibold text-foreground">
+                                Sustainable style,
                             </h1>
-                            <h1 className="-mt-4 text-6xl font-black leading-none tracking-tight lg:-mt-8 lg:text-8xl">
-                                <RippleText text="reimagined." className="text-ink" />
+                            <h1 className="font-display -mt-2 text-[clamp(3rem,7vw,6.5rem)] font-semibold italic text-primary">
+                                reimagined.
                             </h1>
                         </motion.div>
                         <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
@@ -221,7 +230,7 @@ export default function LoginPage() {
                                     className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 font-bold text-primary-foreground shadow-md transition-all duration-300 hover:bg-primary-hover"
                                 >
                                     {loading ? (
-                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-paper border-t-transparent" />
                                     ) : (
                                         <>
                                             Sign In

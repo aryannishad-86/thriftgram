@@ -170,7 +170,7 @@ export default function ProfilePage() {
                                             href={`https://instagram.com/${user.social_links.instagram.replace('@', '')}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-white"
+                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                                         >
                                             <Instagram className="h-5 w-5" />
                                         </a>
@@ -180,7 +180,7 @@ export default function ProfilePage() {
                                             href={`https://twitter.com/${user.social_links.twitter.replace('@', '')}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-white"
+                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                                         >
                                             <Twitter className="h-5 w-5" />
                                         </a>
@@ -190,7 +190,7 @@ export default function ProfilePage() {
                                             href={user.social_links.website}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-white"
+                                            className="rounded-full bg-base-2 p-2 text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                                         >
                                             <Globe className="h-5 w-5" />
                                         </a>
