@@ -124,16 +124,20 @@
   --glass-dark-border: rgba(244, 244, 242, 0.12);
   --glass-blur: 14px;
 
-  /* TYPE SCALE — none existed before; sizes were ad-hoc at every call site.
-     Fluid, viewport-scaled. The extreme jump from --text-display down to
+  /* EDITORIAL TYPE SCALE — additive, not a replacement of Tailwind's own
+     scale. This was NOT true in the first draft: --text-sm/base/lg/xl/2xl/3xl
+     were declared here to add fluid display sizes, but Tailwind v4's @theme
+     treats ANY --text-KEY as DEFINING the real utility .text-KEY — there is
+     no such thing as a same-named-but-separate token. That silently
+     redefined text-sm (14px -> 13px) and text-3xl (30px -> 40px) for every
+     PRE-EXISTING usage across all 14 pages, not just new editorial
+     headlines — caught by measuring computed font-size in the browser, not
+     by how anything looked. Names below no longer collide with any of
+     Tailwind's default scale keys (sm/base/lg/xl/2xl/3xl/…), so they only
+     ever add new utilities (.text-meta, .text-display, …) rather than
+     redefine existing ones. The extreme jump from --text-display down to
      --text-meta IS the design: huge Didone against small mono. */
   --text-meta: 0.6875rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-lg: 1.125rem;
-  --text-xl: clamp(1.25rem, 0.9rem + 1.2vw, 1.75rem);
-  --text-2xl: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
-  --text-3xl: clamp(2.5rem, 1.4rem + 4.2vw, 5rem);
   --text-display: clamp(3.5rem, 0.5rem + 11vw, 13rem);
 
   /* RADIUS — editorial is sharp. The old system had six radii coexisting
@@ -299,14 +303,10 @@
   --radius-lg: var(--radius-lg);
   --radius-full: var(--radius-full);
 
-  /* Type scale */
+  /* Type scale — only the two additive, non-colliding sizes (see the note
+     in :root above). Every other text-* utility is untouched Tailwind
+     default: no --text-sm/base/lg/xl/2xl/3xl entries here on purpose. */
   --text-meta: var(--text-meta);
-  --text-sm: var(--text-sm);
-  --text-base: var(--text-base);
-  --text-lg: var(--text-lg);
-  --text-xl: var(--text-xl);
-  --text-2xl: var(--text-2xl);
-  --text-3xl: var(--text-3xl);
   --text-display: var(--text-display);
 
   --font-sans: var(--font-archivo);

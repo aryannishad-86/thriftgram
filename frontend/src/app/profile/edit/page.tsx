@@ -150,7 +150,7 @@ export default function ProfileEditPage() {
                         </Field>
 
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-foreground">Social Links</h3>
+                            <h3 className="label-meta text-foreground">Social Links</h3>
 
                             <Field label="Instagram">
                                 <Input

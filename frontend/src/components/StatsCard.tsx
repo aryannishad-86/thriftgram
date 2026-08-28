@@ -16,28 +16,28 @@ export default function StatsCard({ title, value, icon, trend, description }: St
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -8 }}
             transition={{ duration: 0.3 }}
-            className="group relative overflow-hidden rounded-none border border-border bg-card p-6 shadow-md hover:shadow-xl transition-all duration-300"
+            className="group relative overflow-hidden border border-border bg-card p-6 transition-colors duration-300 hover:border-line-strong"
         >
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-xs font-semibold text-base-02 uppercase tracking-wide mb-2">
+                    <p className="label-meta mb-2 text-muted">
                         {title}
                     </p>
-                    <h3 className="text-3xl font-bold text-base-03 mb-1">
+                    <h3 className="font-mono text-3xl text-foreground mb-1">
                         {value}
                     </h3>
                     {description && (
-                        <p className="text-sm text-base-02">
+                        <p className="text-sm text-muted-foreground">
                             {description}
                         </p>
                     )}
                     {trend && (
-                        <p className="text-xs font-semibold text-base-03 mt-2">
+                        <p className="label-meta mt-2 text-foreground">
                             ↗ {trend}
                         </p>
                     )}
                 </div>
-                <div className="flex-shrink-0 rounded-none bg-base-03/5 p-3 text-base-03">
+                <div className="flex-shrink-0 border border-border bg-base-2 p-3 text-foreground">
                     {icon}
                 </div>
             </div>

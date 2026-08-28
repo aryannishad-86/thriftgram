@@ -8,6 +8,10 @@ const SIZES = {
     md: { px: 40, cls: "h-10 w-10 text-xs" },
     lg: { px: 48, cls: "h-12 w-12 text-sm" },
     xl: { px: 96, cls: "h-24 w-24 text-xl" },
+    // Profile-hero size — the one recurring case big enough to need its own
+    // tier: /profile/[username] and /profile/edit both hand-rolled the exact
+    // same h-32 w-32 avatar independently before this.
+    "2xl": { px: 128, cls: "h-32 w-32 text-3xl border-4" },
 } as const
 
 export interface AvatarProps {

@@ -3,6 +3,7 @@
 import { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import Feed from "@/components/Feed";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 import WaveGallery from "@/components/WaveGallery";
@@ -36,50 +37,79 @@ function HomeContent() {
 
   return (
     <PageShell maxWidth="full" noPadding className="selection:bg-primary/20">
-      {/* Hero — typographic, no photo. The old hero used a Studio Ghibli
-          still as a decorative wash (off-brand and copyrighted on a public
-          site); with no reliable product photography to replace it with,
-          the type itself carries the section instead. */}
-      <div className="relative overflow-hidden py-32 sm:py-40">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="font-display text-6xl font-semibold tracking-tight text-foreground sm:text-8xl lg:text-9xl">
-            Future of Thrifting.
-          </h1>
-          <p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">
-            Discover curated vintage and pre-loved fashion in a premium marketplace
-            built for sustainable style.
-          </p>
+      {/* Hero — broken 12-col grid, not a centered block. A magazine cover
+          doesn't center its masthead; it lets the headline run to one edge
+          and holds the rest as deliberate negative space. The old hero
+          centered everything (text-center, mx-auto max-w-2xl) — the single
+          most "generic SaaS landing page" tell in the whole app. */}
+      <div className="relative overflow-hidden px-6 pb-20 pt-28 sm:px-10 lg:pb-28 lg:pt-36">
+        <div className="grid grid-cols-1 gap-y-10 lg:grid-cols-12 lg:gap-x-4">
+          {/* Vertical index rail — pure editorial furniture, desktop only.
+              This is the wall-label voice applied to the page itself, not
+              just its buttons. */}
+          <div className="hidden lg:col-span-1 lg:flex lg:items-end lg:justify-start">
+            <span className="label-meta origin-bottom-left -rotate-90 whitespace-nowrap text-muted">
+              Vol. 01 — After Hours
+            </span>
+          </div>
 
-          {/* Was two hand-rolled <a> elements duplicating button styling — so
-              the hero CTA and the navbar's Sell Item button, visible together
-              on first paint, were two different button systems. Both now go
-              through the primitive. */}
-          <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Button asChild size="lg">
-              <a href="#feed">Explore Feed</a>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href="/sell">
-                Start Selling <span aria-hidden="true">→</span>
-              </a>
-            </Button>
+          <div className="lg:col-start-2 lg:col-span-7">
+            <p className="label-meta mb-6 text-primary">
+              Est. Now — Resale Marketplace
+            </p>
+            <h1 className="font-display text-display leading-[0.88] text-foreground">
+              Future of
+              <br />
+              Thrifting.
+            </h1>
+          </div>
+
+          {/* Narrow subhead column, bottom-aligned and offset a full column
+              from the headline (the gap at col 9 is deliberate) — the
+              asymmetry IS the layout, not a responsive accident. */}
+          <div className="flex flex-col justify-end gap-8 lg:col-start-10 lg:col-span-3">
+            <p className="text-lg leading-8 text-muted-foreground">
+              Curated vintage and pre-loved fashion, for people who&rsquo;d
+              rather find something than shop for it.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <Button asChild size="lg">
+                <a href="#feed">Explore Feed</a>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <a href="/sell">
+                  Start Selling <span aria-hidden="true">→</span>
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* WaveGallery Section */}
+      <Separator className="mx-6 sm:mx-10" />
+
+      {/* WaveGallery Section — CSS 3D for now; the three.js signature-moment
+          rebuild is R5, a deliberately separate phase (WebGL is scoped to
+          two moments only, this is the first, and it deserves its own
+          reviewable diff rather than arriving as a drive-by inside R3). */}
       <WaveGallery />
 
-      {/* Feed Section */}
-      <div id="feed" className="container mx-auto px-4 py-16">
-        <div className="mb-10">
-          <h2 className="font-display mb-6 text-2xl font-semibold tracking-tight text-foreground">
-            {searchParams.get('search') ? `Results for "${searchParams.get('search')}"` : 'Trending Now'}
-          </h2>
+      <Separator className="mx-6 sm:mx-10" />
 
-          <AdvancedFilters filters={filters} onFiltersChange={setFilters} />
+      {/* Feed Section */}
+      <div id="feed" className="container mx-auto px-6 py-16 sm:px-10">
+        <div className="mb-10 flex items-baseline justify-between gap-4">
+          <div>
+            <p className="label-meta mb-3 text-muted">
+              {searchParams.get('search') ? 'Search Results' : 'The Rack'}
+            </p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+              {searchParams.get('search') ? `"${searchParams.get('search')}"` : 'Trending Now'}
+            </h2>
+          </div>
         </div>
 
+        <AdvancedFilters filters={filters} onFiltersChange={setFilters} />
         <Feed filters={feedFilters} />
       </div>
     </PageShell>

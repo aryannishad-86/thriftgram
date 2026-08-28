@@ -69,6 +69,7 @@ export default function WishlistPage() {
     return (
         <PageShell>
             <div className="mb-8">
+                <p className="label-meta mb-3 text-muted">Saved for Later</p>
                 <h1 className="font-display mb-2 flex items-center gap-3 text-4xl font-semibold text-foreground">
                     <Heart className="h-9 w-9 fill-error text-error" />
                     Wishlist

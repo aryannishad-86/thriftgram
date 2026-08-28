@@ -6,8 +6,11 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Heart, Share2, Sparkles, Shirt, CheckCircle, MessageCircle, PackageSearch } from 'lucide-react';
 import api from '@/lib/api';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageShell } from '@/components/layout/page-shell';
 import BuyButton from '@/components/BuyButton';
@@ -38,6 +41,13 @@ interface Item {
     };
 }
 
+interface ClosetMatch {
+    id: number;
+    image: string;
+    category: string;
+    color?: string;
+}
+
 export default function ItemDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -47,7 +57,7 @@ export default function ItemDetailPage() {
     const [refreshReviews, setRefreshReviews] = useState(0);
 
     const [matching, setMatching] = useState(false);
-    const [matches, setMatches] = useState<any[]>([]);
+    const [matches, setMatches] = useState<ClosetMatch[]>([]);
     const [showMatches, setShowMatches] = useState(false);
     const [messagingLoading, setMessagingLoading] = useState(false);
     const [currentUsername, setCurrentUsername] = useState<string | null>(null);
@@ -178,24 +188,39 @@ export default function ItemDetailPage() {
         );
     }
 
+    // The single most important product photo in the app — was never routed
+    // through Cloudinary at all (unlike ItemCard/WaveGallery/Avatar, all
+    // fixed in R1), so it shipped the raw multi-megabyte original AND risked
+    // the double-optimization bug (Cloudinary URL re-processed by
+    // /_next/image) that R1 fixed everywhere else. Full-bleed at 3:4, so a
+    // wider crop than the grid cards' — g_auto still keeps the garment in frame.
+    const rawImage = item.images[0]?.image || '/placeholder.jpg';
+    const mainImage = cloudinaryUrl(rawImage, { width: 1000, aspect: '3:4' });
+
     return (
         <PageShell>
-            <div className="grid gap-12 md:grid-cols-2">
+            {/* Asymmetric 3:2 split, not an even 2-col grid — the photo carries
+                more weight than the details column, the way a magazine spread
+                gives the image more real estate than its caption. */}
+            <div className="grid gap-12 md:grid-cols-5">
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="relative aspect-[3/4] overflow-hidden rounded-none border border-border bg-card shadow-lg"
+                    className="relative aspect-[3/4] overflow-hidden border border-border bg-card md:col-span-3"
                 >
                     <Image
-                        src={item.images[0]?.image || '/placeholder.jpg'}
+                        src={mainImage}
                         alt={item.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, 60vw"
+                        unoptimized={isCloudinary(rawImage)}
                         className="object-cover"
                         priority
                     />
                     {item.ai_analysis?.is_verified && (
-                        <div className="glass-light absolute right-4 top-4 flex items-center gap-2 rounded-none px-4 py-2 font-bold text-success">
-                            <Sparkles className="h-4 w-4" /> AI Verified
+                        <div className="glass-light absolute right-4 top-4 flex items-center gap-2 px-4 py-2 text-success">
+                            <Sparkles className="h-4 w-4" />
+                            <span className="label-meta text-success">AI Verified</span>
                         </div>
                     )}
                 </motion.div>
@@ -203,20 +228,17 @@ export default function ItemDetailPage() {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="space-y-8"
+                    className="space-y-8 md:col-span-2"
                 >
                     <div>
-                        <h1 className="font-display mb-2 text-4xl font-semibold text-foreground md:text-5xl">{item.title}</h1>
+                        <p className="label-meta mb-3 text-muted">Lot {item.id.toString().padStart(4, '0')}</p>
+                        <h1 className="font-display mb-3 text-4xl font-semibold leading-[0.95] text-foreground">{item.title}</h1>
                         <p className="font-mono text-2xl text-foreground">₹{item.price}</p>
                     </div>
 
-                    <div className="flex gap-4">
-                        <div className="rounded-none border border-border bg-card px-4 py-2 text-muted">
-                            Size: <span className="font-bold text-foreground">{item.size}</span>
-                        </div>
-                        <div className="rounded-none border border-border bg-card px-4 py-2 text-muted">
-                            Condition: <span className="font-bold text-foreground">{item.condition}</span>
-                        </div>
+                    <div className="flex gap-2">
+                        <Badge variant="outline" size="md">Size {item.size}</Badge>
+                        <Badge variant="outline" size="md">{item.condition}</Badge>
                     </div>
 
                     <p className="text-lg leading-relaxed text-muted-foreground">
@@ -225,8 +247,8 @@ export default function ItemDetailPage() {
 
                     <Card padding="lg">
                         <div className="mb-6 flex items-center justify-between">
-                            <h3 className="flex items-center gap-2 text-xl font-bold text-foreground">
-                                <Sparkles className="h-5 w-5" />
+                            <h3 className="flex items-center gap-2 label-meta text-foreground">
+                                <Sparkles className="h-4 w-4" />
                                 AI Quality Verification
                             </h3>
                             {isOwner && (
@@ -249,11 +271,11 @@ export default function ItemDetailPage() {
                                 )}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="rounded-none border border-border bg-base-2 p-4">
-                                        <div className="mb-1 text-xs text-muted">Detected Brand</div>
+                                        <div className="label-meta mb-1 text-muted">Detected Brand</div>
                                         <div className="text-lg font-bold text-foreground">{item.ai_analysis.detected_brand}</div>
                                     </div>
                                     <div className="rounded-none border border-border bg-base-2 p-4">
-                                        <div className="mb-1 text-xs text-muted">Material</div>
+                                        <div className="label-meta mb-1 text-muted">Material</div>
                                         <div className="text-lg font-bold text-foreground">{item.ai_analysis.fabric_type}</div>
                                     </div>
                                 </div>
@@ -273,7 +295,7 @@ export default function ItemDetailPage() {
                                 </div>
 
                                 <div className="rounded-none border border-border bg-base-2 p-4">
-                                    <div className="mb-2 text-xs text-muted">Defect Analysis</div>
+                                    <div className="label-meta mb-2 text-muted">Defect Analysis</div>
                                     {item.ai_analysis.detected_defects.length > 0 ? (
                                         <ul className="list-inside list-disc text-sm text-error">
                                             {item.ai_analysis.detected_defects.map((defect: string, i: number) => (
@@ -298,8 +320,8 @@ export default function ItemDetailPage() {
 
                     <Card padding="lg">
                         <div className="mb-4 flex items-center justify-between">
-                            <h3 className="flex items-center gap-2 text-xl font-bold text-foreground">
-                                <Shirt className="h-5 w-5" />
+                            <h3 className="flex items-center gap-2 label-meta text-foreground">
+                                <Shirt className="h-4 w-4" />
                                 Wardrobe Matcher
                             </h3>
                             <Button
@@ -318,8 +340,15 @@ export default function ItemDetailPage() {
                                 {matches.length > 0 ? (
                                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                                         {matches.map((match) => (
-                                            <div key={match.id} className="aspect-[3/4] overflow-hidden rounded-none border border-border bg-base-2">
-                                                <img src={match.image} alt={match.category} className="h-full w-full object-cover" />
+                                            <div key={match.id} className="relative aspect-[3/4] overflow-hidden border border-border bg-base-2">
+                                                <Image
+                                                    src={cloudinaryUrl(match.image, { width: 300, aspect: '3:4' })}
+                                                    alt={match.category}
+                                                    fill
+                                                    sizes="150px"
+                                                    unoptimized={isCloudinary(match.image)}
+                                                    className="object-cover"
+                                                />
                                             </div>
                                         ))}
                                     </div>
@@ -375,12 +404,14 @@ export default function ItemDetailPage() {
                 </motion.div>
             </div>
 
+            <Separator className="my-16" />
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mt-16"
             >
+                <p className="label-meta mb-3 text-muted">Word on the Street</p>
                 <h2 className="font-display mb-8 text-3xl font-semibold text-foreground">Reviews</h2>
 
                 <div className="grid gap-8 md:grid-cols-2">

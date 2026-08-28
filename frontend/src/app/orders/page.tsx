@@ -3,8 +3,10 @@
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { Package } from 'lucide-react';
 import api, { unwrap } from '@/lib/api';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
@@ -147,12 +149,15 @@ function OrdersContent() {
                             onClick={() => router.push(`/items/${order.item.id}`)}
                         >
                             <div className="flex gap-6">
-                                <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-none bg-base-2">
+                                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden bg-base-2">
                                     {order.item.images && order.item.images.length > 0 ? (
-                                        <img
-                                            src={order.item.images[0].image}
+                                        <Image
+                                            src={cloudinaryUrl(order.item.images[0].image, { width: 200, aspect: '1:1' })}
                                             alt={order.item.title}
-                                            className="h-full w-full object-cover"
+                                            fill
+                                            sizes="96px"
+                                            unoptimized={isCloudinary(order.item.images[0].image)}
+                                            className="object-cover"
                                         />
                                     ) : (
                                         <div className="flex h-full w-full items-center justify-center">
@@ -171,14 +176,14 @@ function OrdersContent() {
                                                 Order #{order.id} • {new Date(order.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
-                                        <div className="text-xl font-bold text-foreground">
+                                        <div className="font-mono text-xl text-foreground">
                                             ₹{parseFloat(order.total_amount).toFixed(2)}
                                         </div>
                                     </div>
 
                                     <div className="mt-3 flex items-center gap-3">
                                         <span className={cn(
-                                            "rounded-none border px-3 py-1 text-xs font-semibold",
+                                            "label-meta border px-3 py-1",
                                             STATUS_COLORS[order.status as keyof typeof STATUS_COLORS]
                                         )}>
                                             {STATUS_LABELS[order.status as keyof typeof STATUS_LABELS]}

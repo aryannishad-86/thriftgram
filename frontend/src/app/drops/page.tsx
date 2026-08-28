@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Flame, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import api, { unwrap } from '@/lib/api';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import CountdownTimer from '@/components/CountdownTimer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/ui/error-state';
@@ -61,16 +64,16 @@ export default function DropsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 inline-flex items-center gap-2 rounded-none border border-error/20 bg-error/10 px-4 py-2 text-error"
+                    className="mb-6 inline-flex items-center gap-2 border border-error/20 bg-error/10 px-4 py-2 text-error"
                 >
                     <Flame className="h-4 w-4 animate-pulse" />
-                    <span className="text-sm font-bold tracking-wider">LIVE DROPS</span>
+                    <span className="label-meta text-error">Live Drops</span>
                 </motion.div>
 
                 <motion.h1
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="font-display mb-6 text-5xl font-semibold tracking-tight text-foreground md:text-8xl"
+                    className="font-display text-display leading-[0.88] text-foreground"
                 >
                     Next Drop In
                 </motion.h1>
@@ -83,17 +86,19 @@ export default function DropsPage() {
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                         <CountdownTimer targetDate={nextDrop.start_time} onComplete={fetchDrops} />
                         <div className="mt-8">
-                            <h2 className="text-2xl font-bold text-foreground md:text-3xl">{nextDrop.title}</h2>
+                            <h2 className="font-display text-2xl font-semibold text-foreground md:text-3xl">{nextDrop.title}</h2>
                             <p className="mx-auto mt-2 max-w-xl text-muted-foreground">{nextDrop.description}</p>
                         </div>
                     </motion.div>
                 ) : (
                     <div className="py-20">
-                        <h2 className="text-3xl font-bold text-foreground">No upcoming drops scheduled.</h2>
+                        <h2 className="font-display text-3xl font-semibold text-foreground">No upcoming drops scheduled.</h2>
                         <p className="mt-2 text-muted">Check back soon for exclusive collections.</p>
                     </div>
                 )}
             </div>
+
+            {activeDrop && <Separator className="mb-16" />}
 
             {/* Inverted promo panel — a solid BONE block on the black canvas.
                 This was a solid-ink block on the old light theme; the inversion
@@ -106,8 +111,8 @@ export default function DropsPage() {
                     animate={{ opacity: 1 }}
                     className="relative mb-20 overflow-hidden rounded-none bg-ink p-8 md:p-12"
                 >
-                    <div className="absolute right-0 top-0 rounded-bl-3xl bg-error px-6 py-2 font-bold text-paper">
-                        LIVE NOW
+                    <div className="absolute right-0 top-0 bg-error px-6 py-2">
+                        <span className="label-meta text-paper">Live Now</span>
                     </div>
 
                     <div className="grid items-center gap-12 md:grid-cols-2">
@@ -120,9 +125,16 @@ export default function DropsPage() {
                                 </Link>
                             </Button>
                         </div>
-                        <div className="relative aspect-video overflow-hidden rounded-none border border-paper/10">
+                        <div className="relative aspect-video overflow-hidden border border-paper/10">
                             {activeDrop.image ? (
-                                <img src={activeDrop.image} alt={activeDrop.title} className="h-full w-full object-cover" />
+                                <Image
+                                    src={cloudinaryUrl(activeDrop.image, { width: 800, aspect: '16:9' })}
+                                    alt={activeDrop.title}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    unoptimized={isCloudinary(activeDrop.image)}
+                                    className="object-cover"
+                                />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center bg-paper/5 text-paper/40">
                                     No Cover Image
@@ -135,25 +147,33 @@ export default function DropsPage() {
 
             {drops.length > 0 && (
                 <div>
-                    <h3 className="mb-8 flex items-center gap-3 text-2xl font-bold text-foreground">
-                        <Calendar className="h-6 w-6 text-muted" /> Upcoming Schedule
-                    </h3>
+                    <p className="label-meta mb-3 flex items-center gap-2 text-muted">
+                        <Calendar className="h-4 w-4" /> Schedule
+                    </p>
+                    <h3 className="font-display mb-8 text-2xl font-semibold text-foreground">Upcoming Drops</h3>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {drops.filter(d => d.id !== activeDrop?.id && d.id !== nextDrop?.id).map((drop) => (
-                            <div key={drop.id} className="group overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary">
+                            <div key={drop.id} className="group overflow-hidden border border-border bg-card transition-colors hover:border-primary">
                                 <div className="relative aspect-video bg-base-2">
                                     {drop.image && (
-                                        <img src={drop.image} alt={drop.title} className="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-100" />
+                                        <Image
+                                            src={cloudinaryUrl(drop.image, { width: 600, aspect: '16:9' })}
+                                            alt={drop.title}
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, 33vw"
+                                            unoptimized={isCloudinary(drop.image)}
+                                            className="object-cover opacity-80 transition-opacity group-hover:opacity-100"
+                                        />
                                     )}
                                     {/* Genuine glass-over-photo: a date chip floating on the cover image */}
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="glass-dark rounded-none px-4 py-2 font-mono text-sm text-white">
+                                        <div className="glass-dark px-4 py-2 label-meta text-white">
                                             {new Date(drop.start_time).toLocaleDateString()} • {new Date(drop.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="p-6">
-                                    <h4 className="mb-2 text-xl font-bold text-foreground">{drop.title}</h4>
+                                    <h4 className="font-display mb-2 text-xl font-semibold text-foreground">{drop.title}</h4>
                                     <p className="line-clamp-2 text-sm text-muted-foreground">{drop.description}</p>
                                 </div>
                             </div>

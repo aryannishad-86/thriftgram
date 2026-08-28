@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Leaf, Droplets, User as UserIcon } from 'lucide-react';
+import { Leaf, Droplets } from 'lucide-react';
 import api, { unwrap } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { Avatar } from '@/components/ui/avatar';
 import { PageShell } from '@/components/layout/page-shell';
 import { PageHeader } from '@/components/layout/page-header';
 
@@ -51,11 +52,14 @@ export default function LeaderboardPage() {
                 align="center"
             />
 
-            <div className="overflow-hidden rounded-none border border-border bg-card shadow-md">
+            {/* The scoreboard voice: a wall label header row, not bold sans —
+                this is where the mono/uppercase/tracked treatment earns its
+                keep the most in the whole app. */}
+            <div className="overflow-hidden border border-border bg-card">
                 <div className="flex items-center justify-between border-b border-border bg-base-2 p-6">
-                    <div className="font-bold text-foreground">Rank</div>
-                    <div className="ml-8 flex-1 font-bold text-foreground">User</div>
-                    <div className="font-bold text-foreground">Eco-Points</div>
+                    <div className="label-meta w-8 text-muted">Rank</div>
+                    <div className="label-meta ml-8 flex-1 text-muted">Thrifter</div>
+                    <div className="label-meta text-muted">Eco-Points</div>
                 </div>
 
                 {loading ? (
@@ -82,24 +86,14 @@ export default function LeaderboardPage() {
                                 transition={{ delay: index * 0.1 }}
                                 className="flex items-center p-6 transition-colors hover:bg-base-2"
                             >
-                                <div className="w-8 text-2xl font-bold text-foreground">
+                                <div className="w-8 font-mono text-2xl text-foreground">
                                     {index + 1 === 1 ? '🥇' : index + 1 === 2 ? '🥈' : index + 1 === 3 ? '🥉' : `#${index + 1}`}
                                 </div>
 
                                 <div className="ml-8 flex flex-1 items-center gap-4">
-                                    <div className="h-12 w-12 rounded-full bg-ink p-[2px]">
-                                        <div className="relative h-full w-full overflow-hidden rounded-full bg-base-2">
-                                            {user.profile_picture ? (
-                                                <img src={user.profile_picture} alt={user.username} className="h-full w-full object-cover" />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center bg-base-2 text-foreground">
-                                                    <UserIcon className="h-6 w-6" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <Avatar src={user.profile_picture} name={user.username} size="md" />
                                     <div>
-                                        <div className="text-lg font-bold text-foreground">{user.username}</div>
+                                        <div className="font-display text-lg font-semibold text-foreground">{user.username}</div>
                                         <div className="flex gap-3 text-xs text-muted-foreground">
                                             <span className="flex items-center gap-1"><Leaf className="h-3 w-3" /> {user.co2_saved}kg CO₂</span>
                                             <span className="flex items-center gap-1"><Droplets className="h-3 w-3" /> {user.water_saved}L Water</span>
@@ -107,7 +101,7 @@ export default function LeaderboardPage() {
                                     </div>
                                 </div>
 
-                                <div className="font-mono text-2xl font-bold text-foreground">
+                                <div className={`font-mono text-2xl font-bold ${index === 0 ? 'text-primary' : 'text-foreground'}`}>
                                     {user.eco_points}
                                 </div>
                             </motion.div>
