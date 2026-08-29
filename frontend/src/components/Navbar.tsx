@@ -37,7 +37,13 @@ export default function Navbar() {
         <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95">
             <div className="container relative mx-auto grid h-[72px] grid-cols-[1fr_auto_1fr] items-center px-4">
                 <div className="flex justify-start">
-                    <Link href="/" className="font-display text-2xl font-semibold text-ink transition-colors hover:text-ink/70">
+                    {/* text-xl below sm — at text-2xl (both columns are
+                        already at their content floor: 126px wordmark, 244px
+                        for the 5 icon buttons on the right) the header's real
+                        minimum width was ~370px against ~343px available on
+                        a 375px phone, a genuine unavoidable overflow, not a
+                        layout bug fixable with min-w-0. */}
+                    <Link href="/" className="font-display text-xl font-semibold text-ink transition-colors hover:text-ink/70 sm:text-2xl">
                         ThriftGram
                     </Link>
                 </div>
@@ -46,7 +52,7 @@ export default function Navbar() {
                     <NavLinks />
                 </div>
 
-                <div className="z-10 flex items-center justify-end gap-3">
+                <div className="z-10 flex items-center justify-end gap-2 sm:gap-3">
                     <SearchBar />
                     <NavActions username={username} />
                 </div>

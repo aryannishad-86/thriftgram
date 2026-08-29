@@ -61,6 +61,13 @@ export default function SellPage() {
         <main className="relative min-h-screen overflow-hidden bg-background selection:bg-primary/20">
             <div className="container relative z-10 mx-auto max-w-3xl px-4 py-24">
                 <div className="mb-12 space-y-4 text-center">
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="label-meta text-primary"
+                    >
+                        New Listing
+                    </motion.p>
                     <motion.h1
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}

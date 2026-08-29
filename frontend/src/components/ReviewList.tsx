@@ -63,7 +63,7 @@ export default function ReviewList({ itemId, refreshTrigger = 0 }: ReviewListPro
         <div>
             {/* Average Rating */}
             {reviews.length > 0 && (
-                <div className="mb-6 p-6 bg-card border border-border rounded-2xl">
+                <div className="mb-6 p-6 bg-card border border-border rounded-none">
                     <div className="flex items-center gap-4">
                         <div className="text-center">
                             <div className="text-4xl font-bold text-base-03">{averageRating.toFixed(1)}</div>
@@ -77,7 +77,7 @@ export default function ReviewList({ itemId, refreshTrigger = 0 }: ReviewListPro
                                 return (
                                     <div key={star} className="flex items-center gap-2 mb-1">
                                         <span className="text-sm text-base-02 w-8">{star}★</span>
-                                        <div className="flex-1 h-2 bg-base-2 rounded-full overflow-hidden">
+                                        <div className="flex-1 h-2 bg-base-2 rounded-none overflow-hidden">
                                             <div
                                                 className="h-full bg-yellow-400"
                                                 style={{ width: `${percentage}%` }}
@@ -94,7 +94,7 @@ export default function ReviewList({ itemId, refreshTrigger = 0 }: ReviewListPro
 
             {/* Reviews List */}
             {reviews.length === 0 ? (
-                <div className="text-center py-12 bg-card border border-border rounded-2xl">
+                <div className="text-center py-12 bg-card border border-border rounded-none">
                     <MessageSquare className="w-12 h-12 text-base-01 mx-auto mb-3" />
                     <h3 className="text-lg font-semibold text-base-03 mb-1">No reviews yet</h3>
                     <p className="text-base-02">Be the first to review this item!</p>
@@ -107,7 +107,7 @@ export default function ReviewList({ itemId, refreshTrigger = 0 }: ReviewListPro
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="bg-card border border-border rounded-2xl p-6"
+                            className="bg-card border border-border rounded-none p-6"
                         >
                             <div className="flex gap-4">
                                 {/* Reviewer Avatar */}

@@ -43,7 +43,7 @@ export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
     };
 
     return (
-        <div className="rounded-2xl border-2 border-border bg-card overflow-hidden shadow-lg">
+        <div className="rounded-none border-2 border-border bg-card overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-base-2 text-base-03 border-b-2 border-border">
@@ -81,7 +81,7 @@ export default function ListingsTable({ items, onDelete }: ListingsTableProps) {
                                     >
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-base-2 border-2 border-border">
+                                                <div className="relative h-12 w-12 overflow-hidden rounded-none bg-base-2 border-2 border-border">
                                                     {item.images[0] ? (
                                                         <Image
                                                             src={item.images[0].image}

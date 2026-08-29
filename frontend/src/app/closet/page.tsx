@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shirt, Upload } from 'lucide-react';
+import Image from 'next/image';
 import api from '@/lib/api';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -89,7 +91,7 @@ export default function ClosetPage() {
             {loading ? (
                 <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-5">
                     {[...Array(10)].map((_, i) => (
-                        <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+                        <Skeleton key={i} className="aspect-[3/4] rounded-none" />
                     ))}
                 </div>
             ) : loadFailed ? (
@@ -108,15 +110,18 @@ export default function ClosetPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.05 }}
-                            className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary"
+                            className="group relative aspect-[3/4] overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary"
                         >
-                            <img
-                                src={item.image}
+                            <Image
+                                src={cloudinaryUrl(item.image, { width: 400, aspect: '3:4' })}
                                 alt={item.category}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                fill
+                                sizes="(max-width: 768px) 50vw, 20vw"
+                                unoptimized={isCloudinary(item.image)}
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
                             />
                             <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-transparent to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
-                                <span className="font-bold text-white">{item.category}</span>
+                                <span className="label-meta text-white">{item.category}</span>
                                 <span className="text-sm text-white/60">{item.color || 'Unknown Color'}</span>
                             </div>
                         </motion.div>

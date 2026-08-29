@@ -64,12 +64,20 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
 
     return (
         <div className="w-full">
-            <div className="flex gap-3 w-full">
+            {/* flex-col below sm, flex-row at sm+ — "Buy Now - ₹1,299.00" has
+                whitespace-nowrap (from Button's base styles) and can't wrap,
+                so side-by-side with "Add to Cart" on a narrow phone forced
+                this flex-[2] item wider than the viewport (flex items default
+                to min-width: auto, same class of bug as the grid above).
+                Stacking avoids shrinking either button's text — this only
+                changes layout, not the buy button's content or click
+                behavior. */}
+            <div className="flex w-full flex-col gap-3 sm:flex-row">
                 <Button
                     onClick={handleAddToCart}
                     disabled={isSold}
                     variant="outline"
-                    className="flex-1 border-base-03/50 text-base-03 hover:bg-base-03/10 font-bold py-6 text-lg rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full border-base-03/50 text-base-03 hover:bg-base-03/10 font-bold py-6 text-lg rounded-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto sm:flex-1"
                 >
                     <ShoppingCart className="h-5 w-5 mr-2" />
                     {isSold ? 'Sold' : 'Add to Cart'}
@@ -78,16 +86,16 @@ export default function BuyButton({ itemId, price, title = 'Item', image = '', s
                 <motion.div
                     whileHover={{ scale: loading || isSold ? 1 : 1.02 }}
                     whileTap={{ scale: loading || isSold ? 1 : 0.98 }}
-                    className="flex-[2]"
+                    className="w-full sm:w-auto sm:flex-[2]"
                 >
                     <Button
                         onClick={handleBuy}
                         disabled={loading || isSold}
-                        className="w-full bg-base-03 hover:bg-base-03/90 text-white font-bold py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-base-03 hover:bg-base-03/90 text-paper font-bold py-6 text-lg rounded-none shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <span className="flex items-center gap-2">
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-paper border-t-transparent" />
                                 Processing...
                             </span>
                         ) : isSold ? (

@@ -1,8 +1,9 @@
 'use client';
 
-import { User, MessageCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 interface Conversation {
     id: number;
@@ -88,22 +89,12 @@ export default function ConversationList({
                         className={`w-full p-4 flex gap-3 items-start border-b border-border hover:bg-base-2 transition-colors text-left ${isActive ? 'bg-base-2 border-l-4 border-base-03' : ''
                             }`}
                     >
-                        {/* Avatar */}
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-base-2 flex-shrink-0">
-                            {otherUser?.profile_picture ? (
-                                <Image
-                                    src={otherUser.profile_picture}
-                                    alt={otherUser.username}
-                                    width={48}
-                                    height={48}
-                                    className="object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <User className="w-6 h-6 text-base-01" />
-                                </div>
-                            )}
-                        </div>
+                        <Avatar
+                            src={otherUser?.profile_picture}
+                            name={otherUser?.username}
+                            size="lg"
+                            className="flex-shrink-0"
+                        />
 
                         {/* Conversation Info */}
                         <div className="flex-1 min-w-0">
@@ -132,11 +123,10 @@ export default function ConversationList({
                                 </p>
                             )}
 
-                            {/* Unread badge */}
                             {conversation.unread_count && conversation.unread_count > 0 && (
-                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-error text-white text-xs font-semibold">
+                                <Badge variant="danger" size="sm" className="mt-1 border-none bg-error text-paper">
                                     {conversation.unread_count}
-                                </span>
+                                </Badge>
                             )}
                         </div>
                     </motion.button>

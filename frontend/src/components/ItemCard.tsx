@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Heart, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
 
 export interface Item {
@@ -62,7 +63,11 @@ export interface ItemCardProps {
 export default function ItemCard({ item: initialItem, href, onRemove, meta, className }: ItemCardProps) {
     const [item, setItem] = useState(initialItem);
     const [isLiking, setIsLiking] = useState(false);
-    const mainImage = item.images.length > 0 ? item.images[0].image : '/placeholder.jpg';
+    // Routed through Cloudinary: crops every upload to one 4:5 frame with
+    // subject-aware gravity, and drops a ~1 MB original to ~40 KB. The shared
+    // frame is what lets a grid of arbitrary phone photos read as a gallery.
+    const rawImage = item.images.length > 0 ? item.images[0].image : '/placeholder.jpg';
+    const mainImage = cloudinaryUrl(rawImage, { width: 640, aspect: '4:5' });
     const canLike = !onRemove && item.is_liked !== undefined && item.likes_count !== undefined;
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -103,7 +108,25 @@ export default function ItemCard({ item: initialItem, href, onRemove, meta, clas
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
             className={cn(
-                "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow duration-300 hover:shadow-lg",
+                "group relative flex flex-col overflow-hidden rounded-none border border-border bg-card transition-shadow duration-300 hover:shadow-lg",
+                // The actual focusable element is the absolutely-positioned
+                // Link below, but this wrapper has overflow-hidden (for the
+                // image zoom) — a ring drawn on the Link itself would be
+                // clipped by that. focus-within puts the ring on THIS
+                // element instead: an element's own box-shadow is never
+                // clipped by its own overflow-hidden, only a child's would
+                // be. Found via real Tab-key navigation — every ItemCard
+                // across Feed/Wishlist/Profile had no visible focus ring at
+                // all before this (same root issue as WaveGallery's .item).
+                // Matches Button's exact ring construction. Confirmed
+                // visually via screenshot with real focus — getComputedStyle
+                // reads of the composed box-shadow are unreliable in this
+                // tool's execution context (a new instance of the same class
+                // of stale-read issue already seen with its console buffer
+                // and rAF); the individual --tw-ring-* variables and a real
+                // rendered screenshot are the trustworthy signals here, not
+                // the shorthand's computed value.
+                "ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                 className
             )}
         >
@@ -112,6 +135,11 @@ export default function ItemCard({ item: initialItem, href, onRemove, meta, clas
                     src={mainImage}
                     alt={item.title}
                     fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    // Cloudinary already sized, cropped and re-encoded this.
+                    // Letting /_next/image process it again is a second lossy
+                    // pass and a billed Vercel optimization for no gain.
+                    unoptimized={isCloudinary(rawImage)}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
 
@@ -155,7 +183,10 @@ export default function ItemCard({ item: initialItem, href, onRemove, meta, clas
                 )}
             </div>
 
-            <Link href={href ?? `/items/${item.id}`} className="absolute inset-0">
+            {/* focus:outline-none — the ring lives on the outer wrapper via
+                focus-within (see comment above); without this the link's own
+                native default outline would show alongside it. */}
+            <Link href={href ?? `/items/${item.id}`} className="absolute inset-0 focus:outline-none">
                 <span className="sr-only">View {item.title}</span>
             </Link>
         </motion.div>

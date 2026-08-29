@@ -85,7 +85,7 @@ export default function RegisterPage() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, type: "spring", stiffness: 100, damping: 20 }}
-                className="relative w-full max-w-md space-y-8 rounded-3xl border border-border bg-card p-8 shadow-lg"
+                className="relative w-full max-w-md space-y-8 rounded-none border border-border bg-card p-8 shadow-lg"
             >
                 <div className="absolute left-0 top-0 h-1 w-full rounded-t-3xl bg-primary" />
 

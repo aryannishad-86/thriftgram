@@ -3,7 +3,7 @@ import { AlertTriangle, CheckCircle, Info, type LucideIcon } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-const alertVariants = cva("flex items-start gap-3 rounded-xl border p-4 text-sm", {
+const alertVariants = cva("flex items-start gap-3 rounded-none border p-4 text-sm", {
     variants: {
         variant: {
             error: "border-error/20 bg-error/5 text-error",

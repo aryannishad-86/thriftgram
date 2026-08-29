@@ -5,26 +5,39 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// One button radius everywhere (rounded-full) — the previous base rounded-xl
-// vs. per-caller rounded-full override was exactly the "two systems on one
-// page" problem this redesign exists to fix. Settle on one shape.
+// AFTER HOURS: buttons are SQUARE, not pills.
+//
+// The pill was the single most "generic product UI" element in the old design
+// — a gallery/editorial register wants edges. rounded-none across every
+// variant; the only circles left in the system are genuinely circular things
+// (Avatar, icon-only affordances), which opt in via className.
+//
+// Labels are set in mono, uppercase, wide-tracked — the museum wall label /
+// auction lot voice. This is the detail that makes the UI read as a gallery
+// rather than a storefront, and it costs nothing.
 const buttonVariants = cva(
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:pointer-events-none disabled:opacity-40",
     {
         variants: {
             variant: {
-                primary: "bg-ink text-white hover:bg-ink/90",
+                // Bone slab — the loud, primary commitment (buy, submit, post).
+                primary: "bg-ink text-paper hover:bg-base-02",
+                // Acid citron — reserved for the single most wanted action on a
+                // view. Deliberately rarer than primary so it keeps its punch.
                 secondary: "bg-primary text-primary-foreground hover:bg-primary-hover",
-                outline: "border border-ink/30 text-ink bg-transparent hover:border-ink hover:bg-ink hover:text-white",
-                ghost: "text-ink hover:bg-base-2",
-                link: "text-ink underline-offset-4 hover:underline rounded-none p-0 h-auto font-medium",
-                danger: "bg-error text-white hover:bg-error/90",
+                // Hairline box. The default for anything non-committal; on a
+                // dark ground a 1px rule reads better than a filled button.
+                outline: "border border-line-strong text-foreground bg-transparent hover:border-primary hover:text-primary",
+                ghost: "text-foreground hover:bg-base-2",
+                // Not a button shape at all — inline text with a rule under it.
+                link: "text-primary underline-offset-4 hover:underline p-0 h-auto normal-case tracking-normal font-sans text-sm",
+                danger: "bg-error text-paper hover:bg-error/85",
             },
             size: {
-                sm: "h-9 px-4 text-sm",
-                md: "h-11 px-6 text-sm",
-                lg: "h-14 px-8 text-base",
-                icon: "h-10 w-10",
+                sm: "h-8 px-4",
+                md: "h-11 px-6",
+                lg: "h-14 px-10",
+                icon: "h-10 w-10 px-0",
             },
         },
         defaultVariants: { variant: "primary", size: "md" },
@@ -39,10 +52,15 @@ const buttonVariants = cva(
 const MotionButton = motion.create("button")
 const MotionSlot = motion.create(Slot)
 
+// Restrained on purpose. The old spring scaled the button up 3% on hover,
+// which on a PILL was fine but on a square button visibly softens the corners
+// mid-animation and reads as cheap. A square, editorial button should feel
+// precise: no scale-up, a 1px lift, and a fast press-down. Colour does most of
+// the hover work now (see the variants above).
 const tapMotion = {
-    whileHover: { scale: 1.03, y: -1 },
-    whileTap: { scale: 0.97 },
-    transition: { type: "spring" as const, stiffness: 400, damping: 20 },
+    whileHover: { y: -1 },
+    whileTap: { y: 0, scale: 0.985 },
+    transition: { type: "spring" as const, stiffness: 600, damping: 30 },
 }
 
 // framer-motion's motion.create() props (onDrag, onAnimationStart, etc.) clash

@@ -28,11 +28,11 @@ export default function ColdStartLoader({ show }: ColdStartLoaderProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             {/* Flat solid card, not glass — a utility status panel, no photography
                 behind it. Off-palette purple/cyan swapped for the accent token. */}
-            <div className="relative mx-4 max-w-md rounded-2xl border border-border bg-card p-8 shadow-2xl">
+            <div className="relative mx-4 max-w-md rounded-none border border-border bg-card p-8 shadow-2xl">
                 <div className="mb-6 flex justify-center">
                     <div className="relative h-16 w-16">
-                        <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
-                        <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-primary" />
+                        <div className="absolute inset-0 rounded-none border-4 border-primary/20" />
+                        <div className="absolute inset-0 animate-spin rounded-none border-4 border-transparent border-t-primary" />
                     </div>
                 </div>
 
@@ -51,7 +51,7 @@ export default function ColdStartLoader({ show }: ColdStartLoaderProps) {
                             <span>Elapsed: {elapsed}s</span>
                             <span>Expected: ~30-60s</span>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-base-2">
+                        <div className="h-2 w-full overflow-hidden rounded-none bg-base-2">
                             <div
                                 className="h-full bg-primary transition-all duration-1000 ease-out"
                                 style={{ width: `${Math.min((elapsed / 60) * 100, 100)}%` }}

@@ -1,90 +1,158 @@
 @import "tailwindcss";
 
 /*
- * Paper Editorial — design token layer.
+ * AFTER HOURS — design token layer.
  *
- * Migration note: these variable NAMES are the pre-existing Solarized scale
- * (base-03 … base-3, 390+ usages across the app). Rather than a big-bang
- * rename, we REMAP the values to the new cool-paper palette so every existing
- * usage lands correctly immediately. New semantic aliases (--ink, --paper,
- * --surface, --line, --muted, --accent) are layered on top for new code.
- * Old names get retired once every call site has migrated to the aliases.
+ * A fashion magazine printed on black. Garments lit like works in a gallery
+ * after closing.
  *
- * Every text/background pairing below is WCAG-checked (computed, not
- * eyeballed) — see the ratio noted next to each. AA normal text needs 4.5:1.
+ * INVERSION NOTE — read this before touching the ramp.
+ * The variable NAMES are the original Solarized scale (base03 … base3) and are
+ * still used by ~181 call sites. They are POSITIONAL (base03 = one end of the
+ * ramp, base3 = the other), and the app uses them SEMANTICALLY CONSISTENTLY:
+ * the dark end for text, the light end for surfaces. So inverting the ramp's
+ * VALUES flips the entire app to a dark canvas in one move, with every existing
+ * usage still landing correctly — `text-base-03` stays "primary text", it's just
+ * light now; `bg-base-2` stays "raised surface fill", it's just dark now.
+ *
+ * The --ink / --paper aliases survive the inversion too, because they were named
+ * for ROLE, not value: ink is what you mark with, paper is the ground. On black,
+ * ink is light. The metaphor still holds.
+ *
+ * Every pairing below is computed, not eyeballed — ratio noted inline.
+ * AA normal text needs 4.5:1.
  */
 :root {
-  /* Neutral ramp, darkest -> lightest. True neutral gray — no warmth. */
-  --base03: #0b0b0c;
-  /* ink — primary text/headings. 18.99:1 on paper */
-  --base02: #2b2b2e;
-  /* near-ink — secondary/body text. 13.62:1 on paper */
-  --base01: #55555a;
-  /* tertiary — de-emphasized text. 7.15:1 on paper */
-  --base00: #6e6e73;
-  /* = --muted. 4.89:1 on paper */
-  --base0: #9a9a9f;
-  /* decorative/disabled ONLY — 2.70:1, fails AA for text */
-  --base1: #c4c4c1;
+  /* Neutral ramp. INVERTED vs the previous light theme: base03 is now the
+     LIGHTEST (primary text) and base3 the DARKEST (page canvas). */
+  /* Two grounds matter for contrast, and the RAISED SURFACE is the binding
+     constraint, not the canvas — it's lighter, so it's the harder test. Every
+     ratio below is quoted as canvas / surface. A browser audit caught the
+     first draft of this ramp failing: --muted at #6e6e70 measured 3.15:1 on
+     surface while being used for small body copy in 37 places. The mid-range
+     was re-solved to pass AA on BOTH grounds while keeping the ramp strictly
+     monotonic (each step must stay darker than the one above it, or the
+     positional names stop meaning anything). */
+  --base03: #f4f4f2;
+  /* primary text/headings. 17.97 / 14.55 */
+  --base02: #c8c8c5;
+  /* secondary/body text. 11.80 / 9.56 */
+  --base01: #a4a4a6;
+  /* tertiary — = --muted-foreground (39 usages). 7.95 / 6.44 */
+  --base00: #909093;
+  /* = --muted (37 usages, small body copy). 6.22 / 5.03 */
+  --base0: #5c5c60;
+  /* decorative/disabled ONLY — 2.97 / 2.41, fails AA for text by design */
+  --base1: #33333a;
   /* divider / hover border */
-  --base2: #f1f1ef;
-  /* surface fill (skeletons, hover bg) */
-  --base3: #fbfbf9;
-  /* paper — page canvas */
+  --base2: #212126;
+  /* raised surface fill. 1.23:1 vs canvas — the first step that actually
+     reads as a separate plane. #141416 (1.08) and #17171a (1.11) were tried
+     and rejected: on a near-black ground they are invisible. */
+  --base3: #0a0a0b;
+  /* canvas. Deliberately not #000 — pure black halates against bright
+     imagery and makes hairlines buzz. */
 
   /* Semantic aliases — prefer these in new code */
   --ink: var(--base03);
   --paper: var(--base3);
-  --surface: #ffffff;
-  --line: #e4e4e1;
+  --surface: var(--base2);
+  --line: #26262a;
   --line-strong: var(--base1);
   --muted: var(--base00);
 
   /* Theme variables */
   --background: var(--paper);
   --foreground: var(--ink);
-  --primary: #1a47e8;
-  /* electric blue — 6.52:1 on paper */
-  --primary-hover: #1438b8;
-  --primary-foreground: #ffffff;
-  --secondary: #0f766e;
-  /* teal — alt accent, sparingly used */
-  --secondary-hover: #0b5c56;
-  --secondary-foreground: #ffffff;
+
+  /* Acid citron — the single loud note against all that black. This is the
+     thrift/flyer/rave signal that keeps the palette from being just another
+     luxury-minimal dark site. 17.17:1 on canvas. */
+  --primary: #d4ff4f;
+  --primary-hover: #c2f02f;
+  /* Text ON citron must be near-black. White on citron is 1.15:1 — unreadable.
+     This is the single most important inversion consequence to get right. */
+  --primary-foreground: #0a0a0b;
+
+  --secondary: #f4f4f2;
+  /* bone — the quiet alternative to citron for high-contrast fills */
+  --secondary-hover: #d8d8d4;
+  --secondary-foreground: #0a0a0b;
+
   --muted-foreground: var(--base01);
   --accent: var(--primary);
   --accent-hover: var(--primary-hover);
-  --accent-foreground: #ffffff;
+  --accent-foreground: var(--primary-foreground);
   --card: var(--surface);
   --card-foreground: var(--ink);
   --border: var(--line);
   --border-hover: var(--line-strong);
   --input: var(--line);
-  --success: #15803d;
-  /* 4.84:1 on paper */
-  --warning: #b45309;
-  /* 4.85:1 on paper */
-  --error: #b91c1c;
-  /* 6.24:1 on paper — chosen over #dc2626 (4.66:1) for margin */
+
+  --success: #4ade80;
+  /* 11.36:1 */
+  --warning: #ffb020;
+  /* 10.82:1 */
+  --error: #ff5c5c;
+  /* 6.54:1 — light enough to read on black, unlike the old #b91c1c (1.9:1 here) */
   --info: var(--primary);
 
-  /* Shadows — neutral black-based, cool (no warm tint). Low-elevation,
-     editorial: shadows read as "lifted paper," not glow. */
-  --shadow-sm: 0 1px 2px 0 rgba(11, 11, 12, 0.04);
-  --shadow: 0 1px 3px 0 rgba(11, 11, 12, 0.06), 0 1px 2px -1px rgba(11, 11, 12, 0.06);
-  --shadow-md: 0 4px 8px -2px rgba(11, 11, 12, 0.08), 0 2px 4px -2px rgba(11, 11, 12, 0.06);
-  --shadow-lg: 0 12px 20px -4px rgba(11, 11, 12, 0.10), 0 4px 8px -4px rgba(11, 11, 12, 0.06);
-  --shadow-xl: 0 24px 32px -8px rgba(11, 11, 12, 0.14), 0 8px 12px -6px rgba(11, 11, 12, 0.08);
+  /* ELEVATION ON DARK.
+     Black-based shadows are invisible on a near-black canvas — the previous
+     rgba(11,11,12,…) scale did nothing here. On dark, elevation comes from
+     two things: the surface getting LIGHTER, and a hairline. The shadows below
+     are kept (they still help separate genuinely floating things like drawers
+     and dropdowns from content behind them) but are much deeper, and every
+     raised surface should pair one with a border. */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.40);
+  --shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.50);
+  --shadow-md: 0 6px 16px -4px rgba(0, 0, 0, 0.60);
+  --shadow-lg: 0 16px 32px -8px rgba(0, 0, 0, 0.70);
+  --shadow-xl: 0 28px 56px -12px rgba(0, 0, 0, 0.80);
 
-  --ring: rgba(26, 71, 232, 0.35);
+  --ring: rgba(212, 255, 79, 0.55);
   --ring-offset: var(--paper);
 
-  /* Dark glass — ONLY for use over photography/scrims, never over --paper.
-     blur 12px, bg 8-12%, border ~15% per the surgical-glass rule. */
-  --glass-bg: rgba(11, 11, 12, 0.55);
-  --glass-bg-light: rgba(11, 11, 12, 0.10);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-blur: 12px;
+  /* GLASS, INVERTED.
+     The old rule was "dark glass over photography, never over bare paper".
+     On a dark canvas dark glass is invisible against the ground, so the
+     roles swap: LIGHT glass is the one that reads over imagery now, and dark
+     glass survives only for scrims over genuinely bright photos. */
+  --glass-light-bg: rgba(244, 244, 242, 0.10);
+  --glass-light-border: rgba(244, 244, 242, 0.18);
+  --glass-dark-bg: rgba(10, 10, 11, 0.60);
+  --glass-dark-border: rgba(244, 244, 242, 0.12);
+  --glass-blur: 14px;
+
+  /* EDITORIAL TYPE SCALE — additive, not a replacement of Tailwind's own
+     scale. This was NOT true in the first draft: --text-sm/base/lg/xl/2xl/3xl
+     were declared here to add fluid display sizes, but Tailwind v4's @theme
+     treats ANY --text-KEY as DEFINING the real utility .text-KEY — there is
+     no such thing as a same-named-but-separate token. That silently
+     redefined text-sm (14px -> 13px) and text-3xl (30px -> 40px) for every
+     PRE-EXISTING usage across all 14 pages, not just new editorial
+     headlines — caught by measuring computed font-size in the browser, not
+     by how anything looked. Names below no longer collide with any of
+     Tailwind's default scale keys (sm/base/lg/xl/2xl/3xl/…), so they only
+     ever add new utilities (.text-meta, .text-display, …) rather than
+     redefine existing ones. The extreme jump from --text-display down to
+     --text-meta IS the design: huge Didone against small mono. */
+  --text-meta: 0.6875rem;
+  --text-display: clamp(3.5rem, 0.5rem + 11vw, 13rem);
+
+  /* RADIUS — editorial is sharp. The old system had six radii coexisting
+     (rounded-full ×59, 2xl ×31, xl ×18, lg ×13, 3xl ×8, md ×4). A gallery
+     wants edges, not pills. Pills survive only for genuine pill affordances
+     (chips, avatars) via --radius-full. */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-lg: 4px;
+  --radius-full: 9999px;
+
+  /* Editorial rhythm */
+  --rule: 1px;
+  --measure: 62ch;
 }
 
 @layer utilities {
@@ -135,30 +203,44 @@
     animation: dropIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Surgical glass: dark-tinted glass over imagery only. Never apply to a
-     bare --paper background — on light it must sit over a photo or scrim. */
-  .glass-dark {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    backdrop-filter: blur(var(--glass-blur));
-  }
-
+  /* Light glass — the one that reads over imagery on a dark canvas. */
   .glass-light {
-    background: var(--glass-bg-light);
-    border: 1px solid rgba(11, 11, 12, 0.08);
+    background: var(--glass-light-bg);
+    border: 1px solid var(--glass-light-border);
     -webkit-backdrop-filter: blur(var(--glass-blur));
     backdrop-filter: blur(var(--glass-blur));
   }
 
+  /* Dark glass — now only for scrims over genuinely bright photography.
+     Against the bare canvas this is invisible by design; don't use it there. */
+  .glass-dark {
+    background: var(--glass-dark-bg);
+    border: 1px solid var(--glass-dark-border);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+  }
+
+  /* Declaration order matters: Lightning CSS drops the unprefixed
+     backdrop-filter if it appears before the -webkit- one in the same rule.
+     That bug shipped once already — glass with no actual blur. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass-dark {
-      background: rgba(11, 11, 12, 0.85);
+    .glass-light {
+      background: rgba(33, 33, 38, 0.94);
     }
 
-    .glass-light {
-      background: rgba(255, 255, 255, 0.92);
+    .glass-dark {
+      background: rgba(10, 10, 11, 0.92);
     }
+  }
+
+  /* Editorial hairline rule — the horizontal divider that carries a lot of
+     the magazine feel. */
+  .rule-t {
+    border-top: var(--rule) solid var(--color-border);
+  }
+
+  .rule-b {
+    border-bottom: var(--rule) solid var(--color-border);
   }
 }
 
@@ -207,48 +289,79 @@
   --color-ring: var(--ring);
   --color-ring-offset: var(--ring-offset);
 
-  /* Shadows — real box-shadow namespace this time (was misfiled under
-     --color-shadow-*, which made shadow-md/lg silently fall back to
-     Tailwind's stock gray). */
+  /* Shadows — real box-shadow namespace (was once misfiled under
+     --color-shadow-*, which silently fell back to Tailwind's stock gray). */
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
 
-  --font-sans: var(--font-geist-sans);
+  /* Radius */
+  --radius-none: var(--radius-none);
+  --radius-sm: var(--radius-sm);
+  --radius: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  /* Type scale — only the two additive, non-colliding sizes (see the note
+     in :root above). Every other text-* utility is untouched Tailwind
+     default: no --text-sm/base/lg/xl/2xl/3xl entries here on purpose. */
+  --text-meta: var(--text-meta);
+  --text-display: var(--text-display);
+
+  --font-sans: var(--font-archivo);
   --font-mono: var(--font-geist-mono);
-  /* --font-display intentionally omitted here: @theme inline only bakes this
-     into an auto-generated .font-display utility (font-family only). The
-     hand-rolled .font-display class below is the canonical one — it also
-     needs letter-spacing/optical-sizing, so it supersedes the auto utility. */
+  /* --font-display intentionally omitted: @theme inline only bakes it into an
+     auto-generated font-family-only utility. The hand-rolled .font-display
+     below is canonical — it also carries tracking and optical sizing. */
 }
 
 /*
  * NOTE: @theme inline only inlines --font-sans/--font-display into the
- * Tailwind utility classes it generates (.font-sans, .font-display) — it
- * does NOT emit them as standalone, queryable CSS custom properties. A
- * plain `var(--font-sans)` reference outside a Tailwind-generated utility
- * is invalid and silently falls through to Preflight's default stack
- * (verified: this is exactly how the original Arial bug's replacement
- * would have failed silently). So below we reference the raw next/font
- * variables (--font-geist-sans, --font-fraunces) directly — confirmed
- * present on <body> via getComputedStyle, unlike the @theme aliases.
+ * Tailwind utility classes it generates (.font-sans, .font-display) — it does
+ * NOT emit them as standalone, queryable CSS custom properties. A plain
+ * var(--font-sans) reference outside a Tailwind-generated utility is invalid
+ * and silently falls through to Preflight's default stack. So below we
+ * reference the raw next/font variables directly (--font-archivo,
+ * --font-bodoni), which ARE present on <body>.
  */
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  /* Dark canvases need slightly lighter text weight to avoid optical
+     bolding — light-on-dark type visually gains weight. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Display headings default to the editorial serif. Apply .font-display
-   explicitly on the elements that should use it (large headlines only —
-   Fraunces is loaded for display sizes, not body copy). */
+/*
+ * Display type — Bodoni Moda, a true Didone. This is the Vogue/Harper's
+ * register and the single biggest carrier of the new identity.
+ *
+ * HARD RULE: display-only, never below ~32px. Didone hairlines bloom and
+ * break up on a dark ground at small sizes — that optical failure is exactly
+ * why body copy is a grotesk and not this.
+ */
 .font-display {
-  font-family: var(--font-fraunces), Georgia, serif;
-  letter-spacing: -0.03em;
+  font-family: var(--font-bodoni), "Didot", "Bodoni MT", Georgia, serif;
+  letter-spacing: -0.02em;
   font-optical-sizing: auto;
+  /* Didone at display size wants tight leading — the drama is in the stack. */
+  line-height: 0.92;
 }
 
 .font-mono-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Museum wall label / auction lot number. Prices, sizes, and metadata are set
+   in mono uppercase with wide tracking — the detail that makes a marketplace
+   read as a gallery. */
+.label-meta {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: var(--text-meta);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
 }

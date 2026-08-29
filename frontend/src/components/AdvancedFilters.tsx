@@ -59,13 +59,13 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-6 py-3 bg-card border border-border rounded-2xl hover:bg-base-2 transition-colors"
+                className="w-full flex items-center justify-between px-6 py-3 bg-card border border-border rounded-none hover:bg-base-2 transition-colors"
             >
                 <div className="flex items-center gap-2">
                     <SlidersHorizontal className="w-5 h-5 text-base-03" />
                     <span className="font-semibold text-base-03">Filters</span>
                     {activeFilterCount > 0 && (
-                        <span className="px-2 py-0.5 rounded-full bg-primary text-white text-xs font-semibold">
+                        <span className="px-2 py-0.5 rounded-none bg-primary text-primary-foreground text-xs font-semibold">
                             {activeFilterCount}
                         </span>
                     )}
@@ -98,7 +98,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                     >
-                        <div className="mt-4 p-6 bg-card border border-border rounded-2xl space-y-6">
+                        <div className="mt-4 p-6 bg-card border border-border rounded-none space-y-6">
                             {/* Price Range */}
                             <div>
                                 <h3 className="text-sm font-semibold text-base-03 mb-3">Price Range</h3>
@@ -115,7 +115,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                                                 })
                                             }
                                             placeholder="0"
-                                            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary"
+                                            className="w-full px-3 py-2 rounded-none border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary"
                                         />
                                     </div>
                                     <div className="flex-1">
@@ -130,7 +130,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                                                 })
                                             }
                                             placeholder="Any"
-                                            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary"
+                                            className="w-full px-3 py-2 rounded-none border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary"
                                         />
                                     </div>
                                 </div>
@@ -144,8 +144,8 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                                         <button
                                             key={size}
                                             onClick={() => toggleSize(size)}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${filters.sizes.includes(size)
-                                                    ? 'bg-primary text-white border-primary'
+                                            className={`px-4 py-2 rounded-none border transition-all ${filters.sizes.includes(size)
+                                                    ? 'bg-primary text-primary-foreground border-primary'
                                                     : 'bg-background text-base-03 border-border hover:border-primary'
                                                 }`}
                                         >
@@ -168,8 +168,8 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                                                     condition: filters.condition === cond ? null : cond,
                                                 })
                                             }
-                                            className={`px-4 py-2 rounded-lg border transition-all ${filters.condition === cond
-                                                    ? 'bg-primary text-white border-primary'
+                                            className={`px-4 py-2 rounded-none border transition-all ${filters.condition === cond
+                                                    ? 'bg-primary text-primary-foreground border-primary'
                                                     : 'bg-background text-base-03 border-border hover:border-primary'
                                                 }`}
                                         >
@@ -187,7 +187,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                                     onChange={(e) =>
                                         onFiltersChange({ ...filters, ordering: e.target.value })
                                     }
-                                    className="w-full px-4 py-2 rounded-lg border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-2 rounded-none border border-border bg-background text-base-03 focus:outline-none focus:ring-2 focus:ring-primary"
                                 >
                                     {SORT_OPTIONS.map((option) => (
                                         <option key={option.value} value={option.value}>
@@ -205,10 +205,11 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
             {activeFilterCount > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                     {filters.minPrice !== null && (
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-none bg-primary/10 text-base-03 text-sm flex items-center gap-2">
                             Min: ${filters.minPrice}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, minPrice: null })}
+                                aria-label="Clear minimum price filter"
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />
@@ -216,10 +217,11 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                         </span>
                     )}
                     {filters.maxPrice !== null && (
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-none bg-primary/10 text-base-03 text-sm flex items-center gap-2">
                             Max: ${filters.maxPrice}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, maxPrice: null })}
+                                aria-label="Clear maximum price filter"
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />
@@ -229,11 +231,12 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                     {filters.sizes.map((size) => (
                         <span
                             key={size}
-                            className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2"
+                            className="px-3 py-1 rounded-none bg-primary/10 text-base-03 text-sm flex items-center gap-2"
                         >
                             Size: {size}
                             <button
                                 onClick={() => toggleSize(size)}
+                                aria-label={`Remove size ${size} filter`}
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />
@@ -241,10 +244,11 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                         </span>
                     ))}
                     {filters.condition && (
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-base-03 text-sm flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-none bg-primary/10 text-base-03 text-sm flex items-center gap-2">
                             {filters.condition}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, condition: null })}
+                                aria-label="Clear condition filter"
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />

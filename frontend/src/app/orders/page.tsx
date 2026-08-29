@@ -3,13 +3,16 @@
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Package, TrendingUp, ShoppingBag } from 'lucide-react';
+import Image from 'next/image';
+import { Package } from 'lucide-react';
 import api, { unwrap } from '@/lib/api';
+import { cloudinaryUrl, isCloudinary } from '@/lib/cloudinary';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { Tabs } from '@/components/ui/tabs';
 import { PageShell } from '@/components/layout/page-shell';
 import { PageHeader } from '@/components/layout/page-header';
 import { cn } from '@/lib/utils';
@@ -112,34 +115,15 @@ function OrdersContent() {
 
             <PageHeader title="Orders" description="Track your purchases and sales" />
 
-            <div className="mb-8 flex gap-4 border-b border-border">
-                <button
-                    onClick={() => setActiveTab('purchases')}
-                    className={cn(
-                        "relative px-6 py-3 font-semibold transition-colors",
-                        activeTab === 'purchases' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                    )}
-                >
-                    <ShoppingBag className="mr-2 inline h-5 w-5" />
-                    Purchases ({purchases.length})
-                    {activeTab === 'purchases' && (
-                        <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                    )}
-                </button>
-                <button
-                    onClick={() => setActiveTab('sales')}
-                    className={cn(
-                        "relative px-6 py-3 font-semibold transition-colors",
-                        activeTab === 'sales' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                    )}
-                >
-                    <TrendingUp className="mr-2 inline h-5 w-5" />
-                    Sales ({sales.length})
-                    {activeTab === 'sales' && (
-                        <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                    )}
-                </button>
-            </div>
+            <Tabs
+                className="mb-8"
+                value={activeTab}
+                onChange={setActiveTab}
+                items={[
+                    { value: 'purchases', label: 'Purchases', count: purchases.length },
+                    { value: 'sales', label: 'Sales', count: sales.length },
+                ]}
+            />
 
             {loadFailed ? (
                 <ErrorState subject="your orders" onRetry={fetchOrders} />
@@ -161,16 +145,19 @@ function OrdersContent() {
                             key={order.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="cursor-pointer rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md"
+                            className="cursor-pointer rounded-none border border-border bg-card p-6 transition-shadow hover:shadow-md"
                             onClick={() => router.push(`/items/${order.item.id}`)}
                         >
                             <div className="flex gap-6">
-                                <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-base-2">
+                                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden bg-base-2">
                                     {order.item.images && order.item.images.length > 0 ? (
-                                        <img
-                                            src={order.item.images[0].image}
+                                        <Image
+                                            src={cloudinaryUrl(order.item.images[0].image, { width: 200, aspect: '1:1' })}
                                             alt={order.item.title}
-                                            className="h-full w-full object-cover"
+                                            fill
+                                            sizes="96px"
+                                            unoptimized={isCloudinary(order.item.images[0].image)}
+                                            className="object-cover"
                                         />
                                     ) : (
                                         <div className="flex h-full w-full items-center justify-center">
@@ -189,14 +176,14 @@ function OrdersContent() {
                                                 Order #{order.id} • {new Date(order.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
-                                        <div className="text-xl font-bold text-foreground">
+                                        <div className="font-mono text-xl text-foreground">
                                             ₹{parseFloat(order.total_amount).toFixed(2)}
                                         </div>
                                     </div>
 
                                     <div className="mt-3 flex items-center gap-3">
                                         <span className={cn(
-                                            "rounded-full border px-3 py-1 text-xs font-semibold",
+                                            "label-meta border px-3 py-1",
                                             STATUS_COLORS[order.status as keyof typeof STATUS_COLORS]
                                         )}>
                                             {STATUS_LABELS[order.status as keyof typeof STATUS_LABELS]}

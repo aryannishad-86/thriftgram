@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, ArrowRight, Sparkles, Leaf, Recycle, Heart } from 'lucide-react';
-import RippleText from '@/components/RippleText';
 import ColdStartLoader from '@/components/ColdStartLoader';
 
 const FEATURES = [
@@ -112,11 +111,26 @@ export default function LoginPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, type: "spring" }}
                         >
-                            <h1 className="text-6xl font-black leading-none tracking-tight lg:text-8xl">
-                                <RippleText text="Sustainable style," className="text-ink" />
-                            </h1>
-                            <h1 className="-mt-4 text-6xl font-black leading-none tracking-tight lg:-mt-8 lg:text-8xl">
-                                <RippleText text="reimagined." className="text-ink" />
+                            {/* Was two <RippleText> canvases. They rendered NOTHING:
+                                the component sizes its backing store from
+                                canvas.offsetWidth, which measures 0 for a w-full
+                                canvas at effect time, so both headlines on this
+                                page have been silently blank (verified in the
+                                browser: backing width 0, CSS width 505). It also
+                                ran an rAF loop that never idled, with no
+                                prefers-reduced-motion guard, on the first page
+                                many visitors see. Replaced with real display
+                                type — which is the identity anyway. */}
+                            {/* One <h1>, not two — this was briefly split
+                                across two separate h1 elements (a leftover
+                                of the old two-canvas RippleText layout),
+                                which means a screen reader announces the
+                                page's single main heading twice, split
+                                mid-sentence. The two-tone styling stays on
+                                inline spans instead. */}
+                            <h1 className="font-display text-[clamp(3rem,7vw,6.5rem)] font-semibold text-foreground">
+                                <span className="block">Sustainable style,</span>
+                                <span className="-mt-2 block italic text-primary">reimagined.</span>
                             </h1>
                         </motion.div>
                         <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
@@ -149,7 +163,7 @@ export default function LoginPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, delay: 0.1 }}
-                            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-lg"
+                            className="relative w-full max-w-md overflow-hidden rounded-none border border-border bg-card p-8 shadow-lg"
                         >
                             <div className="absolute left-0 top-0 h-1 w-full bg-primary" />
 
@@ -204,6 +218,8 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
+                                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                            aria-pressed={showPassword}
                                             className="absolute right-3 top-3 text-muted transition-colors hover:text-foreground"
                                         >
                                             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -218,10 +234,10 @@ export default function LoginPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="submit"
                                     disabled={loading}
-                                    className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 font-bold text-primary-foreground shadow-md transition-all duration-300 hover:bg-primary-hover"
+                                    className="group flex w-full items-center justify-center gap-2 rounded-none bg-primary py-3.5 font-bold text-primary-foreground shadow-md transition-all duration-300 hover:bg-primary-hover"
                                 >
                                     {loading ? (
-                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-paper border-t-transparent" />
                                     ) : (
                                         <>
                                             Sign In
@@ -244,7 +260,7 @@ export default function LoginPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="button"
                                     onClick={() => handleGoogleLogin()}
-                                    className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background py-3.5 font-medium text-foreground transition-all duration-300 hover:border-primary"
+                                    className="flex w-full items-center justify-center gap-3 rounded-none border border-border bg-background py-3.5 font-medium text-foreground transition-all duration-300 hover:border-primary"
                                 >
                                     <svg className="h-5 w-5" viewBox="0 0 24 24">
                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -279,7 +295,7 @@ export default function LoginPage() {
                                 transition={{ duration: 0.8, delay: index * 0.2 }}
                                 className="group flex items-start gap-6"
                             >
-                                <div className="rounded-2xl border border-border bg-base-2 p-4 transition-transform duration-500 group-hover:scale-110">
+                                <div className="rounded-none border border-border bg-base-2 p-4 transition-transform duration-500 group-hover:scale-110">
                                     <feature.icon className={`h-8 w-8 ${feature.color}`} />
                                 </div>
                                 <div>

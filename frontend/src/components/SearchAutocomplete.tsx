@@ -119,7 +119,7 @@ export default function SearchAutocomplete() {
                     }}
                     onFocus={() => setIsOpen(true)}
                     placeholder="Search ThriftGram..."
-                    className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-border bg-background text-base-03 focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background transition-all"
+                    className="w-full pl-12 pr-4 py-3 rounded-none border-2 border-border bg-background text-base-03 focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background transition-all"
                 />
                 {query && (
                     <button
@@ -128,6 +128,7 @@ export default function SearchAutocomplete() {
                             setQuery('');
                             setSuggestions([]);
                         }}
+                        aria-label="Clear search"
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-base-01 hover:text-base-03 transition-colors"
                     >
                         <X className="w-5 h-5" />
@@ -142,7 +143,7 @@ export default function SearchAutocomplete() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full mt-2 w-full bg-card border border-border rounded-2xl shadow-lg overflow-hidden z-50"
+                        className="absolute top-full mt-2 w-full bg-card border border-border rounded-none shadow-lg overflow-hidden z-50"
                     >
                         {/* Recent Searches */}
                         {query.length < 2 && history.length > 0 && (
@@ -161,19 +162,33 @@ export default function SearchAutocomplete() {
                                 </div>
                                 <div className="space-y-1">
                                     {history.map((item, index) => (
-                                        <button
+                                        // A real <button> here (as this was) can't legally contain the
+                                        // "remove" button below — nested interactive elements are invalid
+                                        // HTML, and browsers resolve the resulting click targets/focus
+                                        // order inconsistently. role="button" + a key handler gets the
+                                        // same click/keyboard behavior without nesting one button in another.
+                                        <div
                                             key={index}
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={() => handleHistoryClick(item)}
-                                            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-base-2 transition-colors text-left group"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    handleHistoryClick(item);
+                                                }
+                                            }}
+                                            className="w-full flex items-center justify-between px-3 py-2 rounded-none hover:bg-base-2 transition-colors text-left group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                         >
                                             <span className="text-sm text-base-03">{item}</span>
                                             <button
                                                 onClick={(e) => handleRemoveHistory(item, e)}
+                                                aria-label={`Remove "${item}" from search history`}
                                                 className="opacity-0 group-hover:opacity-100 text-base-01 hover:text-error transition-all"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
-                                        </button>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
@@ -197,9 +212,9 @@ export default function SearchAutocomplete() {
                                                 <button
                                                     key={item.id}
                                                     onClick={() => handleSuggestionClick(item)}
-                                                    className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-2 transition-colors"
+                                                    className="w-full flex items-center gap-3 p-2 rounded-none hover:bg-base-2 transition-colors"
                                                 >
-                                                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-base-2 flex-shrink-0">
+                                                    <div className="w-12 h-12 rounded-none overflow-hidden bg-base-2 flex-shrink-0">
                                                         {item.images && item.images.length > 0 ? (
                                                             <img
                                                                 src={item.images[0].image}
@@ -226,7 +241,7 @@ export default function SearchAutocomplete() {
                                     </>
                                 ) : (
                                     <div className="text-center py-4 text-base-02">
-                                        No results found for "{query}"
+                                        No results found for &ldquo;{query}&rdquo;
                                     </div>
                                 )}
                             </div>

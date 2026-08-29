@@ -2,9 +2,12 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-// rounded-2xl is the one canonical card radius — replaces the previous
-// 2xl/3xl/xl mix used interchangeably for the same class of surface.
-const cardVariants = cva("rounded-2xl border border-border bg-card", {
+// Square, hairline-bounded panels. On a dark canvas a card is defined by its
+// RULE and a slight lift in surface lightness, not by a shadow — black
+// shadows are invisible here (see the elevation note in globals.css). That
+// makes the border the load-bearing element, so `interactive` brightens the
+// rule on hover rather than deepening a shadow nobody can see.
+const cardVariants = cva("rounded-none border border-border bg-card", {
     variants: {
         padding: {
             none: "",
@@ -13,7 +16,7 @@ const cardVariants = cva("rounded-2xl border border-border bg-card", {
             lg: "p-8",
         },
         interactive: {
-            true: "transition-shadow duration-200 hover:shadow-md",
+            true: "transition-colors duration-200 hover:border-line-strong",
             false: "",
         },
     },
