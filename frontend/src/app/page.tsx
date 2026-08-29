@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import Feed from "@/components/Feed";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
-import WaveGallery from "@/components/WaveGallery";
+import Gallery from "@/components/gallery/Gallery";
 import { PageShell } from "@/components/layout/page-shell";
 
 function HomeContent() {
@@ -88,11 +88,10 @@ function HomeContent() {
 
       <Separator className="mx-6 sm:mx-10" />
 
-      {/* WaveGallery Section — CSS 3D for now; the three.js signature-moment
-          rebuild is R5, a deliberately separate phase (WebGL is scoped to
-          two moments only, this is the first, and it deserves its own
-          reviewable diff rather than arriving as a drive-by inside R3). */}
-      <WaveGallery />
+      {/* Featured gallery — three.js on capable desktops, CSS-only fallback
+          everywhere else, a typographic marquee below the photo threshold.
+          See components/gallery/Gallery.tsx for the actual gating logic. */}
+      <Gallery />
 
       <Separator className="mx-6 sm:mx-10" />
 
