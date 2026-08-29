@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q, Count, OuterRef, Subquery
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
+from core.security import IsOwnerOrReadOnly
 
 
 def _annotate_conversations(queryset, user):
@@ -97,7 +98,17 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
+    # get_queryset only scopes to "am I a participant in this conversation",
+    # not "did I send this message" — with no object-level ownership check,
+    # either participant could PATCH/DELETE the OTHER party's messages (a
+    # real IDOR). IsOwnerOrReadOnly closes that for the standard
+    # update/partial_update/destroy actions; mark_read below deliberately
+    # overrides this back to plain IsAuthenticated, since that action's
+    # whole point is letting the non-sender (the receiver) write to a
+    # message they don't own — it already enforces the correct, inverse
+    # rule itself (sender may NOT mark their own message read).
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    owner_field = 'sender'
 
     def get_queryset(self):
         return Message.objects.filter(
@@ -130,7 +141,7 @@ class MessageViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=['patch'], permission_classes=[IsAuthenticated])
     def mark_read(self, request, pk=None):
         """Mark a message as read"""
         message = self.get_object()

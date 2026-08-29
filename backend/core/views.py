@@ -518,8 +518,13 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
+    # IsOwnerOrReadOnly was missing here — any authenticated user could
+    # PATCH/DELETE any OTHER user's review (a real IDOR: no object-level
+    # check at all, just IsAuthenticatedOrReadOnly). Same pattern already
+    # used on ItemViewSet, just pointed at Review's owner field.
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    owner_field = 'reviewer'
+
     def get_queryset(self):
         item_id = self.request.query_params.get('item')
         if item_id:
