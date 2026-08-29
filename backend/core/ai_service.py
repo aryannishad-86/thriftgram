@@ -27,8 +27,13 @@ class AIService:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
 
-            # Download image
-            response = requests.get(image_url)
+            # Download image. No timeout previously — gunicorn also runs with
+            # --timeout 0 (deliberately, for other reasons), so a hung
+            # Cloudinary/image-host response would have pinned this thread
+            # forever. Caught by the broad except below either way, which is
+            # exactly the fallback path this already has for a failed
+            # analysis — a timeout here just fails fast instead of hanging.
+            response = requests.get(image_url, timeout=10)
             image = Image.open(BytesIO(response.content))
 
             prompt = """
@@ -47,7 +52,12 @@ class AIService:
             - Signs of authenticity
             """
 
-            response = model.generate_content([prompt, image])
+            # Same reasoning as the requests.get above — this SDK call had no
+            # explicit timeout either.
+            response = model.generate_content(
+                [prompt, image],
+                request_options={'timeout': 30},
+            )
             
             # Clean up response to ensure valid JSON
             text = response.text.replace('```json', '').replace('```', '').strip()

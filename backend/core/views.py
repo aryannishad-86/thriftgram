@@ -423,10 +423,16 @@ class GoogleLogin(APIView):
             return Response({'error': 'access_token is required'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Verify the Google access token
+            # Verify the Google access token. No timeout previously — a slow
+            # Google response would hang this request (and, with gunicorn's
+            # --timeout 0, the worker thread) indefinitely. This only bounds
+            # the wait: a timeout raises requests.exceptions.Timeout, caught
+            # by this view's existing except Exception below (500, logged) —
+            # the same path any other unexpected failure here already takes.
             google_response = requests.get(
                 'https://www.googleapis.com/oauth2/v1/userinfo',
-                headers={'Authorization': f'Bearer {access_token}'}
+                headers={'Authorization': f'Bearer {access_token}'},
+                timeout=10
             )
             
             if google_response.status_code != 200:
@@ -518,8 +524,13 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
+    # IsOwnerOrReadOnly was missing here — any authenticated user could
+    # PATCH/DELETE any OTHER user's review (a real IDOR: no object-level
+    # check at all, just IsAuthenticatedOrReadOnly). Same pattern already
+    # used on ItemViewSet, just pointed at Review's owner field.
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    owner_field = 'reviewer'
+
     def get_queryset(self):
         item_id = self.request.query_params.get('item')
         if item_id:

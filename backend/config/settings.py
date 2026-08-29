@@ -33,6 +33,31 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+# Error tracking (Sentry). A no-op everywhere SENTRY_DSN isn't set — local
+# dev, CI, and test_settings all import this module without one, so this
+# must never require a DSN to boot. To turn it on: create a free Sentry
+# project, then add SENTRY_DSN as a GitHub secret (deploy-backend.yml's
+# env.yaml) and a Cloud Run env var — no code change needed after that.
+SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        environment='production' if not DEBUG else 'development',
+        # Conservative default for a low-traffic, free-tier app — every
+        # error is still captured regardless of this; it only samples
+        # performance traces. Raise if/when trace volume is worth the cost.
+        traces_sample_rate=0.1,
+        # Request bodies/user data can contain what this API already goes
+        # out of its way to keep out of responses (see UserSummarySerializer,
+        # the email-hiding tests in test_permissions.py) — don't undo that
+        # by forwarding it to a third party by default.
+        send_default_pii=False,
+    )
+
 # Production Security Settings (only enabled when DEBUG=False)
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -252,7 +277,17 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL', 'postgres://postgres@localhost:5432/thriftgram'),
-        conn_max_age=600
+        # 0, not a persistent-connection age — verified DATABASE_URL (both
+        # locally and in production; they point at the same project) is
+        # aws-*.pooler.supabase.com:6543, Supabase's TRANSACTION-mode
+        # PgBouncer pooler (port 6543; 5432 would be session-mode/direct).
+        # A transaction pooler reassigns the underlying Postgres connection
+        # after every transaction, so a Django-level "persistent" connection
+        # handle can end up issuing queries against a connection PgBouncer
+        # has since handed to a different client — CONN_MAX_AGE > 0 is
+        # actively wrong here, not just unnecessary, since the pooler is
+        # already doing the pooling this setting exists to avoid duplicating.
+        conn_max_age=0
     )
 }
 
