@@ -277,7 +277,17 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL', 'postgres://postgres@localhost:5432/thriftgram'),
-        conn_max_age=600
+        # 0, not a persistent-connection age — verified DATABASE_URL (both
+        # locally and in production; they point at the same project) is
+        # aws-*.pooler.supabase.com:6543, Supabase's TRANSACTION-mode
+        # PgBouncer pooler (port 6543; 5432 would be session-mode/direct).
+        # A transaction pooler reassigns the underlying Postgres connection
+        # after every transaction, so a Django-level "persistent" connection
+        # handle can end up issuing queries against a connection PgBouncer
+        # has since handed to a different client — CONN_MAX_AGE > 0 is
+        # actively wrong here, not just unnecessary, since the pooler is
+        # already doing the pooling this setting exists to avoid duplicating.
+        conn_max_age=0
     )
 }
 
