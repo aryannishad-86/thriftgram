@@ -121,11 +121,16 @@ export default function LoginPage() {
                                 prefers-reduced-motion guard, on the first page
                                 many visitors see. Replaced with real display
                                 type — which is the identity anyway. */}
+                            {/* One <h1>, not two — this was briefly split
+                                across two separate h1 elements (a leftover
+                                of the old two-canvas RippleText layout),
+                                which means a screen reader announces the
+                                page's single main heading twice, split
+                                mid-sentence. The two-tone styling stays on
+                                inline spans instead. */}
                             <h1 className="font-display text-[clamp(3rem,7vw,6.5rem)] font-semibold text-foreground">
-                                Sustainable style,
-                            </h1>
-                            <h1 className="font-display -mt-2 text-[clamp(3rem,7vw,6.5rem)] font-semibold italic text-primary">
-                                reimagined.
+                                <span className="block">Sustainable style,</span>
+                                <span className="-mt-2 block italic text-primary">reimagined.</span>
                             </h1>
                         </motion.div>
                         <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
@@ -213,6 +218,8 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
+                                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                            aria-pressed={showPassword}
                                             className="absolute right-3 top-3 text-muted transition-colors hover:text-foreground"
                                         >
                                             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

@@ -26,7 +26,14 @@ export default function NavActions({ username }: NavActionsProps) {
 
     return (
         <div className="flex items-center gap-3">
-            <Button asChild size="sm">
+            {/* hidden md:inline-flex — below md this duplicated the
+                PlusCircle icon link at the end of this row, and the two
+                together (this button's full "Sell Item" label plus every
+                other icon in this row) overflowed the header horizontally
+                on mobile, causing the whole page to scroll sideways.
+                Verified via a real 375px viewport: scrollWidth 583 vs
+                clientWidth 375 before this, no overflow after. */}
+            <Button asChild size="sm" className="hidden md:inline-flex">
                 <Link href="/sell">
                     <Plus className="h-4 w-4" /> Sell Item
                 </Link>

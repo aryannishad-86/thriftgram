@@ -37,7 +37,15 @@ export function Separator({
             role="separator"
             aria-orientation={orientation}
             className={cn(
-                orientation === "horizontal" ? "h-px w-full" : "h-full w-px",
+                // w-full, not just "h-px" — a block div is already 100% wide
+                // by default, but explicit width:100% (unlike auto) does NOT
+                // subtract margin from that width. Every call site passes a
+                // margin className (mx-6, mb-16, ...), so w-full + margin was
+                // overflowing its container by exactly 2x the margin — real,
+                // measured: a 375px-viewport page's scrollWidth was 399px
+                // because of this. Plain block auto-width correctly nets out
+                // the margin instead.
+                orientation === "horizontal" ? "h-px" : "h-full w-px",
                 "bg-border",
                 className
             )}

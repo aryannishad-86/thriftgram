@@ -203,10 +203,18 @@ export default function ItemDetailPage() {
                 more weight than the details column, the way a magazine spread
                 gives the image more real estate than its caption. */}
             <div className="grid gap-12 md:grid-cols-5">
+                {/* min-w-0 on both children — grid items default to
+                    min-width: auto, which lets their CONTENT's intrinsic
+                    min-content size force the track wider than the grid
+                    container (verified: computed grid-template-columns was
+                    547px inside a 343px-wide grid on mobile, a real
+                    horizontal-scroll bug). min-w-0 lets the track actually
+                    shrink to the available width; children wrap/scroll
+                    internally as normal instead. */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="relative aspect-[3/4] overflow-hidden border border-border bg-card md:col-span-3"
+                    className="relative aspect-[3/4] min-w-0 overflow-hidden border border-border bg-card md:col-span-3"
                 >
                     <Image
                         src={mainImage}
@@ -228,7 +236,7 @@ export default function ItemDetailPage() {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="space-y-8 md:col-span-2"
+                    className="min-w-0 space-y-8 md:col-span-2"
                 >
                     <div>
                         <p className="label-meta mb-3 text-muted">Lot {item.id.toString().padStart(4, '0')}</p>

@@ -63,6 +63,17 @@
     transform: scale(1.05);
 }
 
+/* Keyboard focus — was relying entirely on the browser's native default
+   outline (an off-brand amber, `outline: auto`), the only focus indicator
+   in the app that didn't match the citron ring used everywhere else.
+   Found via real Tab-key navigation, not by reading the CSS and assuming
+   it was fine. Matches Button's ring construction: a canvas-colored
+   offset, then the citron ring itself. */
+.item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--paper, #0a0a0b), 0 0 0 4px var(--ring, rgba(212, 255, 79, 0.55));
+}
+
 /* Right neighbors — subtle brightness falloff, never desaturated */
 .item:hover+.item {
     filter: brightness(0.94);

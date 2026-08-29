@@ -44,6 +44,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
                 <button
                     onClick={handleSend}
                     disabled={!message.trim() || disabled}
+                    aria-label="Send message"
                     className="p-3 rounded-full bg-base-03 text-paper hover:bg-base-03/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                 >
                     <Send className="w-5 h-5" />

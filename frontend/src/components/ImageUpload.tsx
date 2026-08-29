@@ -74,6 +74,7 @@ export default function ImageUpload({ onChange }: ImageUploadProps) {
                                     e.stopPropagation();
                                     handleRemove(index);
                                 }}
+                                aria-label={`Remove photo ${index + 1}`}
                                 className="glass-dark absolute right-1 top-1 rounded-full p-1 text-white transition-colors hover:bg-error hover:border-error"
                             >
                                 <X className="h-3 w-3" />

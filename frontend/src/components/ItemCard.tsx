@@ -109,6 +109,24 @@ export default function ItemCard({ item: initialItem, href, onRemove, meta, clas
             transition={{ duration: 0.2 }}
             className={cn(
                 "group relative flex flex-col overflow-hidden rounded-none border border-border bg-card transition-shadow duration-300 hover:shadow-lg",
+                // The actual focusable element is the absolutely-positioned
+                // Link below, but this wrapper has overflow-hidden (for the
+                // image zoom) — a ring drawn on the Link itself would be
+                // clipped by that. focus-within puts the ring on THIS
+                // element instead: an element's own box-shadow is never
+                // clipped by its own overflow-hidden, only a child's would
+                // be. Found via real Tab-key navigation — every ItemCard
+                // across Feed/Wishlist/Profile had no visible focus ring at
+                // all before this (same root issue as WaveGallery's .item).
+                // Matches Button's exact ring construction. Confirmed
+                // visually via screenshot with real focus — getComputedStyle
+                // reads of the composed box-shadow are unreliable in this
+                // tool's execution context (a new instance of the same class
+                // of stale-read issue already seen with its console buffer
+                // and rAF); the individual --tw-ring-* variables and a real
+                // rendered screenshot are the trustworthy signals here, not
+                // the shorthand's computed value.
+                "ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                 className
             )}
         >
@@ -165,7 +183,10 @@ export default function ItemCard({ item: initialItem, href, onRemove, meta, clas
                 )}
             </div>
 
-            <Link href={href ?? `/items/${item.id}`} className="absolute inset-0">
+            {/* focus:outline-none — the ring lives on the outer wrapper via
+                focus-within (see comment above); without this the link's own
+                native default outline would show alongside it. */}
+            <Link href={href ?? `/items/${item.id}`} className="absolute inset-0 focus:outline-none">
                 <span className="sr-only">View {item.title}</span>
             </Link>
         </motion.div>

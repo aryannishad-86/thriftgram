@@ -209,6 +209,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                             Min: ${filters.minPrice}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, minPrice: null })}
+                                aria-label="Clear minimum price filter"
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />
@@ -220,6 +221,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                             Max: ${filters.maxPrice}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, maxPrice: null })}
+                                aria-label="Clear maximum price filter"
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />
@@ -234,6 +236,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                             Size: {size}
                             <button
                                 onClick={() => toggleSize(size)}
+                                aria-label={`Remove size ${size} filter`}
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />
@@ -245,6 +248,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }: AdvancedFi
                             {filters.condition}
                             <button
                                 onClick={() => onFiltersChange({ ...filters, condition: null })}
+                                aria-label="Clear condition filter"
                                 className="hover:text-error transition-colors"
                             >
                                 <X className="w-3 h-3" />
