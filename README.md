@@ -72,6 +72,10 @@ npm run dev
 
 App runs at `localhost:3000`, API at `localhost:8000`.
 
+For how this actually runs in production (Cloud Run, Vercel, CI/CD, and
+the free-tier constraints behind several config choices), see
+[DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Environment variables
 
 Copy `backend/.env.example` to `backend/.env`. You'll need:
