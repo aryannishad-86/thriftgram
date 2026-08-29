@@ -29,6 +29,16 @@ jobs:
         working-directory: ./backend
         run: pip install -r requirements-dev.txt
 
+      - name: Check for missing migrations
+        working-directory: ./backend
+        # Catches the case a model changed but `makemigrations` was never run
+        # (or the migration was written by hand and drifted) — test_settings'
+        # in-memory SQLite is enough for this, no live DB needed. Verified
+        # locally against current models: "No changes detected", exit 0.
+        env:
+          DJANGO_SETTINGS_MODULE: config.test_settings
+        run: python manage.py makemigrations --check --dry-run
+
       - name: Run tests
         working-directory: ./backend
         run: python -m pytest
@@ -73,6 +83,7 @@ jobs:
           EMAIL_HOST_USER: "${{ secrets.EMAIL_HOST_USER }}"
           EMAIL_HOST_PASSWORD: "${{ secrets.EMAIL_HOST_PASSWORD }}"
           DEFAULT_FROM_EMAIL: "${{ secrets.DEFAULT_FROM_EMAIL }}"
+          SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
           EOF
 
       - name: Deploy to Cloud Run
